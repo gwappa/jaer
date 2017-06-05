@@ -14,7 +14,7 @@ import net.sf.jaer.eventprocessing.tracking.RectangularClusterTracker;
  *
  * @author viktor
  */
-public class EvaluateResults{
+public class ResultEvaluator{
     
     public enum Mode {
     MEDIAN, LINE, RECT
@@ -34,7 +34,7 @@ public class EvaluateResults{
     /**
      * Creates a new instance of ResultEvaluator
      */
-    public EvaluateResults( Mode m ) {
+    public ResultEvaluator( Mode m ) {
         mode = m;
         String modeStr = new String();
         switch (m) {
