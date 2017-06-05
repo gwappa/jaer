@@ -5,42 +5,80 @@
  */
 package de.cco.jaer.eval;
 
-import com.jogamp.opengl.GLAutoDrawable;
-import net.sf.jaer.chip.AEChip;
-import net.sf.jaer.event.EventPacket;
-import net.sf.jaer.eventprocessing.EventFilter2D;
-import net.sf.jaer.graphics.FrameAnnotater;
 
+import java.awt.geom.Point2D;
+import java.util.LinkedList;
+import net.sf.jaer.eventprocessing.tracking.RectangularClusterTracker;
 
 /**
  *
  * @author viktor
  */
-public class EvaluateResults extends EventFilter2D implements FrameAnnotater {
+public class EvaluateResults{
     
+    public enum Mode {
+    MEDIAN, LINE, RECT
+    }
+    
+    Mode mode;
+    
+    // median tracker parameters
+    Point2D medianPoint = new Point2D.Float(), stdPoint = new Point2D.Float(), meanPoint = new Point2D.Float();
+    
+    // line tracker parameters
+    float lineRho, lineTheta;
+    
+    // rectangular cluster tracker
+    LinkedList<RectangularClusterTracker.Cluster> clusters;
     
     /**
      * Creates a new instance of ResultEvaluator
      */
-    public EvaluateResults(AEChip chip) {
-        super(chip);        
+    public EvaluateResults( Mode m ) {
+        mode = m;
+        String modeStr = new String();
+        switch (m) {
+            case MEDIAN:
+                modeStr = "MedianTracker";
+            case LINE:
+                modeStr = "HoughLineTracker";
+            case RECT:
+                modeStr = "RectangleTracker";
+        }
+        System.out.println("Starting evaluation");
+        System.out.println("Using '" + modeStr + "' modus");
     }
     
-    @Override
-    public EventPacket filterPacket(EventPacket in) {
-        return in;
+    public void eval( Point2D med, Point2D std, Point2D mean ) {
+        if (mode == Mode.MEDIAN){
+            medianPoint = med;
+            stdPoint = std;
+            meanPoint = mean;
+            System.out.println("Centroid: " + meanPoint.toString());
+        }
+    }   
+   
+    public void eval( float rho, float theta) {
+        if (mode == Mode.LINE){
+            lineRho = rho;
+            lineTheta = theta;
+            System.out.println("Rho: " + rho + "px");
+            System.out.println("Theta: " + theta + "deg");
+        }
     }
     
-    @Override
-    public void initFilter() {
-    }
-    
-    @Override
-    public void resetFilter() {
-    }
-    
-    @Override
-    public void annotate(GLAutoDrawable drawable) {
-        
+    public void eval( LinkedList<RectangularClusterTracker.Cluster> cl ) {
+        if (mode == Mode.RECT) {
+            if (cl.isEmpty()) {
+                return;
+            }
+            clusters = cl;
+            for (RectangularClusterTracker.Cluster c : cl) {
+                Point2D.Float loc = c.getLocation();
+                Point2D.Float velo = c.getVelocityPPS();
+                int num = c.getClusterNumber();
+                System.out.println("Cluster " + num + ": " + loc.toString() + " " + velo.toString());
+            }
+        }
     }
 }
