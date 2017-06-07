@@ -6,6 +6,7 @@
 package de.cco.jaer.eval;
 
 
+import net.sf.jaer.chip.AEChip;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import net.sf.jaer.eventprocessing.tracking.RectangularClusterTracker;
@@ -22,6 +23,9 @@ public class ResultEvaluator{
     
     Mode mode;
     
+    // chip size
+    int sx, sy;
+    
     // median tracker parameters
     Point2D medianPoint = new Point2D.Float(), stdPoint = new Point2D.Float(), meanPoint = new Point2D.Float();
     
@@ -34,7 +38,9 @@ public class ResultEvaluator{
     /**
      * Creates a new instance of ResultEvaluator
      */
-    public ResultEvaluator( Mode m ) {
+    public ResultEvaluator( AEChip chip,  Mode m ) {
+        sx = chip.getSizeX();
+        sy = chip.getSizeY();
         mode = m;
         String modeStr = new String();
         switch (m) {
