@@ -26,8 +26,11 @@ public class ResultEvaluator{
     // chip size
     int sx, sy;
     
+    // time stamp vars
+    int lastts = 0, prevlastts = 0;
+    
     // median tracker parameters
-    Point2D medianPoint = new Point2D.Float(), stdPoint = new Point2D.Float(), meanPoint = new Point2D.Float();
+    float medianx, mediany, stdx, stdy, meanx, meany, prevx, prevy;
     
     // line tracker parameters
     float lineRho, lineTheta;
@@ -38,9 +41,7 @@ public class ResultEvaluator{
     /**
      * Creates a new instance of ResultEvaluator
      */
-    public ResultEvaluator( AEChip chip,  Mode m ) {
-        sx = chip.getSizeX();
-        sy = chip.getSizeY();
+    public ResultEvaluator( Mode m ) {
         mode = m;
         String modeStr = new String();
         switch (m) {
@@ -55,15 +56,58 @@ public class ResultEvaluator{
         System.out.println("Using '" + modeStr + "' modus");
     }
     
-    public void eval( Point2D med, Point2D std, Point2D mean ) {
+    public void setSize(AEChip chip){
+        sx = chip.getSizeX();
+        sy = chip.getSizeY();
+    }
+    
+    public void setSize(int x, int y){
+        sx = x;
+        sy = y;
+    }
+    
+    public int getDt(){
+        return lastts - prevlastts;
+    }
+    
+    public double getDist() {
+        double dx = 0.0, dy = 0.0, d = 0.0;
+        switch (mode) {
+            case MEDIAN: 
+               dx = Math.abs(meanx - prevx);
+               dy = Math.abs(meany - prevy);
+               d = Math.sqrt(dx * dx + dy * dy);
+            case LINE:
+            case RECT:
+        }
+        return d;
+    }
+    
+    public double getSpeed() {
+        return getDist() / getDt();
+    }
+    
+    // median tracker evaluation method
+    public void eval( int ts, float p1x, float p1y, float p2x, float p2y, float p3x, float p3y) {
         if (mode == Mode.MEDIAN){
-            medianPoint = med;
-            stdPoint = std;
-            meanPoint = mean;
-            System.out.println("Centroid: " + meanPoint.toString());
+            prevlastts = lastts;
+            lastts = ts;
+            prevx = meanx;
+            prevy = meany;
+            medianx = p1x;
+            mediany = p1y;
+            stdx = p2x;
+            stdy = p2y; 
+            meanx = p3x; 
+            meany = p3y;
+                                   
+            System.out.println("Dt: " + Integer.toString(getDt()));
+            System.out.println("Distance: " + Double.toString(getDist()));
+            System.out.println("Speed: " + Double.toString(getSpeed()));
         }
     }   
    
+    // Hough line tracker evaluation method
     public void eval( float rho, float theta) {
         if (mode == Mode.LINE){
             lineRho = rho;
@@ -73,6 +117,7 @@ public class ResultEvaluator{
         }
     }
     
+    // rectangular cluster tracker evaluation method
     public void eval( LinkedList<RectangularClusterTracker.Cluster> cl ) {
         if (mode == Mode.RECT) {
             if (cl.isEmpty()) {
