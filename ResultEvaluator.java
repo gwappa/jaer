@@ -30,10 +30,15 @@ public class ResultEvaluator{
     int lastts = 0, prevlastts = 0;
     
     // median tracker parameters
-    float medianx, mediany, stdx, stdy, meanx, meany, prevx, prevy;
+    float medianx, mediany;
+    float stdx, stdy; 
+    float meanx, meany;
+    float prevx, prevy;
     
     // line tracker parameters
     float lineRho, lineTheta;
+    float prevRho, prevTheta;
+    float rhoRes, thetaRes;
     
     // rectangular cluster tracker
     LinkedList<RectangularClusterTracker.Cluster> clusters;
@@ -66,18 +71,33 @@ public class ResultEvaluator{
         sy = y;
     }
     
+    public void setRhoRes(float res){
+        rhoRes = res;
+    }
+    
+    public void setThetaRes(float res){
+        thetaRes = res;
+    }
+    
     public int getDt(){
         return lastts - prevlastts;
     }
     
     public double getDist() {
-        double dx = 0.0, dy = 0.0, d = 0.0;
+        double d = 0.0;
         switch (mode) {
-            case MEDIAN: 
-               dx = Math.abs(meanx - prevx);
-               dy = Math.abs(meany - prevy);
-               d = Math.sqrt(dx * dx + dy * dy);
+            case MEDIAN:
+                double dx = 0.0, dy = 0.0;
+                dx = Math.abs(meanx - prevx);
+                dy = Math.abs(meany - prevy);
+                d = Math.sqrt(dx * dx + dy * dy);
+                break;
             case LINE:
+                double dRho = 0.0, dTheta = 0.0; 
+                dRho = Math.abs((lineRho - prevRho) / rhoRes);
+                dTheta = Math.abs((lineTheta - prevTheta) / thetaRes);
+                d = Math.sqrt(dRho * dRho + dTheta * dTheta);
+                break;
             case RECT:
         }
         return d;
@@ -90,6 +110,8 @@ public class ResultEvaluator{
     // median tracker evaluation method
     public void eval( int ts, float p1x, float p1y, float p2x, float p2y, float p3x, float p3y) {
         if (mode == Mode.MEDIAN){
+            
+            // set variables
             prevlastts = lastts;
             lastts = ts;
             prevx = meanx;
@@ -104,16 +126,23 @@ public class ResultEvaluator{
             System.out.println("Dt: " + Integer.toString(getDt()));
             System.out.println("Distance: " + Double.toString(getDist()));
             System.out.println("Speed: " + Double.toString(getSpeed()));
+            System.out.println("");
         }
     }   
    
     // Hough line tracker evaluation method
-    public void eval( float rho, float theta) {
+    public void eval( int ts, float rho, float theta ) {
         if (mode == Mode.LINE){
+            prevlastts = lastts;
+            lastts = ts;
+            prevRho = lineRho;
+            prevTheta = lineTheta;
             lineRho = rho;
             lineTheta = theta;
             System.out.println("Rho: " + rho + "px");
             System.out.println("Theta: " + theta + "deg");
+            System.out.println("Speed: " + getSpeed());
+            System.out.println("");
         }
     }
     
