@@ -7,7 +7,6 @@ package de.cco.jaer.eval;
 
 
 import net.sf.jaer.chip.AEChip;
-import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import net.sf.jaer.eventprocessing.tracking.RectangularClusterTracker;
 
@@ -21,30 +20,31 @@ public class ResultEvaluator{
     MEDIAN, LINE, RECT
     }
     
-    Mode mode;
+    private Mode mode;
     
     // chip size
-    int sx, sy;
+    private int sx, sy;
     
     // time stamp vars
-    int lastts = 0, prevlastts = 0;
+    private int lastts = 0, prevlastts = 0;
     
     // median tracker parameters
-    float medianx, mediany;
-    float stdx, stdy; 
-    float meanx, meany;
-    float prevx, prevy;
+    private float medianx, mediany;
+    private float stdx, stdy; 
+    private float meanx, meany;
+    private float prevx, prevy;
     
     // line tracker parameters
-    float lineRho, lineTheta;
-    float prevRho, prevTheta;
-    float rhoRes, thetaRes;
+    private float lineRho, lineTheta;
+    private float prevRho, prevTheta;
+    private float rhoRes, thetaRes;
     
     // rectangular cluster tracker
-    LinkedList<RectangularClusterTracker.Cluster> clusters;
+    private LinkedList<RectangularClusterTracker.Cluster> clusters;
     
     /**
      * Creates a new instance of ResultEvaluator
+     * @param m
      */
     public ResultEvaluator( Mode m ) {
         mode = m;
@@ -52,10 +52,13 @@ public class ResultEvaluator{
         switch (m) {
             case MEDIAN:
                 modeStr = "MedianTracker";
+                break;
             case LINE:
                 modeStr = "HoughLineTracker";
+                break;
             case RECT:
                 modeStr = "RectangleTracker";
+                break;
         }
         System.out.println("Starting evaluation");
         System.out.println("Using '" + modeStr + "' modus");
@@ -87,18 +90,17 @@ public class ResultEvaluator{
         double d = 0.0;
         switch (mode) {
             case MEDIAN:
-                double dx = 0.0, dy = 0.0;
-                dx = Math.abs(meanx - prevx);
-                dy = Math.abs(meany - prevy);
+                double dx = Math.abs(meanx - prevx);
+                double dy = Math.abs(meany - prevy);
                 d = Math.sqrt(dx * dx + dy * dy);
                 break;
             case LINE:
-                double dRho = 0.0, dTheta = 0.0; 
-                dRho = Math.abs((lineRho - prevRho) / rhoRes);
-                dTheta = Math.abs((lineTheta - prevTheta) / thetaRes);
+                double dRho = Math.abs((lineRho - prevRho) / rhoRes);
+                double dTheta = Math.abs((lineTheta - prevTheta) / thetaRes);
                 d = Math.sqrt(dRho * dRho + dTheta * dTheta);
                 break;
             case RECT:
+                break;
         }
         return d;
     }
@@ -140,7 +142,7 @@ public class ResultEvaluator{
             lineRho = rho;
             lineTheta = theta;
             System.out.println("Rho: " + rho + "px");
-            System.out.println("Theta: " + theta + "deg");
+            System.out.println("Theta: " + theta + "°");
             System.out.println("Speed: " + getSpeed());
             System.out.println("");
         }
@@ -154,10 +156,16 @@ public class ResultEvaluator{
             }
             clusters = cl;
             for (RectangularClusterTracker.Cluster c : cl) {
-                Point2D.Float loc = c.getLocation();
-                Point2D.Float velo = c.getVelocityPPS();
+                if (!c.isVisible()) {
+                    continue;
+                }
+                double locx = c.getLocation().getX();
+                double locy = c.getLocation().getY();
+                double velox = c.getVelocityPPS().getX();
+                double veloy = c.getVelocityPPS().getY();
+                double velo = Math.sqrt(Math.abs(velox * velox) + Math.abs(veloy * veloy));
                 int num = c.getClusterNumber();
-                System.out.println("Cluster " + num + ": " + loc.toString() + " " + velo.toString());
+                System.out.println("Cluster " + num + ": [" + locx + "," + locy + "] " + "@ " + velo);
             }
         }
     }
