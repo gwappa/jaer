@@ -46,7 +46,7 @@ public class ResultEvaluator{
      * Creates a new instance of ResultEvaluator
      * @param m
      */
-    public ResultEvaluator( Mode m ) {
+    public ResultEvaluator( Mode m ) throws Exception {
         mode = m;
         String modeStr = new String();
         switch (m) {
@@ -62,6 +62,7 @@ public class ResultEvaluator{
         }
         System.out.println("Starting evaluation");
         System.out.println("Using '" + modeStr + "' modus");
+        connect(); // try to connect to Arduino
     }
     
     public void setSize(AEChip chip){
@@ -168,5 +169,14 @@ public class ResultEvaluator{
                 System.out.println("Cluster " + num + ": [" + locx + "," + locy + "] " + "@ " + velo);
             }
         }
+    }
+    
+    private Arduino connect() throws Exception{
+        Arduino dev = new Arduino();
+        dev.initialize();
+        Thread.sleep(2000);
+        System.out.println("Trying to connect to Arduino and sending 'Hello' packet.");
+        dev.send("Java says 'Hello'");
+        return dev;
     }
 }

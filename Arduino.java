@@ -99,7 +99,19 @@ public class Arduino implements SerialPortEventListener {
 			serialPort.close();
 		}
 	}
+        
+        public synchronized BufferedReader getIntputStream(){
+            return input;
+        }
 
+        public synchronized OutputStream getOutputStream(){
+            return output;
+        }
+        
+        public synchronized void send(String str) throws Exception{
+            getOutputStream().write(str.getBytes());
+        }
+        
 	/**
 	 * Handle an event on the serial port. Read the data and print it.
 	 */
@@ -113,21 +125,5 @@ public class Arduino implements SerialPortEventListener {
 			}
 		}
 		// Ignore all the other eventTypes, but you should consider the other ones.
-	}
-
-	public static void main(String[] args) throws Exception {
-		Arduino main = new Arduino();
-		main.initialize();
-		Thread t=new Thread() {
-			public void run() {
-				//the following line will keep this app alive for 1000 seconds,
-				//waiting for events to occur and responding to them (printing incoming messages to console).
-				try {Thread.sleep(1000000);} catch (InterruptedException ie) {}
-			}
-		};
-		t.start();
-		System.out.println("Started");
-                String data = "x";
-                main.output.write(data.getBytes());
 	}
 }
