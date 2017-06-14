@@ -8,6 +8,8 @@ package de.cco.jaer.eval;
 
 import net.sf.jaer.chip.AEChip;
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sf.jaer.eventprocessing.tracking.RectangularClusterTracker;
 
 /**
@@ -19,6 +21,8 @@ public class ResultEvaluator{
     public enum Mode {
     MEDIAN, LINE, RECT
     }
+    
+    Arduino dev;
     
     private Mode mode;
     
@@ -46,7 +50,7 @@ public class ResultEvaluator{
      * Creates a new instance of ResultEvaluator
      * @param m
      */
-    public ResultEvaluator( Mode m ) throws Exception {
+    public ResultEvaluator( Mode m ) {
         mode = m;
         String modeStr = new String();
         switch (m) {
@@ -62,31 +66,45 @@ public class ResultEvaluator{
         }
         System.out.println("Starting evaluation");
         System.out.println("Using '" + modeStr + "' modus");
-        connect(); // try to connect to Arduino
+        try {
+            dev = connect();
+        } catch (Exception ex) {
+            Logger.getLogger(ResultEvaluator.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
+    protected void finalize(){
+        dev.close();
+    }
+    
+    // set the image size
     public void setSize(AEChip chip){
         sx = chip.getSizeX();
         sy = chip.getSizeY();
     }
     
+    // set size manually isntead of passing AEChip
     public void setSize(int x, int y){
         sx = x;
         sy = y;
     }
     
+    // set offset resolution from lower-left corner for hough-line tracker
     public void setRhoRes(float res){
         rhoRes = res;
     }
     
+    // set rotation angle resolution for hough line tracker
     public void setThetaRes(float res){
         thetaRes = res;
     }
     
+    // get difference between last timestamp and previous one
     public int getDt(){
         return lastts - prevlastts;
     }
     
+    // calculate distance with regard to mode
     public double getDist() {
         double d = 0.0;
         switch (mode) {
@@ -106,6 +124,7 @@ public class ResultEvaluator{
         return d;
     }
     
+    // calculate speed in euclidian space
     public double getSpeed() {
         return getDist() / getDt();
     }
@@ -125,6 +144,21 @@ public class ResultEvaluator{
             stdy = p2y; 
             meanx = p3x; 
             meany = p3y;
+            
+            if (getSpeed() >= 4e-4){
+                try {
+                    dev.send("x");
+                } catch (Exception ex) {
+                    Logger.getLogger(ResultEvaluator.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            else {
+                try {
+                    dev.send("0");
+                } catch (Exception ex) {
+                    Logger.getLogger(ResultEvaluator.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
                                    
             System.out.println("Dt: " + Integer.toString(getDt()));
             System.out.println("Distance: " + Double.toString(getDist()));
