@@ -17,6 +17,10 @@
  */
 package de.cco.jaer.eval;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Class that acts as container for jAER MedianTracker parameters and results.
  * Extends the abstract TrackerParamsTemplate base class which itself implements
@@ -40,8 +44,18 @@ public class MedianTrackerParams extends TrackerParamsTemplate{
     private float meanx, meany;
     private float prevx, prevy;
 
+    /**
+     * Update internal result representation with values from MedianTracker object.
+     * 
+     * @param ts Timestamp of detection, Integer
+     * @param p1x Median size of object in X direction
+     * @param p1y Median size of object in Y direction
+     * @param p2x Standard deviation size in X direction
+     * @param p2y Standard deviation size in Y direction
+     * @param p3x Mean object X position 
+     * @param p3y Mean object Y position
+     */
     public void update(int ts, float p1x, float p1y, float p2x, float p2y, float p3x, float p3y) {
-        // set variables
         setLastTS(ts);
         prevx = meanx;
         prevy = meany;
@@ -53,12 +67,38 @@ public class MedianTrackerParams extends TrackerParamsTemplate{
         meany = p3y;
     }
 
+    /**
+     * Write data to OutputSource.
+     */
     public void log() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        switch (outsrc){
+            case CONSOLE:
+                System.out.println("Dt: " + Integer.toString(getDt()));
+                System.out.println("Distance: " + Double.toString(getDist()));
+                System.out.println("Speed: " + Double.toString(getSpeed()));
+                System.out.println("");
+                break;
+            case FILE:
+                String data = "";
+                try {
+                    outstream.write(data);
+                } catch (IOException ex) {
+                    Logger.getLogger(MedianTrackerParams.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                break;
+        }
+                
     }
 
+    /**
+     * Calculate euclidian distance between current and last object position.
+     * 
+     * @return Euclidian distance, double
+     */
     @Override
     public double getDist() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        double dx = Math.abs(meanx - prevx);
+        double dy = Math.abs(meany - prevy);
+        return Math.sqrt(dx * dx + dy * dy);
     }
 }
