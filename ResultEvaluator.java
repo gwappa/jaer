@@ -1,15 +1,26 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2017 viktor
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package de.cco.jaer.eval;
 
 
-import java.util.LinkedList;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sf.jaer.eventprocessing.tracking.RectangularClusterTracker;
 
 /**
  *
@@ -28,38 +39,32 @@ public class ResultEvaluator<T extends TrackerParams>{
     /**
      * Creates a new instance of ResultEvaluator
      * @param t
+     * @throws java.io.IOException
      */
-    public ResultEvaluator(T t) {
+    public ResultEvaluator(T t) throws IOException, Exception {
         type = t;
-        try {
-            dev = connect();
-        } catch (Exception ex) {
-            Logger.getLogger(ResultEvaluator.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        dev = connect();
         out = new OutputHandler();
+        out.write(type.printHeader());
     }
     
-    public ResultEvaluator(T t, OutputHandler.OutputSource src){
+    public ResultEvaluator(T t, OutputHandler.OutputSource src) throws IOException, Exception {
         type = t;
-        try {
-            dev = connect();
-        } catch (Exception ex) {
-            Logger.getLogger(ResultEvaluator.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        dev = connect();
         out = new OutputHandler(src);
+        out.write(type.printHeader());
     }
     
-    public ResultEvaluator(T t, String path){
+    public ResultEvaluator(T t, String path) throws IOException, Exception {
         type = t;
-        try {
-            dev = connect();
-        } catch (Exception ex) {
-            Logger.getLogger(ResultEvaluator.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        dev = connect();
         out = new OutputHandler(path);
+        out.write(type.printHeader());
     }
     
-    public void eval() throws Exception{
+    public void eval() throws Exception {
+        out.write(type.print());
+        
         if (type.eval()){
             dev.send(ON);
         }
@@ -68,11 +73,11 @@ public class ResultEvaluator<T extends TrackerParams>{
         }
     }
     
-    protected void finalize(){
+    protected void finalize() {
         dev.close();
     }
     
-    private Arduino connect() throws Exception{
+    private Arduino connect() throws Exception {
         dev = new Arduino();
         dev.initialize();
         Thread.sleep(2000);
