@@ -17,9 +17,6 @@
  */
 package de.cco.jaer.eval;
 
-import java.io.IOException;
-
-
 /**
  * Class that acts as container for jAER MedianTracker parameters and results.
  * Extends the abstract TrackerParamsTemplate base class which itself implements
@@ -79,13 +76,22 @@ public class MedianTrackerParams extends TrackerParamsBase{
         return Math.sqrt(dx * dx + dy * dy);
     }
     
+    public double getSpeed() {
+        return getDist() / getDt();
+    }
+    
     @Override
-    public String print(){
-        return "";
+    public String print() {
+        return getDt() + "," + medianx + "," + mediany + "," + getDist() + "," + getSpeed();
+    }
+    
+    @Override
+    public String printHeader() {
+        return "dt,medianx,mediany,distance,speed";
     }
 
     @Override
     public Boolean eval() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return (getSpeed() >= 4e-4);
     }
 }

@@ -22,8 +22,8 @@ public class ResultEvaluator<T extends TrackerParams>{
     Arduino dev;
     T type;
     
-    final String YES = "y";
-    final String NO = "n";
+    final String ON = "y";
+    final String OFF = "n";
     
     /**
      * Creates a new instance of ResultEvaluator
@@ -61,10 +61,10 @@ public class ResultEvaluator<T extends TrackerParams>{
     
     public void eval() throws Exception{
         if (type.eval()){
-            dev.send(YES);
+            dev.send(ON);
         }
         else{
-            dev.send(NO);
+            dev.send(OFF);
         }
     }
     

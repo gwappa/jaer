@@ -21,7 +21,7 @@ package de.cco.jaer.eval;
  *
  * @author viktor
  */
-public class HoughLineTrackerParams extends TrackerParamsBase{
+public class HoughLineTrackerParams extends TrackerParamsBase {
     
     // line tracker parameters
     private float lineRho, lineTheta;
@@ -29,12 +29,12 @@ public class HoughLineTrackerParams extends TrackerParamsBase{
     private float rhoRes, thetaRes;
     
     
-    public HoughLineTrackerParams(){
+    public HoughLineTrackerParams() {
         rhoRes = 6;
         thetaRes = 10;
     }
     
-    public void update(int ts, float rho, float theta){
+    public void update(int ts, float rho, float theta) {
         setLastTS(ts);
         prevRho = lineRho;
         prevTheta = lineTheta;
@@ -43,16 +43,16 @@ public class HoughLineTrackerParams extends TrackerParamsBase{
     }
     
     // set offset resolution from lower-left corner for hough-line tracker
-    public void setRhoRes(float res){
+    public void setRhoRes(float res) {
         rhoRes = res;
     }
     
     // set rotation angle resolution for hough line tracker
-    public void setThetaRes(float res){
+    public void setThetaRes(float res) {
         thetaRes = res;
     }
     
-    public double getDist(){
+    public double getDist() {
         double dRho = Math.abs((lineRho - prevRho) / rhoRes);
         double dTheta = Math.abs((lineTheta - prevTheta) / thetaRes);
         return Math.sqrt(dRho * dRho + dTheta * dTheta);
@@ -60,11 +60,16 @@ public class HoughLineTrackerParams extends TrackerParamsBase{
 
     @Override
     public String print() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return getDt() + "," + lineRho + "," + lineTheta + "," + getDist();
+    }
+    
+    @Override
+    public String printHeader() {
+        return "dt,rho,theta,distance";
     }
 
     @Override
     public Boolean eval() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return false;
     }
 }

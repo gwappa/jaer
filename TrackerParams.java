@@ -91,5 +91,7 @@ public interface TrackerParams {
     
     public String print();
     
+    public String printHeader();
+    
     public Boolean eval();
 }
