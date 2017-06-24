@@ -14,6 +14,7 @@ import net.sf.jaer.eventprocessing.tracking.RectangularClusterTracker;
 /**
  *
  * @author viktor
+ * @param <T>
  */
 public class ResultEvaluator<T extends TrackerParams>{
     
@@ -35,6 +36,7 @@ public class ResultEvaluator<T extends TrackerParams>{
         } catch (Exception ex) {
             Logger.getLogger(ResultEvaluator.class.getName()).log(Level.SEVERE, null, ex);
         }
+        out = new OutputHandler();
     }
     
     public ResultEvaluator(T t, OutputHandler.OutputSource src){
@@ -71,7 +73,7 @@ public class ResultEvaluator<T extends TrackerParams>{
     }
     
     private Arduino connect() throws Exception{
-        Arduino dev = new Arduino();
+        dev = new Arduino();
         dev.initialize();
         Thread.sleep(2000);
         System.out.println("Trying to connect to Arduino and sending 'Hello' packet.");

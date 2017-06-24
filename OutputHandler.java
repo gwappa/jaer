@@ -57,6 +57,10 @@ public class OutputHandler {
         NONE
     }
     
+    public OutputHandler(){
+        setOutput(OutputSource.NONE);
+    }
+    
     public OutputHandler(String str){
         setOutput(str);
     }
