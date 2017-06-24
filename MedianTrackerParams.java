@@ -18,8 +18,7 @@
 package de.cco.jaer.eval;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 /**
  * Class that acts as container for jAER MedianTracker parameters and results.
@@ -36,14 +35,16 @@ import java.util.logging.Logger;
  * @see TrackerParamsTemplate
  * @see TrackerParams
  */
-public class MedianTrackerParams extends TrackerParamsTemplate{
+public class MedianTrackerParams extends TrackerParamsBase{
     
     // median tracker parameters
     private float medianx, mediany;
     private float stdx, stdy; 
     private float meanx, meany;
     private float prevx, prevy;
-
+    
+    public MedianTrackerParams(){}
+    
     /**
      * Update internal result representation with values from MedianTracker object.
      * 
@@ -68,37 +69,23 @@ public class MedianTrackerParams extends TrackerParamsTemplate{
     }
 
     /**
-     * Write data to OutputSource.
-     */
-    public void log() {
-        switch (outsrc){
-            case CONSOLE:
-                System.out.println("Dt: " + Integer.toString(getDt()));
-                System.out.println("Distance: " + Double.toString(getDist()));
-                System.out.println("Speed: " + Double.toString(getSpeed()));
-                System.out.println("");
-                break;
-            case FILE:
-                String data = "";
-                try {
-                    outstream.write(data);
-                } catch (IOException ex) {
-                    Logger.getLogger(MedianTrackerParams.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                break;
-        }
-                
-    }
-
-    /**
      * Calculate euclidian distance between current and last object position.
      * 
      * @return Euclidian distance, double
      */
-    @Override
     public double getDist() {
         double dx = Math.abs(meanx - prevx);
         double dy = Math.abs(meany - prevy);
         return Math.sqrt(dx * dx + dy * dy);
+    }
+    
+    @Override
+    public String print(){
+        return "";
+    }
+
+    @Override
+    public Boolean eval() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

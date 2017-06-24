@@ -20,23 +20,18 @@ package de.cco.jaer.eval;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.util.Date;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import net.sf.jaer.chip.AEChip;
+import java.util.Date;
 
 /**
- * Abstract base class for custom TrackerParams classes.
- * Implements all methods defined in TrackerParams interface.
- * Upstream object implement update(), log() and getDist() methods.
- * 
+ *
  * @author viktor
- * @see TrackerParams
  */
-public abstract class TrackerParamsTemplate implements TrackerParams{
+public class OutputHandler {
     
     // output source
     OutputSource outsrc;
@@ -44,65 +39,60 @@ public abstract class TrackerParamsTemplate implements TrackerParams{
     // output file object
     BufferedWriter outstream;
     
-    // chip size
-    private int sx, sy;
+    public enum OutputSource{
+
+        /**
+         * Log data to file.
+         */
+        FILE,
+
+        /**
+         * Log data to STDOUT
+         */
+        CONSOLE,
+
+        /**
+         * Log data to STDOUT
+         */
+        NONE
+    }
     
-    // time stamp vars
-    private int lastts, prevlastts;    
+    public OutputHandler(String str){
+        setOutput(str);
+    }
     
-    @Override
-    public void setOutputSource(OutputSource src) {
+    public OutputHandler(Path p){
+        setOutput(p.toString());
+    }
+    
+    public OutputHandler(OutputSource src){
+        setOutput(src);
+    }
+    
+    public final void setOutput(OutputSource src) {
         outsrc = src;
-        if (src == OutputSource.CONSOLE){
+        if (src == OutputSource.FILE){
             String path = genFileName();
             outstream = openFile(path);
         }
     }
 
-    @Override
-    public void setOutputSource(String str) {
+    public final void setOutput(String str) {
         outstream = openFile(str);
     }
-
-    @Override
-    public void setSize(AEChip chip){
-        sx = chip.getSizeX();
-        sy = chip.getSizeY();
-    }
-
-    @Override
-    public void setSize(int x, int y){
-        sx = x;
-        sy = y;
-    }
     
-    @Override
-    public void setLastTS(int ts){
-        prevlastts = lastts;
-        lastts = ts;
-    }
-
-    @Override
-    public int[] getSize() {
-        int[] sz = new int[2];
-        sz[0] = sx;
-        sz[1] = sy;
-        return sz;
-    }
-
-    @Override
-    public int getDt(){
-        return lastts - prevlastts;
-    }
-
-    @Override
-    public double getSpeed() {
-        return getDist() / getDt();
-    }
-
-    @Override
-    public int getEventRate() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void write(String str) throws IOException{
+        switch (outsrc){
+            case CONSOLE:
+                System.out.println(str);
+                break;
+            case FILE:
+                outstream.write(str);
+                break;
+            case NONE:
+                break;
+        }
+        
     }
     
     /**
@@ -144,5 +134,6 @@ public abstract class TrackerParamsTemplate implements TrackerParams{
         }
         return bw;
     }
-
+    
+    
 }

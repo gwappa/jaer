@@ -6,7 +6,6 @@
 package de.cco.jaer.eval;
 
 
-import net.sf.jaer.chip.AEChip;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,56 +15,21 @@ import net.sf.jaer.eventprocessing.tracking.RectangularClusterTracker;
  *
  * @author viktor
  */
-public class ResultEvaluator{
+public class ResultEvaluator<T extends TrackerParams>{
     
-    public enum Mode {
-    MEDIAN, LINE, RECT
-    }
-    
+    OutputHandler out;
     Arduino dev;
+    T type;
     
-    private Mode mode;
-    
-    // chip size
-    private int sx, sy;
-    
-    // time stamp vars
-    private int lastts = 0, prevlastts = 0;
-    
-    // median tracker parameters
-    private float medianx, mediany;
-    private float stdx, stdy; 
-    private float meanx, meany;
-    private float prevx, prevy;
-    
-    // line tracker parameters
-    private float lineRho, lineTheta;
-    private float prevRho, prevTheta;
-    private float rhoRes, thetaRes;
-    
-    // rectangular cluster tracker
-    private LinkedList<RectangularClusterTracker.Cluster> clusters;
+    final String YES = "y";
+    final String NO = "n";
     
     /**
      * Creates a new instance of ResultEvaluator
-     * @param m
+     * @param t
      */
-    public ResultEvaluator( Mode m ) {
-        mode = m;
-        String modeStr = new String();
-        switch (m) {
-            case MEDIAN:
-                modeStr = "MedianTracker";
-                break;
-            case LINE:
-                modeStr = "HoughLineTracker";
-                break;
-            case RECT:
-                modeStr = "RectangleTracker";
-                break;
-        }
-        System.out.println("Starting evaluation");
-        System.out.println("Using '" + modeStr + "' modus");
+    public ResultEvaluator(T t) {
+        type = t;
         try {
             dev = connect();
         } catch (Exception ex) {
@@ -73,136 +37,37 @@ public class ResultEvaluator{
         }
     }
     
+    public ResultEvaluator(T t, OutputHandler.OutputSource src){
+        type = t;
+        try {
+            dev = connect();
+        } catch (Exception ex) {
+            Logger.getLogger(ResultEvaluator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        out = new OutputHandler(src);
+    }
+    
+    public ResultEvaluator(T t, String path){
+        type = t;
+        try {
+            dev = connect();
+        } catch (Exception ex) {
+            Logger.getLogger(ResultEvaluator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        out = new OutputHandler(path);
+    }
+    
+    public void eval() throws Exception{
+        if (type.eval()){
+            dev.send(YES);
+        }
+        else{
+            dev.send(NO);
+        }
+    }
+    
     protected void finalize(){
         dev.close();
-    }
-    
-    // set the image size
-    public void setSize(AEChip chip){
-        sx = chip.getSizeX();
-        sy = chip.getSizeY();
-    }
-    
-    // set size manually isntead of passing AEChip
-    public void setSize(int x, int y){
-        sx = x;
-        sy = y;
-    }
-    
-    // set offset resolution from lower-left corner for hough-line tracker
-    public void setRhoRes(float res){
-        rhoRes = res;
-    }
-    
-    // set rotation angle resolution for hough line tracker
-    public void setThetaRes(float res){
-        thetaRes = res;
-    }
-    
-    // get difference between last timestamp and previous one
-    public int getDt(){
-        return lastts - prevlastts;
-    }
-    
-    // calculate distance with regard to mode
-    public double getDist() {
-        double d = 0.0;
-        switch (mode) {
-            case MEDIAN:
-                double dx = Math.abs(meanx - prevx);
-                double dy = Math.abs(meany - prevy);
-                d = Math.sqrt(dx * dx + dy * dy);
-                break;
-            case LINE:
-                double dRho = Math.abs((lineRho - prevRho) / rhoRes);
-                double dTheta = Math.abs((lineTheta - prevTheta) / thetaRes);
-                d = Math.sqrt(dRho * dRho + dTheta * dTheta);
-                break;
-            case RECT:
-                break;
-        }
-        return d;
-    }
-    
-    // calculate speed in euclidian space
-    public double getSpeed() {
-        return getDist() / getDt();
-    }
-    
-    // median tracker evaluation method
-    public void eval( int ts, float p1x, float p1y, float p2x, float p2y, float p3x, float p3y) {
-        if (mode == Mode.MEDIAN){
-            
-            // set variables
-            prevlastts = lastts;
-            lastts = ts;
-            prevx = meanx;
-            prevy = meany;
-            medianx = p1x;
-            mediany = p1y;
-            stdx = p2x;
-            stdy = p2y; 
-            meanx = p3x; 
-            meany = p3y;
-            
-            if (getSpeed() >= 4e-4){
-                try {
-                    dev.send("x");
-                } catch (Exception ex) {
-                    Logger.getLogger(ResultEvaluator.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            else {
-                try {
-                    dev.send("0");
-                } catch (Exception ex) {
-                    Logger.getLogger(ResultEvaluator.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-                                   
-            System.out.println("Dt: " + Integer.toString(getDt()));
-            System.out.println("Distance: " + Double.toString(getDist()));
-            System.out.println("Speed: " + Double.toString(getSpeed()));
-            System.out.println("");
-        }
-    }   
-   
-    // Hough line tracker evaluation method
-    public void eval( int ts, float rho, float theta ) {
-        if (mode == Mode.LINE){
-            prevlastts = lastts;
-            lastts = ts;
-            prevRho = lineRho;
-            prevTheta = lineTheta;
-            lineRho = rho;
-            lineTheta = theta;
-            System.out.println("Rho: " + rho + "px");
-            System.out.println("Theta: " + theta + "°");
-            System.out.println("Speed: " + getSpeed());
-            System.out.println("");
-        }
-    }
-    
-    // rectangular cluster tracker evaluation method
-    public void eval( LinkedList<RectangularClusterTracker.Cluster> cl ) {
-        if (mode == Mode.RECT) {
-            if (cl.isEmpty()) {
-                return;
-            }
-            clusters = cl;
-            for (RectangularClusterTracker.Cluster c : cl) {
-                if (!c.isVisible()) {
-                    continue;
-                }
-                double locx = c.getLocation().getX();
-                double locy = c.getLocation().getY();
-                double velox = c.getVelocityPPS().getX();
-                double veloy = c.getVelocityPPS().getY();
-                double velo = Math.sqrt(Math.abs(velox * velox) + Math.abs(veloy * veloy));
-                int num = c.getClusterNumber();
-                System.out.println("Cluster " + num + ": [" + locx + "," + locy + "] " + "@ " + velo);
-            }
-        }
     }
     
     private Arduino connect() throws Exception{

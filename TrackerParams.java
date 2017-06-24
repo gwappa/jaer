@@ -50,18 +50,7 @@ public interface TrackerParams {
          */
         NONE
     }
-    
-    /**
-     * Setter for output source type.
-     * @param outsrc Output source type.
-     */
-    public void setOutputSource(OutputSource outsrc);
-    
-    /**
-     * Setter for output file path.
-     * @param str Path to log data to.
-     */
-    public void setOutputSource(String str);
+   
    
     /**
      * Setter for chip size.
@@ -95,21 +84,12 @@ public interface TrackerParams {
     public int getDt();
     
     /**
-     * Getter for distance in pixel between current and last tracked object.
-     * @return Distance in pixels, double.
-     */
-    public double getDist();
-    
-    /**
-     * Getter for speed of tracked object.
-     * @return Speed of tracked object. In pixels/sec.
-     */
-    public double getSpeed();
-    
-    /**
      * Getter for event rate.
      * @return Event rat in Hz.
      */
     public int getEventRate();
     
+    public String print();
+    
+    public Boolean eval();
 }
