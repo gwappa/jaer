@@ -19,6 +19,8 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener; 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class ArduinoConnector implements SerialPortEventListener {
@@ -44,6 +46,8 @@ public class ArduinoConnector implements SerialPortEventListener {
 	/** Default bits per second for COM port. */
 	private static final int DATA_RATE = 9600;
         
+        private boolean state;
+        
         public ArduinoConnector() {
             initialize();
         }
@@ -68,6 +72,7 @@ public class ArduinoConnector implements SerialPortEventListener {
 		}
 		if (portId == null) {
 			System.out.println("Could not find COM port.");
+                        state = false;
 			return;
 		}
 
@@ -94,8 +99,10 @@ public class ArduinoConnector implements SerialPortEventListener {
                         Thread.sleep(2000);
                         System.out.println("Trying to connect to Arduino and sending 'Hello' packet.");
                         send("Java says 'Hello'");
+                        state = true;
 		} catch (Exception e) {
 			System.err.println(e.toString());
+                        state = false;
 		}
 	}
 
@@ -118,11 +125,22 @@ public class ArduinoConnector implements SerialPortEventListener {
             return output;
         }
         
+        public boolean isConnected(){
+            return state;
+        }
+        
         public synchronized void send(String str){
-            try {
-                getOutputStream().write(str.getBytes());
-            } catch (IOException ex) {
-                System.out.print(str);
+            if (str.isEmpty()) {
+                return;
+            }
+            if (isConnected()){
+                try {
+                    getOutputStream().write(str.getBytes());
+                } catch (IOException ex) {
+                    Logger.getLogger(ArduinoConnector.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                System.out.println("ResultEvaluator sends: '" + str + "'");
             }
         }
         

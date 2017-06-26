@@ -26,6 +26,8 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -77,11 +79,13 @@ public class OutputHandler {
         outsrc = src;
         if (src == OutputSource.FILE){
             String path = genFileName();
+            System.out.println("Saving data to '" + path + "'");
             outstream = openFile(path);
         }
     }
 
     public final void setOutput(String str) {
+        System.out.println("Saving data to '" + str + "'");
         outstream = openFile(str);
     }
     
@@ -92,7 +96,8 @@ public class OutputHandler {
                 break;
             case FILE:
                 try {
-                    outstream.write(str);
+                    outstream.write(str + "\n");
+                    outstream.flush();
                 }
                 catch (IOException e)
                 {
@@ -113,7 +118,7 @@ public class OutputHandler {
         Path current = Paths.get(System.getProperty("user.dir"));
         Date d = new Date();
         DateFormat dformat = new SimpleDateFormat("ddMMyyyy-HHmmss");
-        Path path = Paths.get(current.toString(), dformat.format(d), ".log");
+        Path path = Paths.get(current.toString(), dformat.format(d) + ".log");
         return path.toString();
     }
     
@@ -137,13 +142,16 @@ public class OutputHandler {
         catch (IOException e) {
             e.printStackTrace();
         }
-        finally {
-            if ( bw != null )
-                try { bw.close(); } catch ( IOException e ) { e.printStackTrace(); }
-
-        }
         return bw;
     }
     
-    
+    protected void finalize() {
+        if (outsrc == OutputSource.FILE){
+            try {
+                outstream.close();
+            } catch (IOException ex) {
+                Logger.getLogger(OutputHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 }
