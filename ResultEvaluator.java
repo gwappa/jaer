@@ -17,11 +17,6 @@
  */
 package de.cco.jaer.eval;
 
-
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  *
  * @author viktor
@@ -30,7 +25,7 @@ import java.util.logging.Logger;
 public class ResultEvaluator<T extends TrackerParams>{
     
     OutputHandler out;
-    Arduino dev;
+    ArduinoConnector con;
     T type;
     
     final String ON = "y";
@@ -39,50 +34,36 @@ public class ResultEvaluator<T extends TrackerParams>{
     /**
      * Creates a new instance of ResultEvaluator
      * @param t
-     * @throws java.io.IOException
      */
-    public ResultEvaluator(T t) throws IOException, Exception {
+    public ResultEvaluator(T t){
         type = t;
-        dev = connect();
+        con = new ArduinoConnector();
         out = new OutputHandler();
         out.write(type.printHeader());
     }
     
-    public ResultEvaluator(T t, OutputHandler.OutputSource src) throws IOException, Exception {
+    public ResultEvaluator(T t, OutputHandler.OutputSource src) {
         type = t;
-        dev = connect();
+        con = new ArduinoConnector();
         out = new OutputHandler(src);
         out.write(type.printHeader());
     }
     
-    public ResultEvaluator(T t, String path) throws IOException, Exception {
+    public ResultEvaluator(T t, String path) {
         type = t;
-        dev = connect();
+        con = new ArduinoConnector();
         out = new OutputHandler(path);
         out.write(type.printHeader());
     }
-    
-    public void eval() throws Exception {
+
+    public void eval() {
         out.write(type.print());
-        
+
         if (type.eval()){
-            dev.send(ON);
+            con.send(ON);
         }
         else{
-            dev.send(OFF);
+            con.send(OFF);
         }
-    }
-    
-    protected void finalize() {
-        dev.close();
-    }
-    
-    private Arduino connect() throws Exception {
-        dev = new Arduino();
-        dev.initialize();
-        Thread.sleep(2000);
-        System.out.println("Trying to connect to Arduino and sending 'Hello' packet.");
-        dev.send("Java says 'Hello'");
-        return dev;
     }
 }

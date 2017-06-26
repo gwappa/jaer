@@ -85,13 +85,19 @@ public class OutputHandler {
         outstream = openFile(str);
     }
     
-    public void write(String str) throws IOException{
+    public void write(String str) {
         switch (outsrc){
             case CONSOLE:
                 System.out.println(str);
                 break;
             case FILE:
-                outstream.write(str);
+                try {
+                    outstream.write(str);
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
                 break;
             case NONE:
                 break;

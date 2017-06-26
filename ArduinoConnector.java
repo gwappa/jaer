@@ -17,10 +17,11 @@ import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent; 
 import gnu.io.SerialPortEventListener; 
+import java.io.IOException;
 import java.util.Enumeration;
 
 
-public class Arduino implements SerialPortEventListener {
+public class ArduinoConnector implements SerialPortEventListener {
 	SerialPort serialPort;
         /** The port we're normally going to use. */
 	private static final String PORT_NAMES[] = { 
@@ -42,11 +43,15 @@ public class Arduino implements SerialPortEventListener {
 	private static final int TIME_OUT = 2000;
 	/** Default bits per second for COM port. */
 	private static final int DATA_RATE = 9600;
+        
+        public ArduinoConnector() {
+            initialize();
+        }
 
-	public void initialize() {
+	private void initialize() {
                 // the next line is for Raspberry Pi and 
                 // gets us into the while loop and was suggested here was suggested http://www.raspberrypi.org/phpBB3/viewtopic.php?f=81&t=32186
-                System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
+                System.setProperty("gnu.io.rxtx.SerialPorts", "COM3");
 
 		CommPortIdentifier portId = null;
 		Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
@@ -84,6 +89,11 @@ public class Arduino implements SerialPortEventListener {
 			// add event listeners
 			serialPort.addEventListener(this);
 			serialPort.notifyOnDataAvailable(true);
+                        
+                        // send test package
+                        Thread.sleep(2000);
+                        System.out.println("Trying to connect to Arduino and sending 'Hello' packet.");
+                        send("Java says 'Hello'");
 		} catch (Exception e) {
 			System.err.println(e.toString());
 		}
@@ -108,8 +118,12 @@ public class Arduino implements SerialPortEventListener {
             return output;
         }
         
-        public synchronized void send(String str) throws Exception{
-            getOutputStream().write(str.getBytes());
+        public synchronized void send(String str){
+            try {
+                getOutputStream().write(str.getBytes());
+            } catch (IOException ex) {
+                System.out.print(str);
+            }
         }
         
 	/**
@@ -126,4 +140,8 @@ public class Arduino implements SerialPortEventListener {
 		}
 		// Ignore all the other eventTypes, but you should consider the other ones.
 	}
+        
+        protected void finalize() {
+            close();
+        }
 }
