@@ -18,9 +18,10 @@
 package de.cco.jaer.eval;
 
 /**
- *
+ * Evaluate results, handle ArduinoConnector and OutputHandle objects
+ * 
  * @author viktor
- * @param <T>
+ * @param <T> T extends TrackerParams 
  */
 public class ResultEvaluator<T extends TrackerParams>{
     
@@ -33,7 +34,7 @@ public class ResultEvaluator<T extends TrackerParams>{
     
     /**
      * Creates a new instance of ResultEvaluator
-     * @param t
+     * @param t Template object extends ParameterTracker interface
      */
     public ResultEvaluator(T t){
         type = t;
@@ -42,6 +43,11 @@ public class ResultEvaluator<T extends TrackerParams>{
         out.write(type.printHeader());
     }
     
+    /**
+     * Create a new instance of ResultEvaluator
+     * @param t Template object extends ParameterTracker interface
+     * @param src OutputSource enum, if FILE -> create new filename
+     */
     public ResultEvaluator(T t, OutputHandler.OutputSource src) {
         type = t;
         con = new ArduinoConnector();
@@ -49,6 +55,11 @@ public class ResultEvaluator<T extends TrackerParams>{
         out.write(type.printHeader());
     }
     
+    /**
+     * Create a new instance of ResultEvaluator
+     * @param t Template object extends ParameterTracker interface
+     * @param path Path to log file 
+     */
     public ResultEvaluator(T t, String path) {
         type = t;
         con = new ArduinoConnector();
@@ -56,6 +67,9 @@ public class ResultEvaluator<T extends TrackerParams>{
         out.write(type.printHeader());
     }
 
+    /**
+     * Evaluate result and send signal to Arduino.
+     */
     public void eval() {
         out.write(type.print());
 

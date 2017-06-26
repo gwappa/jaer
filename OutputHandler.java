@@ -30,7 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Handle output of results
  * @author viktor
  */
 public class OutputHandler {
@@ -59,18 +59,34 @@ public class OutputHandler {
         NONE
     }
     
+    /**
+     * Create new instance of OutputHandler.
+     * Default is no output.
+     */
     public OutputHandler(){
         setOutput(OutputSource.NONE);
     }
     
+    /**
+     * Create new instance of OutputHandler
+     * @param str String with path to logfile
+     */
     public OutputHandler(String str){
         setOutput(str);
     }
     
+    /**
+     * Create new instance of OutputHandler
+     * @param p Path to new logfile
+     */
     public OutputHandler(Path p){
         setOutput(p.toString());
     }
     
+    /**
+     * Create new instance of OutputHandler
+     * @param src OutputSource enum
+     */
     public OutputHandler(OutputSource src){
         setOutput(src);
     }

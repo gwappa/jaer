@@ -6,7 +6,8 @@
 package de.cco.jaer.eval;
 
 /**
- *
+ * Handle connection to Arduino board.
+ * 
  * @author viktor
  */
 
@@ -52,6 +53,9 @@ public class ArduinoConnector implements SerialPortEventListener {
             initialize();
         }
 
+        /**
+         * Try to set up connection to Arduino board.
+         */
 	private void initialize() {
                 // the next line is for Raspberry Pi and 
                 // gets us into the while loop and was suggested here was suggested http://www.raspberrypi.org/phpBB3/viewtopic.php?f=81&t=32186
@@ -117,18 +121,34 @@ public class ArduinoConnector implements SerialPortEventListener {
 		}
 	}
         
+        /**
+         * Getter for BufferedReader input stream
+         * @return Opened BufferedReader 
+         */
         public synchronized BufferedReader getIntputStream(){
             return input;
         }
 
+        /**
+         * Getter for OutputStreat ouput stream object
+         * @return Opened OutputStream 
+         */
         public synchronized OutputStream getOutputStream(){
             return output;
         }
         
+        /**
+         * Check if connection to Arduino is established
+         * @return boolean, true if connection is established
+         */
         public boolean isConnected(){
             return state;
         }
         
+        /**
+         * Try to send String to Arduino board.
+         * @param str String to send
+         */
         public synchronized void send(String str){
             if (str.isEmpty()) {
                 return;
