@@ -341,15 +341,20 @@ public class OpenCVFlow extends AbstractMotionFlow
 
                 
                 float[] new_slice_buff = new float[(int) (newFrame.total() * 
-                                                newFrame.channels())];
+                                                newFrame.channels()) * 3];
+                Arrays.fill(new_slice_buff, 0);
                 
                 for (int i = 0; i < chip.getSizeY(); i++) {
                     for (int j = 0; j < chip.getSizeX(); j++) {
-                        new_slice_buff[chip.getSizeX()*i + j] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;         
+                        if(new1DArray[chip.getSizeX()*i + j] > 0) {                            
+                            new_slice_buff[(chip.getSizeX()*i + j) * 3] = 0;       
+                            new_slice_buff[(chip.getSizeX()*i + j) * 3 + 1] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;         
+                            new_slice_buff[(chip.getSizeX()*i + j) * 3 + 2] = 0;   
+                        }                 
                     }
                 }                  
                 
-                OFResultDisplay.setPixmapFromGrayArray(new_slice_buff);               
+                OFResultDisplay.setPixmapArray(new_slice_buff);
             }            
             
             // draw the tracks
