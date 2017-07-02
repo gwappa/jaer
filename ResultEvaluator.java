@@ -18,37 +18,35 @@
 package de.cco.jaer.eval;
 
 /**
- * Evaluate results, handle ArduinoConnector and OutputHandle objects
+ * Generic class, handles TrackerParams, ArduinoConnector and OutputHandle objects
  * 
  * @author viktor
- * @param <T> T extends TrackerParams 
  */
-public class ResultEvaluator<T extends TrackerParams>{
+public class ResultEvaluator{
     
     OutputHandler out;
     ArduinoConnector con;
-    T type;
+    TrackerParams type;
     
     final String ON = "y";
     final String OFF = "n";
     
     /**
-     * Creates a new instance of ResultEvaluator
+     * Creates a new instance of ResultEvaluator, no logging
      * @param t Template object extends ParameterTracker interface
      */
-    public ResultEvaluator(T t){
+    public ResultEvaluator(TrackerParams t){
         type = t;
         con = new ArduinoConnector();
         out = new OutputHandler();
-        out.write(type.printHeader());
     }
     
     /**
-     * Create a new instance of ResultEvaluator
+     * Create a new instance of ResultEvaluator, use specified OutputSource
      * @param t Template object extends ParameterTracker interface
      * @param src OutputSource enum, if FILE -> create new filename
      */
-    public ResultEvaluator(T t, OutputHandler.OutputSource src) {
+    public ResultEvaluator(TrackerParams t, OutputHandler.OutputSource src) {
         type = t;
         con = new ArduinoConnector();
         out = new OutputHandler(src);
@@ -56,11 +54,11 @@ public class ResultEvaluator<T extends TrackerParams>{
     }
     
     /**
-     * Create a new instance of ResultEvaluator
+     * Create a new instance of ResultEvaluator, log to specified path
      * @param t Template object extends ParameterTracker interface
      * @param path Path to log file 
      */
-    public ResultEvaluator(T t, String path) {
+    public ResultEvaluator(TrackerParams t, String path) {
         type = t;
         con = new ArduinoConnector();
         out = new OutputHandler(path);

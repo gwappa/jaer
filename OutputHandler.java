@@ -30,7 +30,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Handle output of results
+ * Handle output of tracker results.
+ * Log to file, console or do nothing.
  * @author viktor
  */
 public class OutputHandler {
