@@ -66,10 +66,34 @@ public interface TrackerParams {
     public void setSize(int x, int y);
     
     /**
+     * Setter for package size
+     * @param n Number of events in packets
+     */
+    public void setNumEvents(int n);
+    
+        /**
+     * Setter for first timestamp.
+     * @param ts Integer, first timestamp in package.
+     */
+    public void setFirstTS(int ts);
+    
+    /**
      * Setter for last timestamp.
-     * @param ts Integer, last timestamp.
+     * @param ts Integer, last timestamp in package.
      */
     public void setLastTS(int ts);
+    
+    /**
+     * Getter for first timestamp.
+     * @return first timestamp in package
+     */
+    public int getFirstTS();
+    
+    /**
+     * Getter for last timestamp.
+     * @return Last timestamp in package
+     */
+    public int getLastTS();
     
     /**
      * Getter for chip size.
@@ -78,10 +102,22 @@ public interface TrackerParams {
     public int[] getSize();
     
     /**
-     * Getter for time difference betweens events.
+     * Getter for packet size
+     * @return Number of events per packet
+     */
+    public int getNumEvents();
+    
+    /**
+     * Getter for time difference betweens packages.
      * @return Difference in time, Interger.
      */
     public int getDt();
+    
+    /**
+     * Package duration
+     * @return Difference between first and last timestamp in package.
+     */
+    public int getDuration();
     
     /**
      * Getter for event rate.
@@ -89,9 +125,21 @@ public interface TrackerParams {
      */
     public int getEventRate();
     
+    /**
+     * Print selected data
+     * @return String of selected data, comma seperated
+     */
     public String print();
     
+    /**
+     * Print selected data column
+     * @return String of selected data columns, comma seperated
+     */
     public String printHeader();
     
+    /**
+     * Evaluate tracker data
+     * @return Boolean 
+     */
     public Boolean eval();
 }

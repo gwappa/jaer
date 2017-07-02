@@ -34,8 +34,10 @@ public class HoughLineTrackerParams extends TrackerParamsBase {
         thetaRes = 10;
     }
     
-    public void update(int ts, float rho, float theta) {
-        setLastTS(ts);
+    public void update(int n, int firstts, int lastts, float rho, float theta) {
+        setNumEvents(n);
+        setFirstTS(firstts);
+        setLastTS(lastts);
         prevRho = lineRho;
         prevTheta = lineTheta;
         lineRho = rho;
@@ -60,12 +62,12 @@ public class HoughLineTrackerParams extends TrackerParamsBase {
 
     @Override
     public String print() {
-        return getDt() + "," + lineRho + "," + lineTheta + "," + getDist();
+        return getEventRate() + "," + getFirstTS() + "," + getLastTS() + "," + lineRho + "," + lineTheta + "," + getDist();
     }
     
     @Override
     public String printHeader() {
-        return "dt,rho,theta,distance";
+        return "eventrate,firstts,lastts,rho,theta,distance";
     }
 
     @Override

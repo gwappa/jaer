@@ -45,7 +45,9 @@ public class MedianTrackerParams extends TrackerParamsBase{
     /**
      * Update internal result representation with values from MedianTracker object.
      * 
-     * @param ts Timestamp of detection, Integer
+     * @param n Number of events per package
+     * @param firstts First timestamp in event package
+     * @param lastts Last timestamp in event package
      * @param p1x Median size of object in X direction
      * @param p1y Median size of object in Y direction
      * @param p2x Standard deviation size in X direction
@@ -53,8 +55,10 @@ public class MedianTrackerParams extends TrackerParamsBase{
      * @param p3x Mean object X position 
      * @param p3y Mean object Y position
      */
-    public void update(int ts, float p1x, float p1y, float p2x, float p2y, float p3x, float p3y) {
-        setLastTS(ts);
+    public void update(int n, int firstts, int lastts, float p1x, float p1y, float p2x, float p2y, float p3x, float p3y) {
+        setNumEvents(n);
+        setFirstTS(firstts);
+        setLastTS(lastts);
         prevx = meanx;
         prevy = meany;
         medianx = p1x;
@@ -82,12 +86,12 @@ public class MedianTrackerParams extends TrackerParamsBase{
     
     @Override
     public String print() {
-        return getDt() + "," + medianx + "," + mediany + "," + getDist() + "," + getSpeed();
+        return getEventRate() + "," + getFirstTS() + "," + getLastTS() + "," + medianx + "," + mediany + "," + getDist() + "," + getSpeed();
     }
     
     @Override
     public String printHeader() {
-        return "dt,medianx,mediany,distance,speed";
+        return "eventrate,firstts,lastts,medianx,mediany,distance,speed";
     }
 
     @Override

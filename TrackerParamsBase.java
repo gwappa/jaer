@@ -32,8 +32,11 @@ public abstract class TrackerParamsBase implements TrackerParams{
     // chip size
     private int sx, sy;
     
+    // package size
+    private int nevents, prevnevents;
+    
     // time stamp vars
-    private int lastts, prevlastts;    
+    private int firstts, lastts, prevfirstts, prevlastts;    
 
     @Override
     public void setSize(AEChip chip){
@@ -48,9 +51,31 @@ public abstract class TrackerParamsBase implements TrackerParams{
     }
     
     @Override
+    public void setFirstTS(int ts){
+        prevfirstts = firstts;
+        firstts = ts;
+    }
+    
+    @Override
     public void setLastTS(int ts){
         prevlastts = lastts;
         lastts = ts;
+    }
+    
+    @Override
+    public void setNumEvents(int n) {
+        prevnevents = nevents;
+        nevents = n;
+    }
+    
+    @Override
+    public int getFirstTS() {
+        return firstts;
+    }
+
+    @Override
+    public int getLastTS() {
+        return lastts;
     }
 
     @Override
@@ -62,12 +87,22 @@ public abstract class TrackerParamsBase implements TrackerParams{
     }
 
     @Override
+    public int getNumEvents() {
+        return nevents;
+    }
+    
+    @Override
     public int getDt(){
         return lastts - prevlastts;
     }
 
     @Override
+    public int getDuration(){
+        return (lastts > 0) ? lastts - firstts : 1;
+    }
+    
+    @Override
     public int getEventRate() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return getNumEvents() / getDuration();
     }
 }
