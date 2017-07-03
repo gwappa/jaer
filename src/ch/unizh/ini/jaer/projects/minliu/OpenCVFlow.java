@@ -69,7 +69,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -82,6 +85,7 @@ import net.sf.jaer.event.ApsDvsEventPacket;
 import net.sf.jaer.event.EventPacket;
 import net.sf.jaer.event.PolarityEvent;
 import net.sf.jaer.event.orientation.ApsDvsMotionOrientationEvent;
+import net.sf.jaer.eventio.AEDataFile;
 import net.sf.jaer.eventprocessing.EventFilter;
 import static net.sf.jaer.eventprocessing.EventFilter.log;
 import net.sf.jaer.eventprocessing.EventFilter2D;
@@ -118,6 +122,7 @@ public class OpenCVFlow extends AbstractMotionFlow
     private int[][] color = new int[100][3];
     private float[] oldBuffer = null, newBuffer = null;
     private PatchMatchFlow patchFlow;
+    private boolean isSavedAsImage = getBoolean("isSavedAsImage", true);
     
     
     public OpenCVFlow(AEChip chip) {
@@ -349,16 +354,19 @@ public class OpenCVFlow extends AbstractMotionFlow
                 for (int i = 0; i < chip.getSizeY(); i++) {
                     for (int j = 0; j < chip.getSizeX(); j++) {
                         if(new1DArray[chip.getSizeX()*i + j] > 0) {                            
-                            new_slice_buff[(chip.getSizeX()*i + j) * 4] = 0;       
+                            new_slice_buff[(chip.getSizeX()*i + j) * 4] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;       
                             new_slice_buff[(chip.getSizeX()*i + j) * 4 + 1] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;         
-                            new_slice_buff[(chip.getSizeX()*i + j) * 4 + 2] = 0;   
-                            new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 0.5f;  
-                        }                
+                            new_slice_buff[(chip.getSizeX()*i + j) * 4 + 2] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;   
+                            new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f;  
+                        }            
 
                     }
                 }                  
                 AEFrameChipRenderer render = (AEFrameChipRenderer)(chip.getRenderer());
                 OFResultDisplay.setPixmapArray(new_slice_buff);  
+                if(isSavedAsImage) {
+                    saveImage();
+                }
             }            
             
             // draw the tracks
@@ -395,7 +403,23 @@ public class OpenCVFlow extends AbstractMotionFlow
     }
 
     private void saveImage() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        final Date d = new Date();
+        final String fn = "EventSlices/" + "EventSlice-" + System.nanoTime() + ".png";
+        final BufferedImage theImage = new BufferedImage(chip.getSizeX(), chip.getSizeY(), BufferedImage.TYPE_INT_RGB);
+        for (int y = 0; y < chip.getSizeY(); y++) {
+            for (int x = 0; x < chip.getSizeX(); x++) {
+                final int idx = OFResultDisplay.getPixMapIndex(x, chip.getSizeY() - y - 1);
+                final int value = ((int) (256 * OFResultDisplay.getPixmapArray()[idx]) << 16)
+                        | ((int) (256 * OFResultDisplay.getPixmapArray()[idx + 1]) << 8) | (int) (256 * OFResultDisplay.getPixmapArray()[idx + 2]);
+                theImage.setRGB(x, y, value);
+            }
+        }
+        final File outputfile = new File(fn);
+        try {
+            ImageIO.write(theImage, "png", outputfile);
+        } catch (final IOException ex) {
+            Logger.getLogger(ApsFrameExtractor.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public class FeatureParams {
@@ -495,13 +519,17 @@ public class OpenCVFlow extends AbstractMotionFlow
             OFResultFrame.setVisible(showAPSFrameDisplay);
         }
         getSupport().firePropertyChange("showAPSFrameDisplay", null, showAPSFrameDisplay);
-    }    
-    
-    /**
-     */
-    public void doSaveAsPNG() {
-        saveImage();
+    }  
+
+    public boolean isIsSavedAsImage() {
+        return isSavedAsImage;
     }
+
+    public void setIsSavedAsImage(boolean isSavedAsImage) {
+        this.isSavedAsImage = isSavedAsImage;
+        getSupport().firePropertyChange("isSavedAsImage", null, isSavedAsImage);        
+    }
+    
 }
 
 

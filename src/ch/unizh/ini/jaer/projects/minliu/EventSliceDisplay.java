@@ -187,4 +187,19 @@ public class EventSliceDisplay extends ImageDisplay{
 
         gl.glEnd();
     }
+    
+    /**
+     * Returns an int that can be used to index to a particular pixel's RGB
+     * start location in the pixmap. The successive 3 entries are the float
+     * (0-1) RGB values.
+     *
+     * @param x pixel x, 0 is left side.
+     * @param y pixel y, 0 is bottom.
+     * @return index into pixmap.
+     * @see #getPixmapArray()
+     */
+    @Override      
+    public int getPixMapIndex(int x, int y) {
+        return 4 * (x + (y * getSizeX()));
+    }    
 }
