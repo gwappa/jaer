@@ -78,4 +78,13 @@ public class ResultEvaluator{
             con.send(OFF);
         }
     }
+    
+    public OutputHandler getOutputHandler() {
+        return out;
+    }
+    
+    public boolean isListening() {
+        return getOutputHandler().isListening();
+    }
+    
 }

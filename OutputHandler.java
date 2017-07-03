@@ -17,6 +17,7 @@
  */
 package de.cco.jaer.eval;
 
+import java.beans.PropertyChangeEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -28,6 +29,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
 /**
  * Handle output of tracker results.
@@ -41,6 +44,33 @@ public class OutputHandler {
     
     // output file object
     BufferedWriter outstream;
+    
+    PropertyChangeSupport pcs;
+    PropertyChangeListener li = new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent pce) {
+            if (pce.getPropertyName().equals("filterEnabled")) {
+                boolean val = (boolean) pce.getNewValue();
+                if (val == false) {
+                    try {
+                        System.out.println("Filter disabled.");
+                        System.out.println("Trying to close BufferWriter.");
+                        outstream.close();
+                    } catch (IOException ex) {
+                        Logger.getLogger(OutputHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                else if (val == true) {
+                    System.out.println("Filter enabled.");
+                    String path = genFileName();
+                    System.out.println("Saving data to new file '" + path + "'");
+                    outstream = openFile(path);
+                }
+            }
+        }
+    };
+    
+    private boolean listening = false;
     
     public enum OutputSource{
 
@@ -74,6 +104,7 @@ public class OutputHandler {
      */
     public OutputHandler(String str){
         setOutput(str);
+        
     }
     
     /**
@@ -103,6 +134,7 @@ public class OutputHandler {
 
     public final void setOutput(String str) {
         System.out.println("Saving data to '" + str + "'");
+        outsrc = OutputSource.FILE;
         outstream = openFile(str);
     }
     
@@ -160,6 +192,24 @@ public class OutputHandler {
             e.printStackTrace();
         }
         return bw;
+    }
+    
+    public boolean isListening() {
+        return listening;
+    }
+    
+    public void attachCustomListener(PropertyChangeSupport s) {
+        if (pcs != null) {
+            return;
+        }
+        pcs = s;
+        pcs.addPropertyChangeListener(li);
+        listening = true;
+    }
+    
+    public void removeCustomListener(PropertyChangeSupport pcs) {
+        pcs.removePropertyChangeListener(li);
+        listening = false;
     }
     
     protected void finalize() {
