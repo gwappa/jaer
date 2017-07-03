@@ -119,13 +119,16 @@ public class EventSliceDisplay extends ImageDisplay{
         {
             try {
                 pixmap.rewind();
+                int[] renderBuffers = new int[1];   
+                gl.glGenTextures(1, renderBuffers, 0);
+                int id = renderBuffers[0];
 		gl.glDisable(GL.GL_DEPTH_TEST);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glEnable(GL.GL_BLEND);
                 
                 final int nearestFilter = GL.GL_NEAREST;
 
-                gl.glBindTexture(GL.GL_TEXTURE_2D, 5);
+                gl.glBindTexture(GL.GL_TEXTURE_2D, id);
                 gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1);
                 gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
                 gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
@@ -136,7 +139,7 @@ public class EventSliceDisplay extends ImageDisplay{
                 gl.glDrawPixels(getSizeX(), getSizeY(), GL.GL_RGBA, GL.GL_FLOAT, pixmap);
 
                 gl.glEnable(GL.GL_TEXTURE_2D);
-                gl.glBindTexture(GL.GL_TEXTURE_2D, 5);
+                gl.glBindTexture(GL.GL_TEXTURE_2D, id);
                 drawPolygon(gl, getSizeX(), getSizeY());
                 gl.glDisable(GL.GL_TEXTURE_2D);    
 		gl.glDisable(GL.GL_BLEND);

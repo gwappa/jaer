@@ -59,6 +59,8 @@ import static ch.unizh.ini.jaer.projects.rbodo.opticalflow.AbstractMotionFlowIMU
 import static ch.unizh.ini.jaer.projects.rbodo.opticalflow.AbstractMotionFlowIMU.vx;
 import static ch.unizh.ini.jaer.projects.rbodo.opticalflow.AbstractMotionFlowIMU.vy;
 import com.jogamp.common.util.Bitstream.ByteStream;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
@@ -110,8 +112,7 @@ public class OpenCVFlow extends AbstractMotionFlow
         }
     }
     
-    private final ImageDisplay OFResultDisplay;
-    
+    private final EventSliceDisplay OFResultDisplay;    
     private JFrame OFResultFrame = null;
     protected boolean showAPSFrameDisplay = getBoolean("showAPSFrameDisplay", true);
     private int[][] color = new int[100][3];
@@ -123,8 +124,8 @@ public class OpenCVFlow extends AbstractMotionFlow
         super(chip);
         System.out.println("Welcome to OpenCV " + Core.VERSION);
 
-        OFResultDisplay = ImageDisplay.createOpenGLCanvas();
-        
+        OFResultDisplay = EventSliceDisplay.createOpenGLCanvas();        
+
         OFResultFrame = new JFrame("Optical Flow Result Frame");
         OFResultFrame.setPreferredSize(new Dimension(800, 800));
         OFResultFrame.getContentPane().add(OFResultDisplay, BorderLayout.CENTER);
@@ -341,20 +342,23 @@ public class OpenCVFlow extends AbstractMotionFlow
 
                 
                 float[] new_slice_buff = new float[(int) (newFrame.total() * 
-                                                newFrame.channels()) * 3];
+                                                newFrame.channels()) * 4];
+
                 Arrays.fill(new_slice_buff, 0);
-                
+                Random r = new Random();
                 for (int i = 0; i < chip.getSizeY(); i++) {
                     for (int j = 0; j < chip.getSizeX(); j++) {
                         if(new1DArray[chip.getSizeX()*i + j] > 0) {                            
-                            new_slice_buff[(chip.getSizeX()*i + j) * 3] = 0;       
-                            new_slice_buff[(chip.getSizeX()*i + j) * 3 + 1] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;         
-                            new_slice_buff[(chip.getSizeX()*i + j) * 3 + 2] = 0;   
-                        }                 
+                            new_slice_buff[(chip.getSizeX()*i + j) * 4] = 0;       
+                            new_slice_buff[(chip.getSizeX()*i + j) * 4 + 1] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;         
+                            new_slice_buff[(chip.getSizeX()*i + j) * 4 + 2] = 0;   
+                            new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 0.5f;  
+                        }                
+
                     }
                 }                  
-                
-                OFResultDisplay.setPixmapArray(new_slice_buff);
+                AEFrameChipRenderer render = (AEFrameChipRenderer)(chip.getRenderer());
+                OFResultDisplay.setPixmapArray(new_slice_buff);  
             }            
             
             // draw the tracks
@@ -388,6 +392,10 @@ public class OpenCVFlow extends AbstractMotionFlow
            
         }
         
+    }
+
+    private void saveImage() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public class FeatureParams {
@@ -488,6 +496,12 @@ public class OpenCVFlow extends AbstractMotionFlow
         }
         getSupport().firePropertyChange("showAPSFrameDisplay", null, showAPSFrameDisplay);
     }    
+    
+    /**
+     */
+    public void doSaveAsPNG() {
+        saveImage();
+    }
 }
 
 
