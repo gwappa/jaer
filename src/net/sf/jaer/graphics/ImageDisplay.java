@@ -157,7 +157,7 @@ import static net.sf.jaer.graphics.ImageDisplay.log;
 public class ImageDisplay extends GLJPanel implements GLEventListener {
 
     private static Preferences prefs = Preferences.userNodeForPackage(ImageDisplay.class);
-    static final Logger log = Logger.getLogger("ImageDisplay");
+    protected static final Logger log = Logger.getLogger("ImageDisplay");
     private int fontSize = 20;
     private int sizeX = 0, sizeY = 0;
     /**
@@ -175,16 +175,16 @@ public class ImageDisplay extends GLJPanel implements GLEventListener {
     private GLU glu = new GLU();
     private TextRenderer textRenderer;
     public final int BORDER_SPACE_PIXELS_DEFAULT = 40;
-    private float borderPixels = BORDER_SPACE_PIXELS_DEFAULT;
-    private boolean fillsVertically;
-    private boolean fillsHorizontally;
+    protected float borderPixels = BORDER_SPACE_PIXELS_DEFAULT;
+    protected boolean fillsVertically;
+    protected boolean fillsHorizontally;
     private final float ZCLIP = 1;
     /**
      * The actual borders in model space around the chip area.
      */
     private Borders borders = new Borders();
     private String xLabel = null, yLabel = null, titleLabel = null;
-    boolean reshapePending = false;
+    protected boolean reshapePending = false;
     private HashMap<Integer, String> xticks, yticks;
     private float[] textColor = new float[]{1, 1, 1};
     private ArrayList<Legend> legends = new ArrayList();
@@ -309,7 +309,7 @@ public class ImageDisplay extends GLJPanel implements GLEventListener {
      *
      * @param drawable
      */
-    synchronized private void displayPixmap(GLAutoDrawable drawable) {
+    synchronized public void displayPixmap(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
         if (gl == null) {
             return;
@@ -367,7 +367,7 @@ public class ImageDisplay extends GLJPanel implements GLEventListener {
      * @param glu the GLU used to obtain the error strings
      * @param msg an error message to log to e.g., show the context
      */
-    private void checkGLError(GL2 g, String msg) {
+    protected void checkGLError(GL2 g, String msg) {
         int error = g.glGetError();
         int nerrors = 3;
         while ((error != GL.GL_NO_ERROR) && (nerrors-- != 0)) {
@@ -1051,7 +1051,7 @@ public class ImageDisplay extends GLJPanel implements GLEventListener {
      *
      * @param gl
      */
-    private void drawText(GL2 gl) {
+    protected void drawText(GL2 gl) {
         if ((xLabel == null) && (yLabel == null) && (titleLabel == null) && (xticks == null) && (yticks == null) && legends.isEmpty()) {
             return;
         }
