@@ -176,23 +176,8 @@ public class OpenCVFlow extends AbstractMotionFlow
         }
         
 
-        OFResultDisplay.checkPixmapAllocation();       
-        
-//        final ApsDvsEventPacket packet = (ApsDvsEventPacket) in;
-//        if (packet == null) {
-//            return null;
-//        }
-//        if (packet.getEventClass() != ApsDvsEvent.class) {
-//            EventFilter.log.warning("wrong input event class, got " + packet.getEventClass() + " but we need to have " + ApsDvsEvent.class);
-//            return null;
-//        }
-//        final Iterator apsItr = packet.fullIterator();
-//        while (apsItr.hasNext()) {
-//            final ApsDvsEvent e = (ApsDvsEvent) apsItr.next();
-//            if (e.isApsData()) {
-//                apsFrameExtractor.putAPSevent(e);
-//            }
-//        }
+        OFResultDisplay.checkPixmapAllocation();     
+
         if(isShowAPSFrameDisplay()) {
             OFResultDisplay.repaint();            
         }
@@ -235,65 +220,7 @@ public class OpenCVFlow extends AbstractMotionFlow
     } 
     
     @Override
-    public synchronized void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getPropertyName().equals(ApsFrameExtractor.EVENT_NEW_FRAME)) {
-            if(newBuffer == null) {
-                newBuffer = (float[]) evt.getNewValue();                
-                return;
-            }
-            oldBuffer = newBuffer;
-            float[] buffer = OFResultDisplay.getPixmapArray();
-            byte[] byteBuffer = new byte[buffer.length];
-            for(int i=0; i<buffer.length;i++) {
-                byteBuffer[i] = (byte) (buffer[i] * 255);
-            }
-            newBuffer = (float[]) evt.getNewValue();
-            Mat newFrame = new Mat(chip.getSizeY(), chip.getSizeX(), CvType.CV_32F);
-            newFrame.put(0, 0, newBuffer);   
-            Mat oldFrame = new Mat(chip.getSizeY(), chip.getSizeX(), CvType.CV_32F);
-            oldFrame.put(0, 0, oldBuffer);       
-            
-            // params for ShiTomasi corner detection            
-            FeatureParams feature_params  = new FeatureParams(100, 0.3, 7, 7);
-            
-            // Feature extraction
-            MatOfPoint p0 = new MatOfPoint();
-            Imgproc.goodFeaturesToTrack(newFrame, p0, feature_params.maxCorners, feature_params.qualityLevel, feature_params.minDistance);       
-
-            MatOfPoint2f prevPts = new MatOfPoint2f(p0.toArray());
-            MatOfPoint2f nextPts = new MatOfPoint2f();
-            MatOfByte status = new MatOfByte();
-            MatOfFloat err = new MatOfFloat();
-
-            int featureNum = prevPts.checkVector(2, CvType.CV_32F, true);
-            System.out.println("The number of feature detected is : " + featureNum);     
-
-            try {
-                Video.calcOpticalFlowPyrLK(oldFrame, newFrame, prevPts, nextPts, status, err);            
-            } catch (Exception e) {
-                System.err.println(e);
-                // newFrame.copyTo(oldFrame);
-            }            
-            
-            // TODO: Select good points 
-
-            // draw the tracks
-            Point[] prevPoints = prevPts.toArray();
-            // Point[] nextPoints = nextPts.toArray();
-            // byte[] st = status.toArray();
-            // float[] er = err.toArray();    
-            Mat mask = new Mat(newFrame.rows(), newFrame.cols(), CvType.CV_32F);
-            for (int i = 0; i < prevPoints.length; i++) {
-                // Imgproc.line(displayFrame, prevPoints[i], nextPoints[i], new Scalar(color[i][0],color[i][1],color[i][2]), 2);  
-                Imgproc.circle(newFrame,prevPoints[i], 5, new Scalar(255,255,255),-1);
-            }
-            
-            float[] return_buff = new float[(int) (newFrame.total() * 
-                                            newFrame.channels())];
-            newFrame.get(0, 0, return_buff);
-            // OFResultDisplay.setPixmapFromGrayArray(return_buff);           
-        }
-        
+    public synchronized void propertyChange(PropertyChangeEvent evt) {       
         if (evt.getPropertyName().equals(PatchMatchFlow.EVENT_NEW_SLICES)) {
             byte[][][] tMinus2dSlice = (byte[][][]) evt.getOldValue();
             byte[][][] tMinusdSlice = (byte[][][]) evt.getNewValue();
