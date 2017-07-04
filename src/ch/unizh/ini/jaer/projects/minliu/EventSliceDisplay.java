@@ -88,7 +88,7 @@ public class EventSliceDisplay extends ImageDisplay{
         try {
             gl.glClearColor(0.5f, 0.5f, 0.5f, 0f);            
             gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-            displayPixmap(drawable);
+            displayEventPixmap(drawable);
             drawText(gl);
             gl.glFlush();
         } catch (GLException e) {
@@ -97,8 +97,7 @@ public class EventSliceDisplay extends ImageDisplay{
         checkGLError(gl, "after setDefaultProjection in ID");
     }
     
-    @Override    
-    synchronized public void displayPixmap(GLAutoDrawable drawable) {
+    synchronized private void displayEventPixmap(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
         if (gl == null) {
             return;

@@ -309,7 +309,7 @@ public class ImageDisplay extends GLJPanel implements GLEventListener {
      *
      * @param drawable
      */
-    synchronized public void displayPixmap(GLAutoDrawable drawable) {
+    synchronized private void displayPixmap(GLAutoDrawable drawable) {
         GL2 gl = drawable.getGL().getGL2();
         if (gl == null) {
             return;
