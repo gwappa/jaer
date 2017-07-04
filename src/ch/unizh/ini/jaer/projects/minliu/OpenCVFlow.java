@@ -5,25 +5,16 @@
  */
 package ch.unizh.ini.jaer.projects.minliu;
 
-import ch.unizh.ini.jaer.projects.davis.calibration.SingleCameraCalibration;
 import java.awt.FlowLayout;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static java.nio.file.Files.list;
-import static java.rmi.Naming.list;
-
-import java.util.ArrayList;
-import static java.util.Collections.list;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -42,25 +33,13 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.TermCriteria;
 import org.opencv.core.MatOfPoint2f; 
 import org.opencv.core.Point; 
-import org.opencv.core.Rect; 
-import org.opencv.core.RotatedRect; 
-import org.opencv.core.Scalar; 
 import org.opencv.core.Size; 
 import org.opencv.video.Video;
-import org.opencv.videoio.VideoCapture;
-import org.bytedeco.javacpp.opencv_videoio.VideoWriter;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import ch.unizh.ini.jaer.projects.davis.frames.ApsFrameExtractor;
 import ch.unizh.ini.jaer.projects.rbodo.opticalflow.AbstractMotionFlow;
-import ch.unizh.ini.jaer.projects.rbodo.opticalflow.AbstractMotionFlowIMU;
-import static ch.unizh.ini.jaer.projects.rbodo.opticalflow.AbstractMotionFlowIMU.v;
-import static ch.unizh.ini.jaer.projects.rbodo.opticalflow.AbstractMotionFlowIMU.vx;
-import static ch.unizh.ini.jaer.projects.rbodo.opticalflow.AbstractMotionFlowIMU.vy;
-import com.jogamp.common.util.Bitstream.ByteStream;
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.MouseWheelEvent;
@@ -71,28 +50,19 @@ import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import net.sf.jaer.Description;
 import net.sf.jaer.DevelopmentStatus;
 import net.sf.jaer.chip.AEChip;
 import net.sf.jaer.chip.Chip2D;
-import net.sf.jaer.event.ApsDvsEvent;
-import net.sf.jaer.event.ApsDvsEventPacket;
+
 import net.sf.jaer.event.EventPacket;
 import net.sf.jaer.event.PolarityEvent;
-import net.sf.jaer.event.orientation.ApsDvsMotionOrientationEvent;
-import net.sf.jaer.eventio.AEDataFile;
-import net.sf.jaer.eventprocessing.EventFilter;
 import static net.sf.jaer.eventprocessing.EventFilter.log;
-import net.sf.jaer.eventprocessing.EventFilter2D;
 import net.sf.jaer.eventprocessing.FilterChain;
 import net.sf.jaer.graphics.AEFrameChipRenderer;
-import net.sf.jaer.graphics.ImageDisplay;
 import org.apache.commons.lang3.ArrayUtils;
 
 
@@ -117,9 +87,9 @@ public class OpenCVFlow extends AbstractMotionFlow
         }
     }
     
-    private final EventSliceDisplay OFResultDisplay;    
-    private JFrame OFResultFrame = null;
-    protected boolean showAPSFrameDisplay = getBoolean("showAPSFrameDisplay", true);
+    private final EventSliceDisplay tminusdSliceResult,tminus2dSliceResult;    
+    private JFrame tminusdSlice = null, tminus2dSlice = null;
+    protected boolean showEventSlicesDisplay = getBoolean("showEventSlicesDisplay", true);
     private int[][] color = new int[100][3];
     private float[] oldBuffer = null, newBuffer = null;
     private PatchMatchFlow patchFlow;
@@ -131,23 +101,42 @@ public class OpenCVFlow extends AbstractMotionFlow
         super(chip);
         System.out.println("Welcome to OpenCV " + Core.VERSION);
 
-        OFResultDisplay = EventSliceDisplay.createOpenGLCanvas();        
-        OFResultDisplay.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+        tminusdSliceResult = EventSliceDisplay.createOpenGLCanvas();   
+        tminus2dSliceResult = EventSliceDisplay.createOpenGLCanvas();   
+        
+        tminusdSlice = new JFrame("The t-d event slice frame");
+        tminusdSlice.setPreferredSize(new Dimension(800, 800));
+        tminusdSlice.getContentPane().add(tminusdSliceResult, BorderLayout.CENTER);
+        
+        tminusdSlice.pack();
+        tminusdSlice.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(final WindowEvent e) {
+                setShowEventSlicesDisplay(false);
+            }
+        });         
+        tminusdSlice.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 imagePanelMouseWheelMoved(evt);
             }
         });
-     
-        OFResultFrame = new JFrame("Optical Flow Result Frame");
-        OFResultFrame.setPreferredSize(new Dimension(800, 800));
-        OFResultFrame.getContentPane().add(OFResultDisplay, BorderLayout.CENTER);
-        OFResultFrame.pack();
-        OFResultFrame.addWindowListener(new WindowAdapter() {
+
+        
+        tminus2dSlice = new JFrame("The t-2d event slice frame");
+        tminus2dSlice.setPreferredSize(new Dimension(800, 800));
+        tminus2dSlice.getContentPane().add(tminus2dSliceResult, BorderLayout.CENTER);
+        tminus2dSlice.pack();
+        tminus2dSlice.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(final WindowEvent e) {
-                setShowAPSFrameDisplay(false);
+                setShowEventSlicesDisplay(false);
             }
-        }); 
+        });         
+        tminus2dSlice.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                imagePanelMouseWheelMoved(evt);
+            }
+        });
         
         FilterChain chain = new FilterChain(chip);        
         try {
@@ -171,15 +160,19 @@ public class OpenCVFlow extends AbstractMotionFlow
         }
         setupFilter(in);
         
-        if (showAPSFrameDisplay && !OFResultFrame.isVisible()) {
-            OFResultFrame.setVisible(true);
+        if (showEventSlicesDisplay && !tminusdSlice.isVisible()) {
+            tminusdSlice.setVisible(true);
         }
-        
+        if (showEventSlicesDisplay && !tminus2dSlice.isVisible()) {
+            tminus2dSlice.setVisible(true);            
+        }        
 
-        OFResultDisplay.checkPixmapAllocation();     
+        tminusdSliceResult.checkPixmapAllocation();     
+        tminus2dSliceResult.checkPixmapAllocation();     
 
-        if(isShowAPSFrameDisplay()) {
-            OFResultDisplay.repaint();            
+        if(isShowEventSlicesDisplay()) {
+            tminusdSliceResult.repaint(); 
+            tminus2dSliceResult.repaint();                      
         }
         return in;     
     }
@@ -192,7 +185,8 @@ public class OpenCVFlow extends AbstractMotionFlow
             patchFlow.resetFilter();            
         }
         
-        OFResultDisplay.setImageSize(chip.getSizeX(), chip.getSizeY());
+        tminusdSliceResult.setImageSize(chip.getSizeX(), chip.getSizeY());
+        tminus2dSliceResult.setImageSize(chip.getSizeX(), chip.getSizeY());            
     }
 
     @Override
@@ -213,9 +207,12 @@ public class OpenCVFlow extends AbstractMotionFlow
     public synchronized void setFilterEnabled(final boolean yes) {
         super.setFilterEnabled(yes); // To change body of generated methods, choose Tools | Templates.
         if (!isFilterEnabled()) {
-            if (OFResultFrame != null) {
-                OFResultFrame.setVisible(false);
+            if (tminusdSlice != null) {
+                tminusdSlice.setVisible(false);
             }
+            if (tminus2dSlice != null) {
+                tminus2dSlice.setVisible(false);
+            }            
         }
     } 
     
@@ -295,9 +292,29 @@ public class OpenCVFlow extends AbstractMotionFlow
                         }            
 
                     }
-                }                  
+                }      
+                
+                
+                float[] old_slice_buff = new float[(int) (oldFrame.total() * 
+                                                oldFrame.channels()) * 4];
+
+                Arrays.fill(old_slice_buff, 0);
+                for (int i = 0; i < chip.getSizeY(); i++) {
+                    for (int j = 0; j < chip.getSizeX(); j++) {
+                        if(old1DArray[chip.getSizeX()*i + j] > 0) {                            
+                            old_slice_buff[(chip.getSizeX()*i + j) * 4] = old1DArray[chip.getSizeX()*i + j]/oldGrayScale;       
+                            old_slice_buff[(chip.getSizeX()*i + j) * 4 + 1] = old1DArray[chip.getSizeX()*i + j]/oldGrayScale;         
+                            old_slice_buff[(chip.getSizeX()*i + j) * 4 + 2] = old1DArray[chip.getSizeX()*i + j]/oldGrayScale;   
+                            old_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f/colorScale;  
+                        }            
+
+                    }
+                }  
+                
                 AEFrameChipRenderer render = (AEFrameChipRenderer)(chip.getRenderer());
-                OFResultDisplay.setPixmapArray(new_slice_buff);  
+                tminusdSliceResult.setPixmapArray(new_slice_buff);  
+                tminus2dSliceResult.setPixmapArray(old_slice_buff);  
+                
                 if(isSavedAsImage) {
                     saveImage();
                 }
@@ -342,9 +359,9 @@ public class OpenCVFlow extends AbstractMotionFlow
         final BufferedImage theImage = new BufferedImage(chip.getSizeX(), chip.getSizeY(), BufferedImage.TYPE_INT_RGB);
         for (int y = 0; y < chip.getSizeY(); y++) {
             for (int x = 0; x < chip.getSizeX(); x++) {
-                final int idx = OFResultDisplay.getPixMapIndex(x, chip.getSizeY() - y - 1);
-                final int value = ((int) (256 * OFResultDisplay.getPixmapArray()[idx]) << 16)
-                        | ((int) (256 * OFResultDisplay.getPixmapArray()[idx + 1]) << 8) | (int) (256 * OFResultDisplay.getPixmapArray()[idx + 2]);
+                final int idx = tminusdSliceResult.getPixMapIndex(x, chip.getSizeY() - y - 1);
+                final int value = ((int) (256 * tminusdSliceResult.getPixmapArray()[idx]) << 16)
+                        | ((int) (256 * tminusdSliceResult.getPixmapArray()[idx + 1]) << 8) | (int) (256 * tminusdSliceResult.getPixmapArray()[idx + 2]);
                 theImage.setRGB(x, y, value);
             }
         }
@@ -437,22 +454,25 @@ public class OpenCVFlow extends AbstractMotionFlow
     }    
     
     /**
-     * @return the showAPSFrameDisplay
+     * @return the showEventSlicesDisplay
      */
-    public boolean isShowAPSFrameDisplay() {
-        return showAPSFrameDisplay;
+    public boolean isShowEventSlicesDisplay() {
+        return showEventSlicesDisplay;
     }
 
     /**
-     * @param showAPSFrameDisplay the showAPSFrameDisplay to set
+     * @param showEventSlicesDisplay the showEventSlicesDisplay to set
      */
-    public void setShowAPSFrameDisplay(final boolean showAPSFrameDisplay) {
-        this.showAPSFrameDisplay = showAPSFrameDisplay;
-        putBoolean("showAPSFrameDisplay", showAPSFrameDisplay);
-        if (OFResultFrame != null) {
-            OFResultFrame.setVisible(showAPSFrameDisplay);
+    public void setShowEventSlicesDisplay(final boolean showEventSlicesDisplay) {
+        this.showEventSlicesDisplay = showEventSlicesDisplay;
+        putBoolean("showEventSlicesDisplay", showEventSlicesDisplay);
+        if (tminusdSlice != null) {
+            tminusdSlice.setVisible(showEventSlicesDisplay);
         }
-        getSupport().firePropertyChange("showAPSFrameDisplay", null, showAPSFrameDisplay);
+        if (tminus2dSlice != null) {
+            tminus2dSlice.setVisible(showEventSlicesDisplay);
+        }        
+        getSupport().firePropertyChange("showEventSlicesDisplay", null, showEventSlicesDisplay);
     }  
 
     public boolean isIsSavedAsImage() {
