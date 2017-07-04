@@ -63,6 +63,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.MouseWheelEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
@@ -122,7 +123,8 @@ public class OpenCVFlow extends AbstractMotionFlow
     private int[][] color = new int[100][3];
     private float[] oldBuffer = null, newBuffer = null;
     private PatchMatchFlow patchFlow;
-    private boolean isSavedAsImage = getBoolean("isSavedAsImage", true);
+    private boolean isSavedAsImage = getBoolean("isSavedAsImage", false);
+    private int colorScale = getInt("colorScale", 2);
     
     
     public OpenCVFlow(AEChip chip) {
@@ -130,7 +132,12 @@ public class OpenCVFlow extends AbstractMotionFlow
         System.out.println("Welcome to OpenCV " + Core.VERSION);
 
         OFResultDisplay = EventSliceDisplay.createOpenGLCanvas();        
-
+        OFResultDisplay.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                imagePanelMouseWheelMoved(evt);
+            }
+        });
+     
         OFResultFrame = new JFrame("Optical Flow Result Frame");
         OFResultFrame.setPreferredSize(new Dimension(800, 800));
         OFResultFrame.getContentPane().add(OFResultDisplay, BorderLayout.CENTER);
@@ -357,7 +364,7 @@ public class OpenCVFlow extends AbstractMotionFlow
                             new_slice_buff[(chip.getSizeX()*i + j) * 4] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;       
                             new_slice_buff[(chip.getSizeX()*i + j) * 4 + 1] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;         
                             new_slice_buff[(chip.getSizeX()*i + j) * 4 + 2] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;   
-                            new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f;  
+                            new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f/colorScale;  
                         }            
 
                     }
@@ -529,7 +536,23 @@ public class OpenCVFlow extends AbstractMotionFlow
         this.isSavedAsImage = isSavedAsImage;
         getSupport().firePropertyChange("isSavedAsImage", null, isSavedAsImage);        
     }
+
+    public int getColorScale() {
+        return colorScale;
+    }
+
+    public void setColorScale(int colorScale) {
+        if(colorScale < 0) {
+            colorScale = 0;
+        }
+        this.colorScale = colorScale;
+        getSupport().firePropertyChange("colorScale", null, colorScale);            
+    }
     
+    private void imagePanelMouseWheelMoved(MouseWheelEvent evt) {
+        int rotation = evt.getWheelRotation();
+        setColorScale(colorScale + rotation);
+    }       
 }
 
 
