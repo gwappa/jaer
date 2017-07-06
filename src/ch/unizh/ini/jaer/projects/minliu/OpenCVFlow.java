@@ -318,6 +318,13 @@ public class OpenCVFlow extends AbstractMotionFlow
 
             // Select good points  and copy them for output
             int index = 0;
+            float accuracy = 0;
+            
+            float[] new_slice_buff = new float[(int) (newFrame.total() * 
+                                            newFrame.channels()) * 4];            
+            Arrays.fill(new_slice_buff, 0);
+            Random r = new Random();   
+            
             for(byte stTmp: st) {
                 if(stTmp == 1) {
                     e = new PolarityEvent();
@@ -331,67 +338,27 @@ public class OpenCVFlow extends AbstractMotionFlow
                     nextXX[index] = (int)Math.round(nextPoints[index].x);
                     nextYY[index] = (int)Math.round(nextPoints[index].y);
                     
+                    if(prevXX[index] < 0 || prevYY[index] < 0 || nextXX[index] < 0 || nextYY[index] < 0) {
+                        int tmp = 0;
+                    }
+                    
                     vx = (float)(nextPoints[index].x - prevPoints[index].x) * 1000000 / - patchFlow.getSliceDeltaT();
                     vy = (float)(nextPoints[index].y - prevPoints[index].y) * 1000000 / - patchFlow.getSliceDeltaT();
                     v = (float) Math.sqrt(vx * vx + vy * vy);
+                    
+//                    new_slice_buff[(prevXX[index] + prevYY[index] * chip.getSizeY()) * 4] = old1DArray[prevXX[index] + prevYY[index] * chip.getSizeY()]/oldGrayScale;
+//                    new_slice_buff[(prevXX[index] + prevYY[index] * chip.getSizeY()) * 4 + 1] = new1DArray[nextXX[index] + nextYY[index] * chip.getSizeY()]/newGrayScale;
+//                    new_slice_buff[(prevXX[index] + prevYY[index] * chip.getSizeY()) * 4 + 3] = 1.0f/colorScale;         
+                    
+//                    accuracy += Math.sqrt(old1DArray[prevXX[index] + prevYY[index] * chip.getSizeX()]/oldGrayScale
+//                                - new1DArray[nextXX[index] + nextYY[index] * chip.getSizeX()]/newGrayScale);
                     processGoodEvent();
                     index++;
                 }
             }
-            float[] new_slice_buff = new float[(int) (newFrame.total() * 
-                                            newFrame.channels()) * 4];
-
-            Arrays.fill(new_slice_buff, 0);
-            Random r = new Random();   
-            int accuracy = 0;            
-            for (int i = 0; i < chip.getSizeY(); i++) {
-                for (int j = 0; j < chip.getSizeX(); j++) {
-                    
-                    final int tmp_i = i, tmp_j = j; // The lamda function as a parameter of anyMatch needs to compare with a final variable.
-//                    boolean contains_prevXX = IntStream.of(prevXX).anyMatch(x -> x + 3 >= tmp_j && x - 3 <= tmp_j);     
-//                    boolean contains_prevYY = IntStream.of(prevYY).anyMatch(x -> x + 3 >= tmp_i && x - 3 <= tmp_i);                         
-//                    boolean contains_nextXX = IntStream.of(nextXX).anyMatch(x -> x + 1 >= tmp_j && x - 1 <= tmp_j);     
-//                    boolean contains_nextYY = IntStream.of(nextYY).anyMatch(x -> x + 1 >= tmp_i && x - 1 <= tmp_i);  
-                    
-                    int cornerBlockRadius = feature_params.blockSize/2;
-                    /*Since java 1.8, the following lambda expressions can be used.*/
-                    boolean contains_prevPt = Arrays.stream(prevPoints).anyMatch(p-> p.x + cornerBlockRadius >= tmp_j && p.x - cornerBlockRadius <= tmp_j 
-                                                                                      && p.y + cornerBlockRadius >= tmp_i && p.y - cornerBlockRadius <= tmp_i);
-                    boolean contains_nextPt = Arrays.stream(nextPoints).anyMatch(p-> (Math.round(p.x)) + cornerBlockRadius >= tmp_j && (Math.round(p.x)) - cornerBlockRadius <= tmp_j 
-                                                                                      && Math.round(p.y) + cornerBlockRadius >= tmp_i && Math.round(p.y) - cornerBlockRadius <= tmp_i);
-                    Optional<Point> nextOP = Arrays.stream(nextPoints).filter(p-> (Math.round(p.x)) + cornerBlockRadius >= tmp_j && (Math.round(p.x)) - cornerBlockRadius <= tmp_j 
-                                                     && Math.round(p.y) + cornerBlockRadius >= tmp_i && Math.round(p.y) - cornerBlockRadius <= tmp_i).findAny();
-                    Point nextCorners = null;
-                    
-                    if(nextOP.isPresent()) {
-                        int ptIndex = (int)(Math.round(nextOP.get().y) * chip.getSizeX() + Math.round(nextOP.get().x));
-                        nextCorners = nextOP.get();
-                    }
-//                    boolean contains_prevPt = Arrays.asList(prevPoints).contains(new Point(j, i));
-//                    boolean contains_nextPt = Arrays.asList(nextPoints).contains(new Point(j, i));
-                    if(contains_prevPt) {
-                        
-                    }    
- 
-                    if(contains_nextPt) {
-                        new_slice_buff[(chip.getSizeX()*i + j) * 4 + 1] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;       
-                        
-                        new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f/colorScale;                    
-                    }                        
-//                    if((old1DArray[chip.getSizeX()*i + j] > 0 && !contains_prevPt) || contains_nextPt && (new1DArray[chip.getSizeX()*i + j] > 0)) {
-//                        new_slice_buff[(chip.getSizeX()*i + j) * 4] = 1.0f;                       
-//                        new_slice_buff[(chip.getSizeX()*i + j) * 4 + 1] = 1.0f;  
-//                        new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f/colorScale;         
-//                        accuracy ++ ;
-//                    }
-                    
-//                    if(new1DArray[chip.getSizeX()*i + j] > 0) {                                                  
-//                        new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f/colorScale;                     
-//                    }                         
-                }
-            }      
+    
             tminusdSliceResult.setPixmapArray(new_slice_buff);  
-//            System.out.println("The accuracy is:" + accuracy/(346*260f));
+            System.out.println("The accuracy is:" + accuracy/(346*260f));
             Mat mask = new Mat(newFrame.rows(), newFrame.cols(), CvType.CV_32F);
             for (int i = 0; i < prevPoints.length; i++) {
                 // Imgproc.line(displayFrame, prevPoints[i], nextPoints[i], new Scalar(color[i][0],color[i][1],color[i][2]), 2);  
