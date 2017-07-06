@@ -52,6 +52,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -342,7 +343,7 @@ public class OpenCVFlow extends AbstractMotionFlow
 
             Arrays.fill(new_slice_buff, 0);
             Random r = new Random();   
-            int accuracy = 0;
+            int accuracy = 0;            
             for (int i = 0; i < chip.getSizeY(); i++) {
                 for (int j = 0; j < chip.getSizeX(); j++) {
                     
@@ -358,14 +359,18 @@ public class OpenCVFlow extends AbstractMotionFlow
                                                                                       && p.y + cornerBlockRadius >= tmp_i && p.y - cornerBlockRadius <= tmp_i);
                     boolean contains_nextPt = Arrays.stream(nextPoints).anyMatch(p-> (Math.round(p.x)) + cornerBlockRadius >= tmp_j && (Math.round(p.x)) - cornerBlockRadius <= tmp_j 
                                                                                       && Math.round(p.y) + cornerBlockRadius >= tmp_i && Math.round(p.y) - cornerBlockRadius <= tmp_i);
-
+                    Optional<Point> nextOP = Arrays.stream(nextPoints).filter(p-> (Math.round(p.x)) + cornerBlockRadius >= tmp_j && (Math.round(p.x)) - cornerBlockRadius <= tmp_j 
+                                                     && Math.round(p.y) + cornerBlockRadius >= tmp_i && Math.round(p.y) - cornerBlockRadius <= tmp_i).findAny();
+                    Point nextCorners = null;
+                    
+                    if(nextOP.isPresent()) {
+                        int ptIndex = (int)(Math.round(nextOP.get().y) * chip.getSizeX() + Math.round(nextOP.get().x));
+                        nextCorners = nextOP.get();
+                    }
 //                    boolean contains_prevPt = Arrays.asList(prevPoints).contains(new Point(j, i));
 //                    boolean contains_nextPt = Arrays.asList(nextPoints).contains(new Point(j, i));
-                    
                     if(contains_prevPt) {
-                        new_slice_buff[(chip.getSizeX()*i + j) * 4] = old1DArray[chip.getSizeX()*i + j]/oldGrayScale;       
                         
-                        new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f/colorScale;                    
                     }    
  
                     if(contains_nextPt) {
