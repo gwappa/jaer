@@ -47,11 +47,15 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 import net.sf.jaer.Description;
 import net.sf.jaer.DevelopmentStatus;
@@ -274,26 +278,7 @@ public class OpenCVFlow extends AbstractMotionFlow
                 System.err.println(e);                   
                 return;
             } finally {
-                // showResult(newFrame);
-
-                
-                float[] new_slice_buff = new float[(int) (newFrame.total() * 
-                                                newFrame.channels()) * 4];
-
-                Arrays.fill(new_slice_buff, 0);
-                Random r = new Random();
-                for (int i = 0; i < chip.getSizeY(); i++) {
-                    for (int j = 0; j < chip.getSizeX(); j++) {
-                        if(new1DArray[chip.getSizeX()*i + j] > 0) {                            
-                            new_slice_buff[(chip.getSizeX()*i + j) * 4] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;       
-                            new_slice_buff[(chip.getSizeX()*i + j) * 4 + 1] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;         
-                            new_slice_buff[(chip.getSizeX()*i + j) * 4 + 2] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;   
-                            new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f/colorScale;  
-                        }            
-
-                    }
-                }      
-                
+                // showResult(newFrame);                
                 
                 float[] old_slice_buff = new float[(int) (oldFrame.total() * 
                                                 oldFrame.channels()) * 4];
@@ -312,7 +297,6 @@ public class OpenCVFlow extends AbstractMotionFlow
                 }  
                 
                 AEFrameChipRenderer render = (AEFrameChipRenderer)(chip.getRenderer());
-                tminusdSliceResult.setPixmapArray(new_slice_buff);  
                 tminus2dSliceResult.setPixmapArray(old_slice_buff);  
                 
                 if(isSavedAsImage) {
@@ -323,6 +307,11 @@ public class OpenCVFlow extends AbstractMotionFlow
             // draw the tracks
             Point[] prevPoints = prevPts.toArray();
             Point[] nextPoints = nextPts.toArray();
+            int[] prevXX = new int[prevPoints.length];
+            int[] prevYY = new int[prevPoints.length];
+            int[] nextXX = new int[nextPoints.length];
+            int[] nextYY = new int[nextPoints.length];
+            
             byte[] st = status.toArray();
             float[] er = err.toArray();
 
@@ -335,14 +324,69 @@ public class OpenCVFlow extends AbstractMotionFlow
                     y = (short)prevPoints[index].y;
                     e.x = (short)x;
                     e.y = (short)y;    // e, x and y all of them are used in processGoodEvent();
-                    vx = (float)(nextPoints[index].x - prevPoints[index].x) * 1000000 / -patchFlow.getSliceDeltaT();
-                    vy = (float)(nextPoints[index].y - prevPoints[index].y) * 1000000 / -patchFlow.getSliceDeltaT();
+                    
+                    prevXX[index] = (int)prevPoints[index].x;
+                    prevYY[index] = (int)prevPoints[index].y;
+                    nextXX[index] = (int)Math.round(nextPoints[index].x);
+                    nextYY[index] = (int)Math.round(nextPoints[index].y);
+                    
+                    vx = (float)(nextPoints[index].x - prevPoints[index].x) * 1000000 / - patchFlow.getSliceDeltaT();
+                    vy = (float)(nextPoints[index].y - prevPoints[index].y) * 1000000 / - patchFlow.getSliceDeltaT();
                     v = (float) Math.sqrt(vx * vx + vy * vy);
                     processGoodEvent();
                     index++;
                 }
             }
-           
+            float[] new_slice_buff = new float[(int) (newFrame.total() * 
+                                            newFrame.channels()) * 4];
+
+            Arrays.fill(new_slice_buff, 0);
+            Random r = new Random();   
+            int accuracy = 0;
+            for (int i = 0; i < chip.getSizeY(); i++) {
+                for (int j = 0; j < chip.getSizeX(); j++) {
+                    
+                    final int tmp_i = i, tmp_j = j; // The lamda function as a parameter of anyMatch needs to compare with a final variable.
+//                    boolean contains_prevXX = IntStream.of(prevXX).anyMatch(x -> x + 3 >= tmp_j && x - 3 <= tmp_j);     
+//                    boolean contains_prevYY = IntStream.of(prevYY).anyMatch(x -> x + 3 >= tmp_i && x - 3 <= tmp_i);                         
+//                    boolean contains_nextXX = IntStream.of(nextXX).anyMatch(x -> x + 1 >= tmp_j && x - 1 <= tmp_j);     
+//                    boolean contains_nextYY = IntStream.of(nextYY).anyMatch(x -> x + 1 >= tmp_i && x - 1 <= tmp_i);  
+                    
+                    int cornerBlockRadius = feature_params.blockSize/2;
+                    /*Since java 1.8, the following lambda expressions can be used.*/
+                    boolean contains_prevPt = Arrays.stream(prevPoints).anyMatch(p-> p.x + cornerBlockRadius >= tmp_j && p.x - cornerBlockRadius <= tmp_j 
+                                                                                      && p.y + cornerBlockRadius >= tmp_i && p.y - cornerBlockRadius <= tmp_i);
+                    boolean contains_nextPt = Arrays.stream(nextPoints).anyMatch(p-> (Math.round(p.x)) + cornerBlockRadius >= tmp_j && (Math.round(p.x)) - cornerBlockRadius <= tmp_j 
+                                                                                      && Math.round(p.y) + cornerBlockRadius >= tmp_i && Math.round(p.y) - cornerBlockRadius <= tmp_i);
+
+//                    boolean contains_prevPt = Arrays.asList(prevPoints).contains(new Point(j, i));
+//                    boolean contains_nextPt = Arrays.asList(nextPoints).contains(new Point(j, i));
+                    
+                    if(contains_prevPt) {
+                        new_slice_buff[(chip.getSizeX()*i + j) * 4] = old1DArray[chip.getSizeX()*i + j]/oldGrayScale;       
+                        
+                        new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f/colorScale;                    
+                    }    
+ 
+                    if(contains_nextPt) {
+                        new_slice_buff[(chip.getSizeX()*i + j) * 4 + 1] = new1DArray[chip.getSizeX()*i + j]/newGrayScale;       
+                        
+                        new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f/colorScale;                    
+                    }                        
+//                    if((old1DArray[chip.getSizeX()*i + j] > 0 && !contains_prevPt) || contains_nextPt && (new1DArray[chip.getSizeX()*i + j] > 0)) {
+//                        new_slice_buff[(chip.getSizeX()*i + j) * 4] = 1.0f;                       
+//                        new_slice_buff[(chip.getSizeX()*i + j) * 4 + 1] = 1.0f;  
+//                        new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f/colorScale;         
+//                        accuracy ++ ;
+//                    }
+                    
+//                    if(new1DArray[chip.getSizeX()*i + j] > 0) {                                                  
+//                        new_slice_buff[(chip.getSizeX()*i + j) * 4 + 3] = 1.0f/colorScale;                     
+//                    }                         
+                }
+            }      
+            tminusdSliceResult.setPixmapArray(new_slice_buff);  
+//            System.out.println("The accuracy is:" + accuracy/(346*260f));
             Mat mask = new Mat(newFrame.rows(), newFrame.cols(), CvType.CV_32F);
             for (int i = 0; i < prevPoints.length; i++) {
                 // Imgproc.line(displayFrame, prevPoints[i], nextPoints[i], new Scalar(color[i][0],color[i][1],color[i][2]), 2);  
@@ -352,7 +396,7 @@ public class OpenCVFlow extends AbstractMotionFlow
         }
         
     }
-
+    
     private void saveImage() {
         final Date d = new Date();
         final String fn = "EventSlices/" + "EventSlice-" + System.nanoTime() + ".png";
