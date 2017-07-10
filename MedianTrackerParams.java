@@ -40,7 +40,7 @@ public class MedianTrackerParams extends TrackerParamsBase{
     private float meanx, meany;
     private float prevx, prevy;
     
-    public MedianTrackerParams(){}
+    public MedianTrackerParams(){ name = "MedianTracker";}
     
     /**
      * Update internal result representation with values from MedianTracker object.

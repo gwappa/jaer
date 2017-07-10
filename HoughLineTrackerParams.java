@@ -30,6 +30,7 @@ public class HoughLineTrackerParams extends TrackerParamsBase {
     
     
     public HoughLineTrackerParams() {
+        name = "HoughLineTracker";
         rhoRes = 6;
         thetaRes = 10;
     }

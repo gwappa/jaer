@@ -29,6 +29,12 @@ import net.sf.jaer.chip.AEChip;
  */
 public abstract class TrackerParamsBase implements TrackerParams{
     
+    // Tracker name
+    public String name;
+    
+    // AEChip instance
+    private AEChip chip;
+    
     // chip size
     private int sx, sy;
     
@@ -39,25 +45,21 @@ public abstract class TrackerParamsBase implements TrackerParams{
     private int firstts, lastts, prevfirstts, prevlastts;    
 
     @Override
-    public void setSize(AEChip chip){
+    public void setChip(AEChip ch) {
+        chip = ch;
         sx = chip.getSizeX();
         sy = chip.getSizeY();
     }
-
-    @Override
-    public void setSize(int x, int y){
-        sx = x;
-        sy = y;
-    }
+    
     
     @Override
-    public void setFirstTS(int ts){
+    public void setFirstTS(int ts) {
         prevfirstts = firstts;
         firstts = ts;
     }
     
     @Override
-    public void setLastTS(int ts){
+    public void setLastTS(int ts) {
         prevlastts = lastts;
         lastts = ts;
     }
@@ -84,6 +86,11 @@ public abstract class TrackerParamsBase implements TrackerParams{
         sz[0] = sx;
         sz[1] = sy;
         return sz;
+    }
+    
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override

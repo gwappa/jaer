@@ -53,17 +53,10 @@ public interface TrackerParams {
    
    
     /**
-     * Setter for chip size.
-     * @param chip AEChip object, containing information about chipsize.
+     * Setter for chip obj.
+     * @param chip AEChip object, containing information about chipsize, filename
      */
-    public void setSize(AEChip chip);
-    
-    /**
-     * Setter for chip size.
-     * @param x Number of pixels in X-Direction.
-     * @param y Number of pixels in Y-Direction.
-     */
-    public void setSize(int x, int y);
+    public void setChip(AEChip chip);
     
     /**
      * Setter for package size
@@ -100,6 +93,12 @@ public interface TrackerParams {
      * @return 1x2 size array of Intergers, X & Y chip size.
      */
     public int[] getSize();
+    
+    /**
+     * Getter for tracker name
+     * @return Tracker name
+     */
+    public String getName();
     
     /**
      * Getter for packet size
