@@ -37,7 +37,7 @@ public class ResultEvaluator{
      */
     public ResultEvaluator(TrackerParams t){
         type = t;
-        con = new ArduinoConnector();
+        con = ArduinoConnector.getInstance();
         out = new OutputHandler(OutputHandler.OutputSource.CONSOLE, t.getName(), t.printHeader());
     }
     
@@ -48,8 +48,8 @@ public class ResultEvaluator{
      */
     public ResultEvaluator(TrackerParams t, OutputHandler.OutputSource src) {
         type = t;
-        con = new ArduinoConnector();
-         out = new OutputHandler(src, t.getName(), t.printHeader());
+        con = ArduinoConnector.getInstance();
+        out = new OutputHandler(src, t.getName(), t.printHeader());
     }
     
     /**
@@ -59,7 +59,7 @@ public class ResultEvaluator{
      */
     public ResultEvaluator(TrackerParams t, String path) {
         type = t;
-        con = new ArduinoConnector();
+        con = ArduinoConnector.getInstance();
         out = new OutputHandler(path);
         out.write(type.printHeader());
     }
