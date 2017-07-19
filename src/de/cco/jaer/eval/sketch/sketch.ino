@@ -1,9 +1,9 @@
 
-int LED = 13; // LED connected to digital pin 13
-int SYNC_OFF = 48; // jAER logging stopped
-int SYNC_ON = 49; // jAER logging started
-int LASER_ON = 101; // swtich on optogenetic laser
-int LASER_OFF = 102; // switch off optogenetic laser
+const int LED = 13; // LED connected to digital pin 13
+const int SYNC_OFF = 48; // jAER logging stopped
+const int SYNC_ON = 49; // jAER logging started
+const int LASER_ON = 101; // swtich on optogenetic laser
+const int LASER_OFF = 102; // switch off optogenetic laser
 int recv = 0; // byte received on the serial port
 
 void setup() {
@@ -19,27 +19,25 @@ void loop()
   if (Serial.available() > 0) {
     recv = Serial.read();
 
+    // if '0' (decimal 48) is received, turn SNYC on
+    // if '1' (decimal 49) is received, turn SYNC off
     // if 'A' (decimal 101) is received, turn LED on
     // if 'B', or any other non registered character is received, turn LED off
-    if (recv == LASER_ON) 
+    switch (recv) 
     {
-      digitalWrite(LED, HIGH);
-    }
-    else if (recv == LASER_OFF) 
-    {
-      digitalWrite(LED, LOW);
-    }
-    else if (recv == SYNC_ON)
-    {
-      // TODO
-    }
-    else if (recv == SYNC_OFF)
-    {
-      // TODO
-    }
-    else 
-    {
-      digitalWrite(LED, LOW);
+      case LASER_ON:
+        digitalWrite(LED, HIGH);
+        break;
+      case LASER_OFF: 
+        digitalWrite(LED, LOW);
+        break;
+      case SYNC_ON:
+        break;
+      case SYNC_OFF:
+        break;
+      default:
+        digitalWrite(LED, LOW);
+        break;
     }
 
     // confirm values received in serial monitor window
