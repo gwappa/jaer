@@ -11,9 +11,12 @@ package net.sf.jaer.eventprocessing.tracking;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
+import de.cco.jaer.eval.MedianTrackerParams;
+import de.cco.jaer.eval.OutputHandler;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
 
+import de.cco.jaer.eval.ResultEvaluator;
 
 import net.sf.jaer.Description;
 import net.sf.jaer.DevelopmentStatus;
@@ -33,6 +36,7 @@ import net.sf.jaer.util.filter.LowpassFilter;
 @DevelopmentStatus(DevelopmentStatus.Status.Stable)
 public class MedianTracker extends EventFilter2D implements FrameAnnotater {
 
+    
     Point2D medianPoint = new Point2D.Float(), stdPoint = new Point2D.Float(), meanPoint = new Point2D.Float();
     float xmedian = 0f;
     float ymedian = 0f;
@@ -47,12 +51,19 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
     int tauUs =getInt("tauUs", 1000);
     private float numStdDevsForBoundingBox =getFloat("numStdDevsForBoundingBox", 1f);
     float alpha = 1, beta = 0; // alpha is current weighting, beta is past value weighting
-
+    
+    MedianTrackerParams params;
+    ResultEvaluator reval;
+    
     /**
      * Creates a new instance of MedianTracker
      */
     public MedianTracker(AEChip chip) {
         super(chip);
+        params = new MedianTrackerParams();
+        params.setChip(chip);
+        reval = new ResultEvaluator(params, OutputHandler.OutputSource.FILE);
+        
         xFilter.setTauMs(tauUs / 1000f);
         yFilter.setTauMs(tauUs / 1000f);
         xStdFilter.setTauMs(tauUs / 1000f);
@@ -112,6 +123,10 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
     @Override
     public EventPacket filterPacket(EventPacket in) {
         int n = in.getSize();
+        
+        if (!reval.isListening()) {
+            reval.getOutputHandler().attachCustomListener(this.getSupport());
+        }
 
         lastts = in.getLastTimestamp();
         dt = lastts - prevlastts;
@@ -173,6 +188,17 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
         meanPoint.setLocation(xmean, ymean);
         stdPoint.setLocation(xstd*numStdDevsForBoundingBox, ystd*numStdDevsForBoundingBox);
 
+        if (n>0) {
+            // evaluate tracker output
+            params.update(n, 
+                    in.getFirstTimestamp(), 
+                    lastts, 
+                    xmedian, ymedian, 
+                    xstd, ystd, 
+                    xmean, ymean);
+            reval.eval();
+        }
+        
         return in; // xs and ys will now be sorted, output will be bs because time will not be sorted like addresses
     }
 

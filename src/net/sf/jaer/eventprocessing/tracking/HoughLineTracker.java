@@ -22,6 +22,11 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.GLU;
+import de.cco.jaer.eval.HoughLineTrackerParams;
+import de.cco.jaer.eval.OutputHandler;
+import de.cco.jaer.eval.ResultEvaluator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 
 import net.sf.jaer.Description;
@@ -90,6 +95,10 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
     //    private int maxNumLines=getPrefs().getInt("LineTracker.maxNumLines",2);
     //    private List<Line> lines=new ArrayList<Line>(maxNumLines);
     //    Peak[] peaks=null;
+    
+    // attach result evaluator
+    HoughLineTrackerParams params;
+    ResultEvaluator reval;
 
     /**
      * Creates a new instance of LineTracker
@@ -108,7 +117,12 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
         setPropertyTooltip("rhoResPixels", "quantization in pixels of hough transform map");
         setPropertyTooltip("showHoughWindow", "shows the hough transform integrator array");
         setPropertyTooltip("tauMs", "time constant in ms of line lowpass");
-    }
+        params = new HoughLineTrackerParams();
+        params.setChip(chip);
+        params.setRhoRes(rhoResPixels);
+        params.setThetaRes(thetaResDeg);    
+        reval = new ResultEvaluator(params, OutputHandler.OutputSource.FILE);
+     }
 
     /**
      * returns the Hough line radius of the last packet's estimate - the closest
@@ -187,6 +201,18 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
         decayAccumArray();
         thetaDegFiltered = thetaFilter.filter(getThetaDeg(), in.getLastTimestamp());
         rhoPixelsFiltered = rhoFilter.filter(getRhoPixels(), in.getLastTimestamp());
+        
+        int n = in.getSize();
+        if (n > 0) {
+        // evalute line parameters
+        params.update(in.getSize(), 
+                in.getFirstTimestamp(), 
+                in.getLastTimestamp(), 
+                getRhoPixels(), 
+                getThetaDeg());
+        reval.eval();
+        }
+        
         if (showHoughWindow) {
             checkAccumFrame();
             accumCanvas.repaint();
@@ -399,6 +425,7 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
     // also determines maximum accumulator value and sets line estimate according to this
 
     private void decayAccumArray() {
+        // TODO: Detect more than one line
         accumMax = 0;
         for (int theta = 0; theta < nTheta; theta++) {
             float[] f = accumArray[theta];
