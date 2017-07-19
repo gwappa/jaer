@@ -28,9 +28,6 @@ public class ResultEvaluator{
     ArduinoConnector con;
     TrackerParams type;
     
-    final String ON = "y";
-    final String OFF = "n";
-    
     /**
      * Creates a new instance of ResultEvaluator, no logging
      * @param t Template object extends ParameterTracker interface
@@ -71,10 +68,10 @@ public class ResultEvaluator{
         out.write(type.print());
 
         if (type.eval()){
-            con.send(ON);
+            con.send(con.LASER_ON);
         }
         else{
-            con.send(OFF);
+            con.send(con.LASER_OFF);
         }
     }
     

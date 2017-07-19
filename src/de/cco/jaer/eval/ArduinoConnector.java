@@ -29,6 +29,12 @@ public final class ArduinoConnector implements SerialPortEventListener {
     // singleton instance
     private static volatile ArduinoConnector instance = null;
     
+    // hardcoded messages
+    public final String SNYC_ON = "0";
+    public final String SYNC_OFF = "1";
+    public final String LASER_ON = "A";
+    public final String LASER_OFF = "B";
+    
     SerialPort serialPort;
     /** The port we're normally going to use. */
     private static final String PORT_NAMES[] = { 
@@ -182,7 +188,9 @@ public final class ArduinoConnector implements SerialPortEventListener {
 
     /**
      * Handle an event on the serial port. Read the data and print it.
+     * @param oEvent
      */
+    @Override
     public synchronized void serialEvent(SerialPortEvent oEvent) {
             if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
                     try {
