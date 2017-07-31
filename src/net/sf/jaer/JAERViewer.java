@@ -57,8 +57,6 @@ import com.jogamp.opengl.GLDrawableFactory;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.JoglVersion;
 
-import de.cco.jaer.eval.ArduinoConnector;
-
 /**
  * Used to show multiple chips simultaneously in separate instances of
  * {@link net.sf.jaer.graphics.AEViewer}, each running in its own thread, and
@@ -498,10 +496,6 @@ public class JAERViewer {
             // log.info("not zeroing all board timestamps because they are specified electrically synchronized");
         }
         
-        // send start logging event to Arduino
-        ArduinoConnector con = ArduinoConnector.getInstance();
-        con.send(con.SNYC_ON);
-        
         for (AEViewer v : viewers) {
             File f = v.startLogging();
 
@@ -553,11 +547,6 @@ public class JAERViewer {
         }
         // resume all viewers
         viewers.get(0).aePlayer.resume();
-        
-        // send stop logging event to Arduino
-        ArduinoConnector con = ArduinoConnector.getInstance();
-        con.send(con.SYNC_OFF);
-        
         loggingEnabled = false;
     }
 

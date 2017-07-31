@@ -83,6 +83,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 import ch.unizh.ini.jaer.chip.retina.DVS128;
+import de.cco.jaer.eval.ArduinoConnector;
 import eu.seebetter.ini.chips.davis.DAVIS240B;
 import eu.seebetter.ini.chips.davis.DAVIS240C;
 import eu.seebetter.ini.chips.davis.Davis640;
@@ -4784,6 +4785,11 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
             if (loggingTimeLimit > 0) {
                 loggingStartTime = System.currentTimeMillis();
             }
+            
+            // send start logging event to Arduino
+            ArduinoConnector con = ArduinoConnector.getInstance();
+            con.send(con.SNYC_ON);
+            
             log.info("starting logging to " + loggingFile.getAbsolutePath());
             //            aemon.resetTimestamps();
 
@@ -5002,6 +5008,11 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
                 }
 
             }
+            
+            // send stop logging event to Arduino
+            ArduinoConnector con = ArduinoConnector.getInstance();
+            con.send(con.SYNC_OFF);
+            
             loggingEnabled = false;
         }
 
