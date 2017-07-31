@@ -1,7 +1,7 @@
 
 const int LED = 13; // LED connected to digital pin 13
-const int SYNC_OFF = 48; // jAER logging stopped
-const int SYNC_ON = 49; // jAER logging started
+const int SYNC_OFF = 49; // jAER logging stopped
+const int SYNC_ON = 50; // jAER logging started
 const int LASER_ON = 101; // swtich on optogenetic laser
 const int LASER_OFF = 102; // switch off optogenetic laser
 int recv = 0; // byte received on the serial port

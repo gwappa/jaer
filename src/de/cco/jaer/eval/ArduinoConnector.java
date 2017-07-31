@@ -30,8 +30,8 @@ public final class ArduinoConnector implements SerialPortEventListener {
     private static volatile ArduinoConnector instance = null;
     
     // hardcoded messages
-    public final String SNYC_ON = "0";
-    public final String SYNC_OFF = "1";
+    public final String SNYC_ON = "1";
+    public final String SYNC_OFF = "2";
     public final String LASER_ON = "A";
     public final String LASER_OFF = "B";
     
@@ -81,7 +81,7 @@ public final class ArduinoConnector implements SerialPortEventListener {
     private void initialize() {
             // the next line is for Raspberry Pi and 
             // gets us into the while loop and was suggested here was suggested http://www.raspberrypi.org/phpBB3/viewtopic.php?f=81&t=32186
-            System.setProperty("gnu.io.rxtx.SerialPorts", "COM3");
+            System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
 
             CommPortIdentifier portId = null;
             Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
