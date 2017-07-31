@@ -46,7 +46,7 @@ public class OutputHandler {
     BufferedWriter outstream;
     
     PropertyChangeSupport pcs;
-    PropertyChangeListener li = new PropertyChangeListener() {
+    PropertyChangeListener filterStateListener = new PropertyChangeListener() {
         @Override
         public void propertyChange(PropertyChangeEvent pce) {
             if (pce.getPropertyName().equals("filterEnabled")) {
@@ -214,17 +214,17 @@ public class OutputHandler {
         return listening;
     }
     
-    public synchronized void attachCustomListener(PropertyChangeSupport s) {
+    public synchronized void attachFilterStateListener(PropertyChangeSupport s) {
         if (pcs != null) {
             return;
         }
         pcs = s;
-        pcs.addPropertyChangeListener(li);
+        pcs.addPropertyChangeListener(filterStateListener);
         listening = true;
     }
     
-    public synchronized void removeCustomListener(PropertyChangeSupport pcs) {
-        pcs.removePropertyChangeListener(li);
+    public synchronized void removeFilterStateListener(PropertyChangeSupport pcs) {
+        pcs.removePropertyChangeListener(filterStateListener);
         listening = false;
     }
     
