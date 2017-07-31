@@ -19,11 +19,11 @@ package de.cco.jaer.eval;
 
 import java.beans.PropertyChangeEvent;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -52,24 +52,19 @@ public class OutputHandler {
             if (pce.getPropertyName().equals("filterEnabled")) {
                 boolean val = (boolean) pce.getNewValue();
                 if (val == false) {
-                    try {
-                        System.out.println("Filter disabled.");
-                        System.out.println("Closing BufferedWriter.");
-                        outstream.close();
-                    } catch (IOException ex) {
-                        Logger.getLogger(OutputHandler.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    System.out.println("Filter disabled.");
+                    System.out.println("Closing OutputObject.");
+                    OutputHandler.this.close();
                 }
                 else if (val == true) {
                     System.out.println("Filter enabled.");
-                    String path = genFileName();
-                    System.out.println("Saving data to new file '" + path + "'");
-                    outstream = openFile(path);
+                    OutputHandler.this.setOutput(OutputSource.FILE);
                 }
             }
         }
     };
     
+    private Path current;
     private String name, header;
     private int linecount = 0;
     private boolean listening = false;
@@ -97,9 +92,9 @@ public class OutputHandler {
      * @param str String with path to logfile
      */
     public OutputHandler(String str){
-        setOutput(str);
         setName("Unknown");
         setHeader("");
+        setOutput(str);
     }
     
     /**
@@ -127,8 +122,8 @@ public class OutputHandler {
     public synchronized final void setOutput(OutputSource src) {
         this.outsrc = src;
         if (src == OutputSource.FILE){
-            String path = genFileName();
-            System.out.println("Saving data to '" + path + "'");
+            Path path = genFileName();
+            System.out.println("Saving data to '" + path.toString() + "'");
             outstream = openFile(path);
             write(getHeader());
         }
@@ -137,7 +132,7 @@ public class OutputHandler {
     public synchronized final void setOutput(String str) {
         System.out.println("Saving data to '" + str + "'");
         outsrc = OutputSource.FILE;
-        outstream = openFile(str);
+        outstream = openFile(Paths.get(str));
         write(getHeader());
     }
     
@@ -149,11 +144,15 @@ public class OutputHandler {
         header = h;
     }
     
-    public synchronized String getName() {
+    public Path getPath() {
+        return current;
+    }
+    
+    public String getName() {
         return name;
     }
     
-    public synchronized String getHeader() {
+    public String getHeader() {
         return header;
     }
     
@@ -184,12 +183,12 @@ public class OutputHandler {
      * Generate new filename from current date and working directory.
      * @return String, new file name.
      */
-    private synchronized String genFileName(){
+    private Path genFileName(){
         Path current = Paths.get(System.getProperty("user.dir"));
         Date d = new Date();
         DateFormat dformat = new SimpleDateFormat("ddMMyyyyHHmmss");
         Path path = Paths.get(current.toString(), getName() + "_" + dformat.format(d) + ".log");
-        return path.toString();
+        return path;
     }
     
     /**
@@ -198,15 +197,16 @@ public class OutputHandler {
      * @param path Path to new file.
      * @return BufferedWriter object to new log file or null.
      */
-    private synchronized BufferedWriter openFile(String path){
+    private synchronized BufferedWriter openFile(Path path){
         BufferedWriter bw = null;
         try{           
-            FileWriter fw = new FileWriter(path);
+            FileWriter fw = new FileWriter(path.toString());
             bw = new BufferedWriter(fw);
         }
         catch (IOException e) {
             e.printStackTrace();
         }
+        current = path;
         return bw;
     }
     
@@ -228,12 +228,19 @@ public class OutputHandler {
         listening = false;
     }
     
-    protected synchronized void finalize() {
+    public synchronized void close() {
         if (outsrc == OutputSource.FILE){
             try {
                 outstream.close();
             } catch (IOException ex) {
                 Logger.getLogger(OutputHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (linecount == 1) {
+                try {
+                    Files.delete(current);
+                } catch (IOException ex) {
+                    Logger.getLogger(OutputHandler.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
