@@ -125,7 +125,7 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
         int n = in.getSize();
         
         if (!reval.isListening()) {
-            reval.getOutputHandler().attachCustomListener(this.getSupport());
+            reval.getOutputHandler().attachFilterStateListener(this.getSupport());
         }
 
         lastts = in.getLastTimestamp();
