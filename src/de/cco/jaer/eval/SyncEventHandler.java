@@ -34,7 +34,7 @@ public class SyncEventHandler {
         con = ArduinoConnector.getInstance();
         out = new OutputHandler(OutputHandler.OutputSource.FILE, 
                 "SyncEvents", 
-                "sync,system,chip");
+                "sync,system");
     }
     
     public static SyncEventHandler getInstance() {
