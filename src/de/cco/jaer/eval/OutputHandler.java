@@ -181,10 +181,19 @@ public class OutputHandler {
     
     /**
      * Generate new filename from current date and working directory.
+     * In case it doesn't exist. Create data directory inside local packet.
      * @return String, new file name.
      */
     private Path genFileName(){
         Path current = Paths.get(System.getProperty("user.dir"));
+        current = Paths.get(current.toString(), "src", "de", "cco", "jaer", "eval", "data");
+        if (!Files.exists(current)) {
+            try { // create data directory
+                Files.createDirectory(current);
+            } catch (IOException ex) {
+                Logger.getLogger(OutputHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         Date d = new Date();
         DateFormat dformat = new SimpleDateFormat("ddMMyyyyHHmmss");
         Path path = Paths.get(current.toString(), getName() + "_" + dformat.format(d) + ".log");
