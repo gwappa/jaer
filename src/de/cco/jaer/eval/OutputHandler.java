@@ -185,8 +185,7 @@ public class OutputHandler {
      * @return String, new file name.
      */
     private Path genFileName(){
-        Path current = Paths.get(System.getProperty("user.dir"));
-        current = Paths.get(current.toString(), "src", "de", "cco", "jaer", "eval", "data");
+        Path current = Paths.get(System.getProperty("user.dir"), "src", "de", "cco", "jaer", "eval", "data");
         if (!Files.exists(current)) {
             try { // create data directory
                 Files.createDirectory(current);
