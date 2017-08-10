@@ -88,6 +88,11 @@ import de.cco.jaer.eval.SyncEventHandler;
 import eu.seebetter.ini.chips.davis.DAVIS240B;
 import eu.seebetter.ini.chips.davis.DAVIS240C;
 import eu.seebetter.ini.chips.davis.Davis640;
+import java.io.FileReader;
+import java.io.LineNumberReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import net.sf.jaer.JAERViewer;
 import net.sf.jaer.aemonitor.AEMonitorInterface;
 import net.sf.jaer.aemonitor.AEPacketRaw;
@@ -542,6 +547,30 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         this.aeChipClassName = aeChipClassName;
     }
 
+    private void deleteEmptyLogFiles() throws FileNotFoundException, IOException {
+        System.out.println("Cleaning up data directory.");
+        File[] files = Paths.get(System.getProperty("user.dir"), 
+                "src", "de", "cco", "jaer", "eval", "data").toFile().listFiles();
+        for (File file : files) {
+            if (file.isFile()) {
+                // count line numbers, all csv files with only one line get deleted
+                LineNumberReader lnr = new LineNumberReader(new FileReader(file));
+                lnr.skip(Long.MAX_VALUE);
+                if (lnr.getLineNumber() <= 1) {
+                    System.out.println("Deleting empty file: " + file.toString());
+                    lnr.close();
+                    Files.delete(file.toPath());
+                }
+                else {
+                    lnr.close();
+                    continue;
+                }
+                
+            }
+        }
+        System.out.println("Cleanup done.");
+    }
+
     /**
      * Modes of viewing: WAITING means waiting for device or for playback or
      * remote, LIVE means showing a hardware interface, PLAYBACK means playing
@@ -928,6 +957,11 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         if (aeMulticastOutput != null) {
             log.info("closing multicastOutput " + aeMulticastOutput);
             aeMulticastOutput.close();
+        }
+        try {
+            deleteEmptyLogFiles();
+        } catch (IOException ex) {
+            Logger.getLogger(AEViewer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
