@@ -42,7 +42,10 @@ public final class ArduinoConnector implements SerialPortEventListener {
                     "/dev/ttyACM0", // Linux
                     "/dev/ttyACM1", // Linux
                     "/dev/ttyUSB0", // Linux
+                    "/dev/ttyUSB1", // Linux
                     "COM3", // Windows
+                    "COM4", // Windows
+                    "COM5", // Windows
     };
     /**
     * A BufferedReader which will be fed by a InputStreamReader 
@@ -79,10 +82,6 @@ public final class ArduinoConnector implements SerialPortEventListener {
      * Try to set up connection to Arduino board.
      */
     private void initialize() {
-            // the next line is for Raspberry Pi and 
-            // gets us into the while loop and was suggested here was suggested http://www.raspberrypi.org/phpBB3/viewtopic.php?f=81&t=32186
-            System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyS4");
-
             CommPortIdentifier portId = null;
             Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
                     
