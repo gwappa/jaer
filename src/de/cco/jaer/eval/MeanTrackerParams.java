@@ -31,7 +31,7 @@ package de.cco.jaer.eval;
  * @see TrackerParamsTemplate
  * @see TrackerParams
  */
-public class MeanTrackerParams extends TrackerParamsBase{
+public class MeanTrackerParams extends TrackerParamsBase {
     
     // median tracker parameters
     private double medianx, mediany;
