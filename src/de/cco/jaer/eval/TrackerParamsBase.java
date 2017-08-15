@@ -109,7 +109,7 @@ public abstract class TrackerParamsBase implements TrackerParams{
     }
     
     @Override
-    public float getEventRate() {
-        return getNumEvents() / getDuration();
+    public double getEventRate() {
+        return (double) getNumEvents() / getDuration();
     }
 }

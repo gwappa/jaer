@@ -122,7 +122,7 @@ public interface TrackerParams {
      * Getter for event rate.
      * @return Event rat in Hz.
      */
-    public float getEventRate();
+    public double getEventRate();
     
     /**
      * Print selected data
