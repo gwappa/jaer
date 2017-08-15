@@ -101,7 +101,7 @@
 
         @Override
         public EventPacket filterPacket(EventPacket in) {
-            int w_packet = in.getSize();
+            int n = in.getSize();
 
             if (!reval.isListening()) {
                 reval.getOutputHandler().attachFilterStateListener(this.getSupport());
@@ -109,15 +109,15 @@
 
             lastts = in.getLastTimestamp();
             dt = lastts - prevlastts;
-            kappa = Math.pow(Math.E, dt / tau);
+            kappa = Math.pow(Math.E, -dt / tau);
             prevlastts = lastts;
-
+            
             if (Double.isInfinite(kappa)) {
-                return in;
+                kappa = 1;
             }
             
-            int[] xs = new int[w_packet];
-            int[] ys = new int[w_packet];
+            int[] xs = new int[n];
+            int[] ys = new int[n];
             float[] wsum_packet = new float[2];
             int index = 0;
             wsum_packet[0] = wsum_packet[1] = 0f;
@@ -138,14 +138,14 @@
             
             wsum[0] = kappa * wsum[0] + wsum_packet[0];
             wsum[1] = kappa * wsum[1] + wsum_packet[1];
-            w = kappa * w + w_packet;
+            w = kappa * w + index;
             
             xmean = wsum[0] / w;
             ymean = wsum[1] / w;
 
             double xvar = 0, yvar = 0;
             double tmp;
-            for (int i = 0; i < w_packet; i++) {
+            for (int i = 0; i < index; i++) {
                 tmp = xs[i] - xmean;
                 tmp *= tmp;
                 xvar += tmp;
@@ -162,9 +162,9 @@
             meanPoint.setLocation(xmean, ymean);
             stdPoint.setLocation(xstd*numStdDevsForBoundingBox, ystd*numStdDevsForBoundingBox);
 
-            if (w_packet>0) {
+            if (n>0) {
                 // evaluate tracker output
-                params.update(w_packet, 
+                params.update(index, 
                         in.getFirstTimestamp(), 
                         lastts,
                         xstd, ystd, 
