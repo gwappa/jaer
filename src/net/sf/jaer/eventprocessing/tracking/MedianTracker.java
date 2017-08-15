@@ -190,12 +190,12 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
 
         if (n>0) {
             // evaluate tracker output
-            params.update(n, 
+            params.update(index, 
                     in.getFirstTimestamp(), 
                     lastts, 
                     xmedian, ymedian, 
                     xstd, ystd, 
-                    xmean, ymean);
+                    xmedian, ymedian);
             reval.eval();
         }
         

@@ -195,17 +195,18 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
         if (getEnclosedFilterChain() != null) {
             in = getEnclosedFilterChain().filterPacket(in);
         }
+        int index = 0;
         for (BasicEvent e : in) {
             addEvent(e);
+            index++;
         }
         decayAccumArray();
         thetaDegFiltered = thetaFilter.filter(getThetaDeg(), in.getLastTimestamp());
         rhoPixelsFiltered = rhoFilter.filter(getRhoPixels(), in.getLastTimestamp());
         
-        int n = in.getSize();
-        if (n > 0) {
+        if (index > 0) {
         // evalute line parameters
-        params.update(in.getSize(), 
+        params.update(index, 
                 in.getFirstTimestamp(), 
                 in.getLastTimestamp(), 
                 getRhoPixels(), 
