@@ -724,6 +724,16 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         setName("AEViewer");
 
         initComponents();
+        
+        // modification that contain extra evaluator interface
+        javax.swing.JToggleButton evalButton = new javax.swing.JToggleButton();
+        evalButton.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
+        evalButton.setText("Evaluate");
+        evalButton.setToolTipText("Evaluate filter output.");
+        evalButton.setAlignmentY(0.0F);
+        evalButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        buttonsPanel.add(evalButton);
+        
         playerControls = new AePlayerAdvancedControlsPanel(this);
         playerControlPanel.add(playerControls, BorderLayout.NORTH);
         this.jaerViewer = jaerViewer;
