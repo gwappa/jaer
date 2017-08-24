@@ -39,6 +39,9 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
 
+        setTitle("ResultEvaluator");
+        setResizable(false);
+
         enableCheckBox.setText("Evaluate Results");
         enableCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
