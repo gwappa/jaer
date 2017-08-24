@@ -75,6 +75,7 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         });
 
         drawCheckBox.setText("Draw");
+        drawCheckBox.setEnabled(false);
         drawCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 drawCheckBoxActionPerformed(evt);
@@ -151,6 +152,7 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         threshLabel.setEnabled(selected);
         threshSlider.setEnabled(selected);
         visualizeLabel.setEnabled(selected);
+        drawCheckBox.setEnabled(selected);
         jRadioButton1.setEnabled(selected);
         jRadioButton2.setEnabled(selected);
     }//GEN-LAST:event_enableCheckBoxActionPerformed
