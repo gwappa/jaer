@@ -6,10 +6,14 @@
 package net.sf.jaer.eventprocessing;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -61,6 +65,8 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
     public static final String LAST_FILTER_SELECTED_KEY = "FilterFrame.lastFilterSelected";
     private JButton resetStatisticsButton = null;
     private Border selectedBorder = new LineBorder(Color.red);
+    private boolean evalFrameBuilt;
+    private EvaluatorFrame evalFrame;
 
     /**
      * Creates new form FilterFrame
@@ -68,6 +74,7 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
     public FilterFrame(AEChip chip) {
         this.chip = chip;
         this.filterChain = chip.getFilterChain();
+        evalFrameBuilt = false;
         chip.setFilterFrame(this);
         setName("FilterFrame");
         initComponents();
@@ -797,7 +804,7 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
     }//GEN-LAST:event_overviewButtonActionPerformed
 
     private void evalButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_evalButtonActionPerformed
-        // TODO add your handling code here:
+        showEvalFrame();
     }//GEN-LAST:event_evalButtonActionPerformed
 
     private void filterVisibleBiases(String string) {
@@ -888,6 +895,31 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
                 getFilterPanelForFilter(f).repaint();
 
             }
+        }
+    }
+
+    private void showEvalFrame() {
+        if (!evalFrameBuilt) {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            try {
+                evalFrame = new EvaluatorFrame();
+            } finally {
+                setCursor(Cursor.getDefaultCursor());
+            }
+            evalFrame.addWindowListener(new WindowAdapter() {
+
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    //                    log.info(e.toString());
+                    evalButton.setSelected(false);
+                }
+            });
+            evalFrameBuilt = true;
+        }
+        
+        if (evalFrame != null) {
+            evalFrame.setVisible(true);
+            evalFrame.setState(Frame.NORMAL);
         }
     }
 
