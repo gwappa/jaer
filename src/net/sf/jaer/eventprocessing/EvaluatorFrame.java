@@ -153,8 +153,6 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         threshSlider.setEnabled(selected);
         visualizeLabel.setEnabled(selected);
         drawCheckBox.setEnabled(selected);
-        jRadioButton1.setEnabled(selected);
-        jRadioButton2.setEnabled(selected);
     }//GEN-LAST:event_enableCheckBoxActionPerformed
 
     private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
@@ -166,7 +164,9 @@ public class EvaluatorFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jRadioButton2ActionPerformed
 
     private void drawCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawCheckBoxActionPerformed
-        // TODO add your handling code here:
+        boolean selected = drawCheckBox.isSelected();
+        jRadioButton1.setEnabled(selected);
+        jRadioButton2.setEnabled(selected);
     }//GEN-LAST:event_drawCheckBoxActionPerformed
 
     /**
