@@ -47,10 +47,17 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         });
 
         threshLabel.setText("Threshold");
+        threshLabel.setEnabled(false);
+
+        threshSlider.setPaintLabels(true);
+        threshSlider.setPaintTicks(true);
+        threshSlider.setEnabled(false);
 
         visualizeLabel.setText("Visualize");
+        visualizeLabel.setEnabled(false);
 
         jRadioButton1.setText("Option 1");
+        jRadioButton1.setEnabled(false);
         jRadioButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jRadioButton1ActionPerformed(evt);
@@ -58,6 +65,7 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         });
 
         jRadioButton2.setText("Option 2");
+        jRadioButton2.setEnabled(false);
         jRadioButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jRadioButton2ActionPerformed(evt);
@@ -126,7 +134,12 @@ public class EvaluatorFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void enableCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableCheckBoxActionPerformed
-        // TODO add your handling code here:
+        boolean selected = enableCheckBox.isSelected();
+        threshLabel.setEnabled(selected);
+        threshSlider.setEnabled(selected);
+        visualizeLabel.setEnabled(selected);
+        jRadioButton1.setEnabled(selected);
+        jRadioButton2.setEnabled(selected);
     }//GEN-LAST:event_enableCheckBoxActionPerformed
 
     private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
