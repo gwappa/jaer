@@ -188,6 +188,7 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
         updateIntervalLabel = new javax.swing.JLabel();
         updateIntervalField = new javax.swing.JTextField();
         jbuttonSelectFilt = new javax.swing.JButton();
+        evalButton = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         scrollPane = new javax.swing.JScrollPane();
         filtersPanel = new javax.swing.JPanel();
@@ -293,6 +294,17 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
         });
         toolBar1.add(jbuttonSelectFilt);
 
+        evalButton.setText("Evaluate");
+        evalButton.setFocusable(false);
+        evalButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        evalButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        evalButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                evalButtonActionPerformed(evt);
+            }
+        });
+        toolBar1.add(evalButton);
+
         jLabel1.setText("<html>Enabled filters (check box selected) <br>are processed from top to bottom");
 
         filtersPanel.setMaximumSize(new java.awt.Dimension(0, 0));
@@ -368,12 +380,12 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
         modeMenu.setMnemonic('o');
         modeMenu.setText("Options");
         modeMenu.addMenuListener(new javax.swing.event.MenuListener() {
-            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                modeMenuMenuSelected(evt);
             }
             public void menuDeselected(javax.swing.event.MenuEvent evt) {
             }
-            public void menuSelected(javax.swing.event.MenuEvent evt) {
-                modeMenuMenuSelected(evt);
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
             }
         });
 
@@ -481,7 +493,7 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
             .addComponent(scrollPane)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(toolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 218, Short.MAX_VALUE))
+                .addGap(0, 147, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -784,6 +796,10 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
         }
     }//GEN-LAST:event_overviewButtonActionPerformed
 
+    private void evalButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_evalButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_evalButtonActionPerformed
+
     private void filterVisibleBiases(String string) {
         if ((string == null) || string.isEmpty()) {
             for (FilterPanel p : filterPanels) {
@@ -896,6 +912,7 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
     private javax.swing.JRadioButtonMenuItem acquisitionModeMenuItem;
     private javax.swing.JMenuItem customizeMenuItem;
     private javax.swing.JToggleButton disableFilteringToggleButton;
+    private javax.swing.JButton evalButton;
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;
     protected javax.swing.JPanel filtersPanel;
