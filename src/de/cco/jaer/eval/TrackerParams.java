@@ -51,6 +51,11 @@ public interface TrackerParams {
         NONE
     }
    
+    /** 
+     * Setter for evaluation threshold
+     * @param thresh Speed threshold [px/ms]
+     */
+    public void setThreshold(double thresh);
    
     /**
      * Setter for chip obj.
@@ -123,6 +128,12 @@ public interface TrackerParams {
      * @return Event rat in Hz.
      */
     public double getEventRate();
+    
+    /**
+     * Getter for evaluation threshold
+     * @return Threshold in px/ms
+     */
+    public double getThreshold();
     
     /**
      * Print selected data
