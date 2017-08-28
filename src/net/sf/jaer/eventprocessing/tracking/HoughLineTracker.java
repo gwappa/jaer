@@ -121,7 +121,8 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
         params.setChip(chip);
         params.setRhoRes(rhoResPixels);
         params.setThetaRes(thetaResDeg);    
-        reval = new ResultEvaluator(params, OutputHandler.OutputSource.FILE);
+        reval = ResultEvaluator.getInstance();
+        reval.initialize(params, OutputHandler.OutputSource.FILE);
      }
 
     /**

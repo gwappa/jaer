@@ -24,40 +24,68 @@ package de.cco.jaer.eval;
  */
 public class ResultEvaluator{
     
+    // singleton instance
+    private static volatile ResultEvaluator instance = null;
+    
+    private ResultEvaluator() {}
+    
     OutputHandler out;
     ArduinoConnector con;
     TrackerParams type;
     
-    private double thresh;
+    public static ResultEvaluator getInstance() {
+        ResultEvaluator tmp = instance;
+        if (tmp == null) {
+            synchronized(ResultEvaluator.class) {
+                tmp = instance;
+                if (tmp == null) {
+                    instance = tmp = new ResultEvaluator();
+                    tmp.con = null;
+                    tmp.type = null;
+                    tmp.out = null;
+                }
+            }
+        }
+        return tmp;
+    }
+    
     /**
-     * Creates a new instance of ResultEvaluator, no logging
-     * @param t Template object extends ParameterTracker interface
+     * Ininitalise ResultEvaluator, no logging
      */
-    public ResultEvaluator(TrackerParams t){
+    public void initialize(TrackerParams t){
         type = t;
         con = ArduinoConnector.getInstance();
+        if (out != null) {
+            out.close();
+        }
         out = new OutputHandler(OutputHandler.OutputSource.CONSOLE, t.getName(), t.printHeader());
     }
     
     /**
-     * Create a new instance of ResultEvaluator, use specified OutputSource
+     * Initialise ResultEvaluator, use specified OutputSource
      * @param t Template object extends ParameterTracker interface
      * @param src OutputSource enum, if FILE -> create new filename
      */
-    public ResultEvaluator(TrackerParams t, OutputHandler.OutputSource src) {
+    public void initialize(TrackerParams t, OutputHandler.OutputSource src) {
         type = t;
         con = ArduinoConnector.getInstance();
+        if (out != null) {
+            out.close();
+        }
         out = new OutputHandler(src, t.getName(), t.printHeader());
     }
     
     /**
-     * Create a new instance of ResultEvaluator, log to specified path
+     * Inintialise ResultEvaluator, log to specified path
      * @param t Template object extends ParameterTracker interface
      * @param path Path to log file 
      */
-    public ResultEvaluator(TrackerParams t, String path) {
+    public void initialize(TrackerParams t, String path) {
         type = t;
         con = ArduinoConnector.getInstance();
+        if (out != null) {
+            out.close();
+        }
         out = new OutputHandler(path);
         out.write(type.printHeader());
     }

@@ -149,8 +149,6 @@ public class EvaluatorFrame extends javax.swing.JFrame {
 
     private void enableCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableCheckBoxActionPerformed
         boolean selected = enableCheckBox.isSelected();
-        threshLabel.setEnabled(selected);
-        threshSlider.setEnabled(selected);
         visualizeLabel.setEnabled(selected);
         drawCheckBox.setEnabled(selected);
     }//GEN-LAST:event_enableCheckBoxActionPerformed

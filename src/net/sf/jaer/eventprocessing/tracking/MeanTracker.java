@@ -58,7 +58,8 @@
             super(chip);
             params = new MeanTrackerParams();
             params.setChip(chip);
-            reval = new ResultEvaluator(params, OutputHandler.OutputSource.FILE);
+            reval = ResultEvaluator.getInstance();
+            reval.initialize(params, OutputHandler.OutputSource.FILE);
             
             setPropertyTooltip("tau", "Time constant in us (microseonds) of mean location lowpass filter, 0 for instantaneous");
             setPropertyTooltip("numStdDevsForBoundingBox", "Multiplier for number of std deviations of x and y distances from median for drawing and returning bounding box");

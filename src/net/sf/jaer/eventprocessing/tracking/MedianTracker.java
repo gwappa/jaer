@@ -62,7 +62,8 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
         super(chip);
         params = new MedianTrackerParams();
         params.setChip(chip);
-        reval = new ResultEvaluator(params, OutputHandler.OutputSource.FILE);
+        reval = ResultEvaluator.getInstance();
+        reval.initialize(params, OutputHandler.OutputSource.FILE);
         
         xFilter.setTauMs(tauUs / 1000f);
         yFilter.setTauMs(tauUs / 1000f);
