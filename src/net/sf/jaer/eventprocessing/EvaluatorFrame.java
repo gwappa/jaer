@@ -59,6 +59,11 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         threshSlider.setPaintLabels(true);
         threshSlider.setPaintTicks(true);
         threshSlider.setEnabled(false);
+        threshSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                threshSliderStateChanged(evt);
+            }
+        });
 
         visualizeLabel.setText("Visualize");
         visualizeLabel.setEnabled(false);
@@ -172,6 +177,11 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         jRadioButton1.setEnabled(selected);
         jRadioButton2.setEnabled(selected);
     }//GEN-LAST:event_drawCheckBoxActionPerformed
+
+    private void threshSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_threshSliderStateChanged
+        int val = threshSlider.getValue();
+        // TODO: Logarithmic scale?
+    }//GEN-LAST:event_threshSliderStateChanged
 
     /**
      * @param args the command line arguments
