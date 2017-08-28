@@ -33,6 +33,8 @@ public class ResultEvaluator{
     ArduinoConnector con;
     TrackerParams type;
     
+    private boolean armed;
+    
     public static ResultEvaluator getInstance() {
         ResultEvaluator tmp = instance;
         if (tmp == null) {
@@ -43,6 +45,7 @@ public class ResultEvaluator{
                     tmp.con = null;
                     tmp.type = null;
                     tmp.out = null;
+                    tmp.arm(false);
                 }
             }
         }
@@ -59,6 +62,7 @@ public class ResultEvaluator{
             out.close();
         }
         out = new OutputHandler(OutputHandler.OutputSource.CONSOLE, t.getName(), t.printHeader());
+        arm(true);
     }
     
     /**
@@ -73,6 +77,7 @@ public class ResultEvaluator{
             out.close();
         }
         out = new OutputHandler(src, t.getName(), t.printHeader());
+        arm(true);
     }
     
     /**
@@ -88,12 +93,15 @@ public class ResultEvaluator{
         }
         out = new OutputHandler(path);
         out.write(type.printHeader());
+        arm(true);
     }
 
     /**
      * Evaluate result and send signal to Arduino.
      */
     public void eval() {
+        if (!isArmed()) {return;}
+        
         out.write(type.print());
 
         if (type.eval()){
@@ -104,11 +112,20 @@ public class ResultEvaluator{
         }
     }
     
+    public void arm(boolean b) {
+        armed = b;
+    }
+    
+    public boolean isArmed() {
+        return armed;
+    }
+    
     /**
      * Set evaluator threshold
      * @param t
      */
     public void setThreshold (double t) {
+        if (!isArmed()) {return;}
         type.setThreshold(t);
     }
     
@@ -117,11 +134,22 @@ public class ResultEvaluator{
     }
     
     public double getThreshold() {
-        return type.getThreshold();
+        if (!isArmed()) {
+            return -1;
+        }
+        else
+        {   return type.getThreshold();
+        
+        }
     }
     
     public boolean isListening() {
-        return getOutputHandler().isListening();
+        if (!isArmed()) {
+            return false;
+        }
+        else {
+            return getOutputHandler().isListening();
+        }
     }
     
 }

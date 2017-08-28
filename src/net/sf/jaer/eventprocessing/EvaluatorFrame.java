@@ -5,16 +5,21 @@
  */
 package net.sf.jaer.eventprocessing;
 
+import de.cco.jaer.eval.ResultEvaluator;
+
 /**
  *
  * @author viktor
  */
 public class EvaluatorFrame extends javax.swing.JFrame {
+    
+    ResultEvaluator reval;
 
     /**
      * Creates new form EvaluatorFrame
      */
     public EvaluatorFrame() {
+        reval = ResultEvaluator.getInstance();
         initComponents();
     }
 
@@ -151,6 +156,7 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         boolean selected = enableCheckBox.isSelected();
         visualizeLabel.setEnabled(selected);
         drawCheckBox.setEnabled(selected);
+        reval.arm(selected);
     }//GEN-LAST:event_enableCheckBoxActionPerformed
 
     private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
