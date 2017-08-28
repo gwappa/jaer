@@ -30,7 +30,7 @@ import net.sf.jaer.chip.AEChip;
 public abstract class TrackerParamsBase implements TrackerParams{
     
     // Tracker name
-    public String name;
+    private String name;
     
     // AEChip instance
     private AEChip chip;
@@ -69,6 +69,11 @@ public abstract class TrackerParamsBase implements TrackerParams{
     public void setLastTS(int ts) {
         prevlastts = lastts;
         lastts = ts;
+    }
+    
+    @Override
+    public void setName(String n) {
+        name = n;
     }
     
     @Override

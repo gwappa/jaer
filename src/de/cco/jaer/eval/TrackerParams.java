@@ -64,6 +64,12 @@ public interface TrackerParams {
     public void setChip(AEChip chip);
     
     /**
+     * Setter for tracker Name
+     * @param name 
+     */
+    public void setName(String name);
+    
+    /**
      * Setter for package size
      * @param n Number of events in packets
      */

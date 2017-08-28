@@ -28,6 +28,7 @@ public class ResultEvaluator{
     ArduinoConnector con;
     TrackerParams type;
     
+    private double thresh;
     /**
      * Creates a new instance of ResultEvaluator, no logging
      * @param t Template object extends ParameterTracker interface
@@ -75,8 +76,20 @@ public class ResultEvaluator{
         }
     }
     
+    /**
+     * Set evaluator threshold
+     * @param t
+     */
+    public void setThreshold (double t) {
+        type.setThreshold(t);
+    }
+    
     public OutputHandler getOutputHandler() {
         return out;
+    }
+    
+    public double getThreshold() {
+        return type.getThreshold();
     }
     
     public boolean isListening() {

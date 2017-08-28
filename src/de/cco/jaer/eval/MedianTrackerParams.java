@@ -40,7 +40,10 @@ public class MedianTrackerParams extends TrackerParamsBase{
     private float meanx, meany;
     private float prevx, prevy;
     
-    public MedianTrackerParams(){ name = "MedianTracker";}
+    public MedianTrackerParams() { 
+        setName("MedianTracker");
+        setThreshold(4e-4);
+    }
     
     /**
      * Update internal result representation with values from MedianTracker object.
@@ -96,6 +99,6 @@ public class MedianTrackerParams extends TrackerParamsBase{
 
     @Override
     public Boolean eval() {
-        return (getSpeed() >= 4e-4);
+        return (getSpeed() >= getThreshold());
     }
 }

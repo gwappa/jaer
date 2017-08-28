@@ -30,9 +30,9 @@ public class HoughLineTrackerParams extends TrackerParamsBase {
     
     
     public HoughLineTrackerParams() {
-        name = "HoughLineTracker";
-        rhoRes = 6;
-        thetaRes = 10;
+        setName("HoughLineTracker");
+        setRhoRes(6);
+        setThetaRes(10);
     }
     
     public void update(int n, int firstts, int lastts, float rho, float theta) {
