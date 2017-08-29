@@ -119,10 +119,11 @@
     </Component>
     <Component class="javax.swing.JSlider" name="threshSlider">
       <Properties>
-        <Property name="majorTickSpacing" type="int" value="10"/>
+        <Property name="majorTickSpacing" type="int" value="1" postCode="Hashtable labels = new Hashtable();&#xa;labels.put(0, new JLabel(&quot;0e-4&quot;));&#xa;labels.put(2, new JLabel(&quot;2e-4&quot;));&#xa;labels.put(4, new JLabel(&quot;4e-4&quot;));&#xa;labels.put(6, new JLabel(&quot;6e-4&quot;));&#xa;labels.put(8, new JLabel(&quot;8e-4&quot;));&#xa;labels.put(10, new JLabel(&quot;10e-4&quot;));&#xa;threshSlider.setLabelTable(labels);"/>
+        <Property name="maximum" type="int" value="10"/>
         <Property name="paintLabels" type="boolean" value="true"/>
         <Property name="paintTicks" type="boolean" value="true"/>
-        <Property name="enabled" type="boolean" value="false"/>
+        <Property name="value" type="int" value="4"/>
       </Properties>
       <Events>
         <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="threshSliderStateChanged"/>

@@ -6,6 +6,8 @@
 package net.sf.jaer.eventprocessing;
 
 import de.cco.jaer.eval.ResultEvaluator;
+import java.util.Hashtable;
+import javax.swing.JLabel;
 
 /**
  *
@@ -55,10 +57,19 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         threshLabel.setText("Threshold");
         threshLabel.setEnabled(false);
 
-        threshSlider.setMajorTickSpacing(10);
+        threshSlider.setMajorTickSpacing(1);
+        Hashtable labels = new Hashtable();
+        labels.put(0, new JLabel("0e-4"));
+        labels.put(2, new JLabel("2e-4"));
+        labels.put(4, new JLabel("4e-4"));
+        labels.put(6, new JLabel("6e-4"));
+        labels.put(8, new JLabel("8e-4"));
+        labels.put(10, new JLabel("10e-4"));
+        threshSlider.setLabelTable(labels);
+        threshSlider.setMaximum(10);
         threshSlider.setPaintLabels(true);
         threshSlider.setPaintTicks(true);
-        threshSlider.setEnabled(false);
+        threshSlider.setValue(4);
         threshSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 threshSliderStateChanged(evt);
@@ -180,7 +191,8 @@ public class EvaluatorFrame extends javax.swing.JFrame {
 
     private void threshSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_threshSliderStateChanged
         int val = threshSlider.getValue();
-        // TODO: Logarithmic scale?
+        double real = val * 1e-4;
+        reval.setThreshold(real);
     }//GEN-LAST:event_threshSliderStateChanged
 
     /**
