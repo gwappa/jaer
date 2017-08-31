@@ -39,21 +39,21 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         jRadioButton1 = new javax.swing.JRadioButton();
         jRadioButton2 = new javax.swing.JRadioButton();
         drawCheckBox = new javax.swing.JCheckBox();
-        jTabbedPane1 = new javax.swing.JTabbedPane();
-        jPanel1 = new javax.swing.JPanel();
-        jSlider4 = new javax.swing.JSlider();
-        jLabel3 = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
-        jSpinner1 = new javax.swing.JSpinner();
-        jSpinner2 = new javax.swing.JSpinner();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jPanel3 = new javax.swing.JPanel();
-        jSlider6 = new javax.swing.JSlider();
-        jLabel4 = new javax.swing.JLabel();
-        jPanel4 = new javax.swing.JPanel();
-        jSlider7 = new javax.swing.JSlider();
-        jLabel9 = new javax.swing.JLabel();
+        tabbedPane = new javax.swing.JTabbedPane();
+        ratePanel = new javax.swing.JPanel();
+        rateSlider = new javax.swing.JSlider();
+        rateLabel = new javax.swing.JLabel();
+        posPanel = new javax.swing.JPanel();
+        xSpinner = new javax.swing.JSpinner();
+        ySpinner = new javax.swing.JSpinner();
+        xLabel = new javax.swing.JLabel();
+        yLabel = new javax.swing.JLabel();
+        speedPane = new javax.swing.JPanel();
+        speedSlider = new javax.swing.JSlider();
+        speedLabel = new javax.swing.JLabel();
+        distPanel = new javax.swing.JPanel();
+        distSlider = new javax.swing.JSlider();
+        distLabel = new javax.swing.JLabel();
 
         setTitle("ResultEvaluator");
         setResizable(false);
@@ -93,131 +93,131 @@ public class EvaluatorFrame extends javax.swing.JFrame {
             }
         });
 
-        jSlider4.setMajorTickSpacing(2);
-        jSlider4.setMaximum(20);
-        jSlider4.setPaintLabels(true);
-        jSlider4.setPaintTicks(true);
-        jSlider4.setValue(4);
+        rateSlider.setMajorTickSpacing(2);
+        rateSlider.setMaximum(20);
+        rateSlider.setPaintLabels(true);
+        rateSlider.setPaintTicks(true);
+        rateSlider.setValue(4);
 
-        jLabel3.setText("# events / dt [µHz]");
+        rateLabel.setText("# events / dt [µHz]");
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout ratePanelLayout = new javax.swing.GroupLayout(ratePanel);
+        ratePanel.setLayout(ratePanelLayout);
+        ratePanelLayout.setHorizontalGroup(
+            ratePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ratePanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(jSlider4, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
-                    .addComponent(jLabel3))
+                .addGroup(ratePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(rateSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
+                    .addComponent(rateLabel))
                 .addContainerGap())
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        ratePanelLayout.setVerticalGroup(
+            ratePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ratePanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSlider4, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(rateSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel3)
+                .addComponent(rateLabel)
                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
-        jTabbedPane1.addTab("Eventrate", jPanel1);
+        tabbedPane.addTab("Eventrate", ratePanel);
 
-        jLabel1.setText("X:");
+        xLabel.setText("X:");
 
-        jLabel2.setText("Y:");
+        yLabel.setText("Y:");
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        javax.swing.GroupLayout posPanelLayout = new javax.swing.GroupLayout(posPanel);
+        posPanel.setLayout(posPanelLayout);
+        posPanelLayout.setHorizontalGroup(
+            posPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(posPanelLayout.createSequentialGroup()
                 .addGap(52, 52, 52)
-                .addComponent(jLabel1)
+                .addComponent(xLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(xSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 103, Short.MAX_VALUE)
-                .addComponent(jLabel2)
+                .addComponent(yLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(ySpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(45, 45, 45))
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        posPanelLayout.setVerticalGroup(
+            posPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(posPanelLayout.createSequentialGroup()
                 .addGap(42, 42, 42)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2)
-                    .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(posPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(xSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(xLabel)
+                    .addComponent(yLabel)
+                    .addComponent(ySpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(39, Short.MAX_VALUE))
         );
 
-        jTabbedPane1.addTab("Position", jPanel2);
+        tabbedPane.addTab("Position", posPanel);
 
-        jSlider6.setMajorTickSpacing(2);
-        jSlider6.setMaximum(20);
-        jSlider6.setPaintLabels(true);
-        jSlider6.setPaintTicks(true);
-        jSlider6.setValue(4);
+        speedSlider.setMajorTickSpacing(2);
+        speedSlider.setMaximum(20);
+        speedSlider.setPaintLabels(true);
+        speedSlider.setPaintTicks(true);
+        speedSlider.setValue(4);
 
-        jLabel4.setText("(distance [px] / dt [µs]) * e-4 ");
+        speedLabel.setText("(distance [px] / dt [µs]) * e-4 ");
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
+        javax.swing.GroupLayout speedPaneLayout = new javax.swing.GroupLayout(speedPane);
+        speedPane.setLayout(speedPaneLayout);
+        speedPaneLayout.setHorizontalGroup(
+            speedPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(speedPaneLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(jSlider6, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
-                    .addComponent(jLabel4))
+                .addGroup(speedPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(speedSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
+                    .addComponent(speedLabel))
                 .addContainerGap())
         );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
+        speedPaneLayout.setVerticalGroup(
+            speedPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(speedPaneLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSlider6, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(speedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel4)
+                .addComponent(speedLabel)
                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
-        jTabbedPane1.addTab("Speed", jPanel3);
+        tabbedPane.addTab("Speed", speedPane);
 
-        jSlider7.setMajorTickSpacing(2);
-        jSlider7.setMaximum(20);
-        jSlider7.setPaintLabels(true);
-        jSlider7.setPaintTicks(true);
-        jSlider7.setValue(4);
+        distSlider.setMajorTickSpacing(2);
+        distSlider.setMaximum(20);
+        distSlider.setPaintLabels(true);
+        distSlider.setPaintTicks(true);
+        distSlider.setValue(4);
 
-        jLabel9.setText("sqrt( dx² / dy² ) [px]");
+        distLabel.setText("sqrt( dx² / dy² ) [px]");
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
+        javax.swing.GroupLayout distPanelLayout = new javax.swing.GroupLayout(distPanel);
+        distPanel.setLayout(distPanelLayout);
+        distPanelLayout.setHorizontalGroup(
+            distPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(distPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(jSlider7, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
-                    .addComponent(jLabel9))
+                .addGroup(distPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(distSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
+                    .addComponent(distLabel))
                 .addContainerGap())
         );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
+        distPanelLayout.setVerticalGroup(
+            distPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(distPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSlider7, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(distSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel9)
+                .addComponent(distLabel)
                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
-        jTabbedPane1.addTab("Distance", jPanel4);
+        tabbedPane.addTab("Distance", distPanel);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -227,7 +227,7 @@ public class EvaluatorFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addComponent(enableCheckBox)
-                    .addComponent(jTabbedPane1)
+                    .addComponent(tabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(visualizeLabel))
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
@@ -245,7 +245,7 @@ public class EvaluatorFrame extends javax.swing.JFrame {
                 .addGap(20, 20, 20)
                 .addComponent(enableCheckBox)
                 .addGap(18, 18, 18)
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(25, 25, 25)
                 .addComponent(visualizeLabel)
                 .addGap(18, 18, 18)
@@ -320,25 +320,25 @@ public class EvaluatorFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel distLabel;
+    private javax.swing.JPanel distPanel;
+    private javax.swing.JSlider distSlider;
     private javax.swing.JCheckBox drawCheckBox;
     private javax.swing.JCheckBox enableCheckBox;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JRadioButton jRadioButton2;
-    private javax.swing.JSlider jSlider4;
-    private javax.swing.JSlider jSlider6;
-    private javax.swing.JSlider jSlider7;
-    private javax.swing.JSpinner jSpinner1;
-    private javax.swing.JSpinner jSpinner2;
-    private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JPanel posPanel;
+    private javax.swing.JLabel rateLabel;
+    private javax.swing.JPanel ratePanel;
+    private javax.swing.JSlider rateSlider;
+    private javax.swing.JLabel speedLabel;
+    private javax.swing.JPanel speedPane;
+    private javax.swing.JSlider speedSlider;
+    private javax.swing.JTabbedPane tabbedPane;
     private javax.swing.JLabel visualizeLabel;
+    private javax.swing.JLabel xLabel;
+    private javax.swing.JSpinner xSpinner;
+    private javax.swing.JLabel yLabel;
+    private javax.swing.JSpinner ySpinner;
     // End of variables declaration//GEN-END:variables
 }

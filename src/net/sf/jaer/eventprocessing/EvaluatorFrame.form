@@ -28,7 +28,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="2" attributes="0">
                   <Component id="enableCheckBox" alignment="2" min="-2" max="-2" attributes="0"/>
-                  <Component id="jTabbedPane1" alignment="2" max="32767" attributes="0"/>
+                  <Component id="tabbedPane" alignment="2" max="-2" attributes="0"/>
                   <Component id="visualizeLabel" alignment="2" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -51,7 +51,7 @@
               <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
               <Component id="enableCheckBox" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Component id="jTabbedPane1" min="-2" pref="132" max="-2" attributes="0"/>
+              <Component id="tabbedPane" min="-2" pref="132" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
               <Component id="visualizeLabel" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -118,11 +118,11 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="drawCheckBoxActionPerformed"/>
       </Events>
     </Component>
-    <Container class="javax.swing.JTabbedPane" name="jTabbedPane1">
+    <Container class="javax.swing.JTabbedPane" name="tabbedPane">
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
       <SubComponents>
-        <Container class="javax.swing.JPanel" name="jPanel1">
+        <Container class="javax.swing.JPanel" name="ratePanel">
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
               <JTabbedPaneConstraints tabName="Eventrate">
@@ -137,8 +137,8 @@
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="2" attributes="0">
-                          <Component id="jSlider4" alignment="2" pref="304" max="32767" attributes="0"/>
-                          <Component id="jLabel3" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="rateSlider" alignment="2" pref="304" max="32767" attributes="0"/>
+                          <Component id="rateLabel" alignment="2" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
@@ -148,16 +148,16 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jSlider4" min="-2" pref="65" max="-2" attributes="0"/>
+                      <Component id="rateSlider" min="-2" pref="65" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+                      <Component id="rateLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace pref="15" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JSlider" name="jSlider4">
+            <Component class="javax.swing.JSlider" name="rateSlider">
               <Properties>
                 <Property name="majorTickSpacing" type="int" value="2"/>
                 <Property name="maximum" type="int" value="20"/>
@@ -166,14 +166,14 @@
                 <Property name="value" type="int" value="4"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="jLabel3">
+            <Component class="javax.swing.JLabel" name="rateLabel">
               <Properties>
                 <Property name="text" type="java.lang.String" value="# events / dt [&#xb5;Hz]"/>
               </Properties>
             </Component>
           </SubComponents>
         </Container>
-        <Container class="javax.swing.JPanel" name="jPanel2">
+        <Container class="javax.swing.JPanel" name="posPanel">
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
               <JTabbedPaneConstraints tabName="Position">
@@ -187,13 +187,13 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="52" max="-2" attributes="0"/>
-                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                      <Component id="xLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jSpinner1" min="-2" max="-2" attributes="0"/>
+                      <Component id="xSpinner" min="-2" max="-2" attributes="0"/>
                       <EmptySpace pref="103" max="32767" attributes="0"/>
-                      <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                      <Component id="yLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jSpinner2" min="-2" max="-2" attributes="0"/>
+                      <Component id="ySpinner" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="45" max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -203,10 +203,10 @@
                   <Group type="102" attributes="0">
                       <EmptySpace min="-2" pref="42" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="2" attributes="0">
-                          <Component id="jSpinner1" alignment="2" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel1" alignment="2" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel2" alignment="2" min="-2" max="-2" attributes="0"/>
-                          <Component id="jSpinner2" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="xSpinner" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="xLabel" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="yLabel" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="ySpinner" alignment="2" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace pref="39" max="32767" attributes="0"/>
                   </Group>
@@ -214,23 +214,23 @@
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JSpinner" name="jSpinner1">
+            <Component class="javax.swing.JSpinner" name="xSpinner">
             </Component>
-            <Component class="javax.swing.JSpinner" name="jSpinner2">
+            <Component class="javax.swing.JSpinner" name="ySpinner">
             </Component>
-            <Component class="javax.swing.JLabel" name="jLabel1">
+            <Component class="javax.swing.JLabel" name="xLabel">
               <Properties>
                 <Property name="text" type="java.lang.String" value="X:"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="jLabel2">
+            <Component class="javax.swing.JLabel" name="yLabel">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Y:"/>
               </Properties>
             </Component>
           </SubComponents>
         </Container>
-        <Container class="javax.swing.JPanel" name="jPanel3">
+        <Container class="javax.swing.JPanel" name="speedPane">
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
               <JTabbedPaneConstraints tabName="Speed">
@@ -245,8 +245,8 @@
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="2" attributes="0">
-                          <Component id="jSlider6" alignment="2" pref="304" max="32767" attributes="0"/>
-                          <Component id="jLabel4" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="speedSlider" alignment="2" pref="304" max="32767" attributes="0"/>
+                          <Component id="speedLabel" alignment="2" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
@@ -256,16 +256,16 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jSlider6" min="-2" pref="65" max="-2" attributes="0"/>
+                      <Component id="speedSlider" min="-2" pref="65" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+                      <Component id="speedLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace pref="15" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JSlider" name="jSlider6">
+            <Component class="javax.swing.JSlider" name="speedSlider">
               <Properties>
                 <Property name="majorTickSpacing" type="int" value="2"/>
                 <Property name="maximum" type="int" value="20"/>
@@ -274,14 +274,14 @@
                 <Property name="value" type="int" value="4"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="jLabel4">
+            <Component class="javax.swing.JLabel" name="speedLabel">
               <Properties>
                 <Property name="text" type="java.lang.String" value="(distance [px] / dt [&#xb5;s]) * e-4 "/>
               </Properties>
             </Component>
           </SubComponents>
         </Container>
-        <Container class="javax.swing.JPanel" name="jPanel4">
+        <Container class="javax.swing.JPanel" name="distPanel">
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
               <JTabbedPaneConstraints tabName="Distance">
@@ -296,8 +296,8 @@
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="2" attributes="0">
-                          <Component id="jSlider7" alignment="2" pref="304" max="32767" attributes="0"/>
-                          <Component id="jLabel9" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="distSlider" alignment="2" pref="304" max="32767" attributes="0"/>
+                          <Component id="distLabel" alignment="2" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
@@ -307,16 +307,16 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jSlider7" min="-2" pref="65" max="-2" attributes="0"/>
+                      <Component id="distSlider" min="-2" pref="65" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jLabel9" min="-2" max="-2" attributes="0"/>
+                      <Component id="distLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace pref="15" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JSlider" name="jSlider7">
+            <Component class="javax.swing.JSlider" name="distSlider">
               <Properties>
                 <Property name="majorTickSpacing" type="int" value="2"/>
                 <Property name="maximum" type="int" value="20"/>
@@ -325,7 +325,7 @@
                 <Property name="value" type="int" value="4"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="jLabel9">
+            <Component class="javax.swing.JLabel" name="distLabel">
               <Properties>
                 <Property name="text" type="java.lang.String" value="sqrt( dx&#xb2; / dy&#xb2; ) [px]"/>
               </Properties>
