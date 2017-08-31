@@ -93,6 +93,12 @@ public class EvaluatorFrame extends javax.swing.JFrame {
             }
         });
 
+        tabbedPane.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                tabbedPaneStateChanged(evt);
+            }
+        });
+
         rateSlider.setMajorTickSpacing(2);
         rateSlider.setMaximum(20);
         rateSlider.setPaintLabels(true);
@@ -283,6 +289,30 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         jRadioButton1.setEnabled(selected);
         jRadioButton2.setEnabled(selected);
     }//GEN-LAST:event_drawCheckBoxActionPerformed
+
+    private void tabbedPaneStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabbedPaneStateChanged
+        switch (tabbedPane.getTitleAt(tabbedPane.getSelectedIndex())) {
+            case "Eventrate":
+                reval.setThreshold(rateSlider.getValue());
+                break;
+            case "Position":
+                try {
+                        xSpinner.commitEdit();
+                        ySpinner.commitEdit();
+                } catch ( java.text.ParseException e ) {  }
+                int x = (Integer) xSpinner.getValue();
+                int y = (Integer) ySpinner.getValue();
+                break;
+            case "Speed":
+                reval.setThreshold(speedSlider.getValue());
+                break;
+            case "Distance":
+                reval.setThreshold(distSlider.getValue());
+                break;
+            default:
+                break;
+        }
+    }//GEN-LAST:event_tabbedPaneStateChanged
 
     /**
      * @param args the command line arguments
