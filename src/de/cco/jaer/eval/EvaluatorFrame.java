@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package net.sf.jaer.eventprocessing;
+package de.cco.jaer.eval;
 
 import de.cco.jaer.eval.ResultEvaluator;
 import java.util.Hashtable;
