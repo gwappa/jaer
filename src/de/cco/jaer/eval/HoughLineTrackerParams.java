@@ -72,7 +72,20 @@ public class HoughLineTrackerParams extends TrackerParamsBase {
     }
 
     @Override
-    public Boolean eval() {
+    public Boolean eval(EvaluatorThreshold thresh) {
+        // TODO: Implement more thresholds for theta and rho?
+        switch (thresh.getTarget()) {
+            case EVENTRATE:
+                return (getEventRate() > (double) thresh.getValue());
+            case POSITION:
+                // TODO: true, when any part of the line crosses this point
+                return false;
+            case SPEED:
+                // TODO?
+                return false;
+            case DISTANCE:
+                return (getDist() > (double) thresh.getValue());
+        }
         return false;
     }
 }

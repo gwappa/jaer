@@ -42,7 +42,6 @@ public class MedianTrackerParams extends TrackerParamsBase{
     
     public MedianTrackerParams() { 
         setName("MedianTracker");
-        setThreshold(4e-4);
     }
     
     /**
@@ -98,7 +97,18 @@ public class MedianTrackerParams extends TrackerParamsBase{
     }
 
     @Override
-    public Boolean eval() {
-        return (getSpeed() >= getThreshold());
+    public Boolean eval(EvaluatorThreshold thresh) {
+        switch (thresh.getTarget()) {
+            case EVENTRATE:
+                return (getEventRate() > (double) thresh.getValue());
+            case POSITION:
+                // TODO
+                return false;
+            case SPEED:
+                return (getSpeed() > (double) thresh.getValue());
+            case DISTANCE:
+                return (getDist() > (double) thresh.getValue());
+        }
+        return false;
     }
 }
