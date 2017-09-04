@@ -43,20 +43,12 @@ public abstract class TrackerParamsBase implements TrackerParams{
     
     // time stamp vars
     private int firstts, lastts, prevfirstts, prevlastts;    
-    
-    // movement speed evaluation threshold
-    private double thresh;
 
     @Override
     public void setChip(AEChip ch) {
         chip = ch;
         sx = chip.getSizeX();
         sy = chip.getSizeY();
-    }
-    
-    @Override
-    public void setThreshold(double t) {
-        thresh = t;
     }
     
     @Override
@@ -123,10 +115,5 @@ public abstract class TrackerParamsBase implements TrackerParams{
     @Override
     public double getEventRate() {
         return (double) getNumEvents() / getDuration();
-    }
-    
-    @Override
-    public double getThreshold() {
-        return thresh;
     }
 }

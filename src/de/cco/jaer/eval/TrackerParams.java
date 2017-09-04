@@ -51,12 +51,6 @@ public interface TrackerParams {
         NONE
     }
    
-    /** 
-     * Setter for evaluation threshold
-     * @param thresh Speed threshold [px/ms]
-     */
-    public void setThreshold(double thresh);
-   
     /**
      * Setter for chip obj.
      * @param chip AEChip object, containing information about chipsize, filename
@@ -136,12 +130,6 @@ public interface TrackerParams {
     public double getEventRate();
     
     /**
-     * Getter for evaluation threshold
-     * @return Threshold in px/ms
-     */
-    public double getThreshold();
-    
-    /**
      * Print selected data
      * @return String of selected data, comma seperated
      */
@@ -157,5 +145,5 @@ public interface TrackerParams {
      * Evaluate tracker data
      * @return Boolean 
      */
-    public Boolean eval();
+    public Boolean eval(EvaluatorThreshold thresh);
 }
