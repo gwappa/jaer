@@ -119,6 +119,9 @@
       </Events>
     </Component>
     <Container class="javax.swing.JTabbedPane" name="tabbedPane">
+      <Events>
+        <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="tabbedPaneStateChanged"/>
+      </Events>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
       <SubComponents>
@@ -159,12 +162,15 @@
           <SubComponents>
             <Component class="javax.swing.JSlider" name="rateSlider">
               <Properties>
-                <Property name="majorTickSpacing" type="int" value="2"/>
-                <Property name="maximum" type="int" value="20"/>
+                <Property name="majorTickSpacing" type="int" value="50"/>
+                <Property name="maximum" type="int" value="500"/>
                 <Property name="paintLabels" type="boolean" value="true"/>
                 <Property name="paintTicks" type="boolean" value="true"/>
                 <Property name="value" type="int" value="4"/>
               </Properties>
+              <Events>
+                <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="rateSliderStateChanged"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="rateLabel">
               <Properties>
@@ -273,6 +279,9 @@
                 <Property name="paintTicks" type="boolean" value="true"/>
                 <Property name="value" type="int" value="4"/>
               </Properties>
+              <Events>
+                <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="speedSliderStateChanged"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="speedLabel">
               <Properties>
@@ -324,6 +333,9 @@
                 <Property name="paintTicks" type="boolean" value="true"/>
                 <Property name="value" type="int" value="4"/>
               </Properties>
+              <Events>
+                <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="distSliderStateChanged"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="distLabel">
               <Properties>

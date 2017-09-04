@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 public class EvaluatorFrame extends javax.swing.JFrame {
     
     ResultEvaluator reval;
+    EvaluatorThreshold thresh;
 
     /**
      * Creates new form EvaluatorFrame
@@ -99,11 +100,16 @@ public class EvaluatorFrame extends javax.swing.JFrame {
             }
         });
 
-        rateSlider.setMajorTickSpacing(2);
-        rateSlider.setMaximum(20);
+        rateSlider.setMajorTickSpacing(50);
+        rateSlider.setMaximum(500);
         rateSlider.setPaintLabels(true);
         rateSlider.setPaintTicks(true);
         rateSlider.setValue(4);
+        rateSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                rateSliderStateChanged(evt);
+            }
+        });
 
         rateLabel.setText("# events / dt [µHz]");
 
@@ -168,6 +174,11 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         speedSlider.setPaintLabels(true);
         speedSlider.setPaintTicks(true);
         speedSlider.setValue(4);
+        speedSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                speedSliderStateChanged(evt);
+            }
+        });
 
         speedLabel.setText("(distance [px] / dt [µs]) * e-4 ");
 
@@ -199,6 +210,11 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         distSlider.setPaintLabels(true);
         distSlider.setPaintTicks(true);
         distSlider.setValue(4);
+        distSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                distSliderStateChanged(evt);
+            }
+        });
 
         distLabel.setText("sqrt( dx² / dy² ) [px]");
 
@@ -293,7 +309,8 @@ public class EvaluatorFrame extends javax.swing.JFrame {
     private void tabbedPaneStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabbedPaneStateChanged
         switch (tabbedPane.getTitleAt(tabbedPane.getSelectedIndex())) {
             case "Eventrate":
-                reval.setThreshold(rateSlider.getValue());
+                thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.EVENTRATE, (double) rateSlider.getValue());
+                reval.setThreshold(thresh);
                 break;
             case "Position":
                 try {
@@ -304,15 +321,29 @@ public class EvaluatorFrame extends javax.swing.JFrame {
                 int y = (Integer) ySpinner.getValue();
                 break;
             case "Speed":
-                reval.setThreshold(speedSlider.getValue());
+                thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, (double) speedSlider.getValue() * 1e-4);
+                reval.setThreshold(thresh);
                 break;
             case "Distance":
-                reval.setThreshold(distSlider.getValue());
+                thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.DISTANCE, (double) distSlider.getValue());
+                reval.setThreshold(thresh);
                 break;
             default:
                 break;
         }
     }//GEN-LAST:event_tabbedPaneStateChanged
+
+    private void rateSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_rateSliderStateChanged
+        thresh.setValue((double) rateSlider.getValue());
+    }//GEN-LAST:event_rateSliderStateChanged
+
+    private void speedSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_speedSliderStateChanged
+        thresh.setValue((double) speedSlider.getValue() * 1e-4);
+    }//GEN-LAST:event_speedSliderStateChanged
+
+    private void distSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_distSliderStateChanged
+        thresh.setValue((double) distSlider.getValue());
+    }//GEN-LAST:event_distSliderStateChanged
 
     /**
      * @param args the command line arguments
