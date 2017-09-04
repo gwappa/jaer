@@ -11,6 +11,7 @@ package net.sf.jaer.eventprocessing.tracking;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
+import de.cco.jaer.eval.EvaluatorThreshold;
 import de.cco.jaer.eval.MedianTrackerParams;
 import de.cco.jaer.eval.OutputHandler;
 import java.awt.geom.Point2D;
@@ -54,6 +55,7 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
     
     MedianTrackerParams params;
     ResultEvaluator reval;
+    EvaluatorThreshold thresh;
     
     /**
      * Creates a new instance of MedianTracker
@@ -63,7 +65,8 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
         params = new MedianTrackerParams();
         params.setChip(chip);
         reval = ResultEvaluator.getInstance();
-        reval.initialize(params, OutputHandler.OutputSource.FILE);
+        thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, 4e-4);
+        reval.initialize(params, thresh, OutputHandler.OutputSource.FILE);
         
         xFilter.setTauMs(tauUs / 1000f);
         yFilter.setTauMs(tauUs / 1000f);

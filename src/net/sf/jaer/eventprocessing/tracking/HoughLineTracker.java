@@ -22,6 +22,7 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.GLU;
+import de.cco.jaer.eval.EvaluatorThreshold;
 import de.cco.jaer.eval.HoughLineTrackerParams;
 import de.cco.jaer.eval.OutputHandler;
 import de.cco.jaer.eval.ResultEvaluator;
@@ -99,6 +100,7 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
     // attach result evaluator
     HoughLineTrackerParams params;
     ResultEvaluator reval;
+    EvaluatorThreshold thresh;
 
     /**
      * Creates a new instance of LineTracker
@@ -120,9 +122,10 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
         params = new HoughLineTrackerParams();
         params.setChip(chip);
         params.setRhoRes(rhoResPixels);
-        params.setThetaRes(thetaResDeg);    
+        params.setThetaRes(thetaResDeg);
+        thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.EVENTRATE, 5.0);
         reval = ResultEvaluator.getInstance();
-        reval.initialize(params, OutputHandler.OutputSource.FILE);
+        reval.initialize(params, thresh, OutputHandler.OutputSource.FILE);
      }
 
     /**

@@ -31,7 +31,8 @@ public class ResultEvaluator{
     
     OutputHandler out;
     ArduinoConnector con;
-    TrackerParams type;
+    TrackerParams param;
+    EvaluatorThreshold<Object> thresh;
     
     private boolean armed;
     
@@ -43,8 +44,9 @@ public class ResultEvaluator{
                 if (tmp == null) {
                     instance = tmp = new ResultEvaluator();
                     tmp.con = null;
-                    tmp.type = null;
+                    tmp.param = null;
                     tmp.out = null;
+                    tmp.thresh = null;
                 }
             }
         }
@@ -54,13 +56,14 @@ public class ResultEvaluator{
     /**
      * Ininitalise ResultEvaluator, no logging
      */
-    public void initialize(TrackerParams t){
-        type = t;
+    public void initialize(TrackerParams param, EvaluatorThreshold thresh){
+        this.param = param;
         con = ArduinoConnector.getInstance();
         if (out != null) {
             out.close();
         }
-        out = new OutputHandler(OutputHandler.OutputSource.CONSOLE, t.getName(), t.printHeader());
+        out = new OutputHandler(OutputHandler.OutputSource.CONSOLE, param.getName(), param.printHeader());
+        this.thresh = thresh;
     }
     
     /**
@@ -68,13 +71,14 @@ public class ResultEvaluator{
      * @param t Template object extends ParameterTracker interface
      * @param src OutputSource enum, if FILE -> create new filename
      */
-    public void initialize(TrackerParams t, OutputHandler.OutputSource src) {
-        type = t;
+    public void initialize(TrackerParams param, EvaluatorThreshold thresh, OutputHandler.OutputSource src) {
+        this.param = param;
         con = ArduinoConnector.getInstance();
         if (out != null) {
             out.close();
         }
-        out = new OutputHandler(src, t.getName(), t.printHeader());
+        out = new OutputHandler(src, param.getName(), param.printHeader());
+        this.thresh = thresh;
     }
     
     /**
@@ -82,14 +86,15 @@ public class ResultEvaluator{
      * @param t Template object extends ParameterTracker interface
      * @param path Path to log file 
      */
-    public void initialize(TrackerParams t, String path) {
-        type = t;
+    public void initialize(TrackerParams param, EvaluatorThreshold thresh, String path) {
+        this.param = param;
         con = ArduinoConnector.getInstance();
         if (out != null) {
             out.close();
         }
         out = new OutputHandler(path);
-        out.write(type.printHeader());
+        out.write(param.printHeader());
+        this.thresh = thresh;
     }
 
     /**
@@ -97,9 +102,9 @@ public class ResultEvaluator{
      */
     public void eval() {
         if (!isArmed()) {return;}
-        out.write(type.print());
+        out.write(param.print());
 
-        if (type.eval()){
+        if (param.eval(getThreshold())){
             con.send(con.LASER_ON);
         }
         else{
@@ -119,16 +124,16 @@ public class ResultEvaluator{
      * Set evaluator threshold
      * @param t
      */
-    public void setThreshold (double t) {
-        type.setThreshold(t);
+    public void setThreshold (EvaluatorThreshold thresh) {
+        this.thresh = thresh;
     }
     
     public OutputHandler getOutputHandler() {
         return out;
     }
     
-    public double getThreshold() {
-        return type.getThreshold();
+    public EvaluatorThreshold getThreshold() {
+        return thresh;
     }
     
     public boolean isListening() {

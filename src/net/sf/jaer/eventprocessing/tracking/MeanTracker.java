@@ -11,6 +11,7 @@
 
     import com.jogamp.opengl.GL2;
     import com.jogamp.opengl.GLAutoDrawable;
+import de.cco.jaer.eval.EvaluatorThreshold;
     import de.cco.jaer.eval.MeanTrackerParams;
     import de.cco.jaer.eval.OutputHandler;
     import java.awt.geom.Point2D;
@@ -50,6 +51,7 @@
 
         MeanTrackerParams params;
         ResultEvaluator reval;
+        EvaluatorThreshold thresh;
 
         /**
          * Creates a new instance of MedianTracker
@@ -58,8 +60,9 @@
             super(chip);
             params = new MeanTrackerParams();
             params.setChip(chip);
+            thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, 4e-4);
             reval = ResultEvaluator.getInstance();
-            reval.initialize(params, OutputHandler.OutputSource.FILE);
+            reval.initialize(params, thresh, OutputHandler.OutputSource.FILE);
             
             setPropertyTooltip("tau", "Time constant in us (microseonds) of mean location lowpass filter, 0 for instantaneous");
             setPropertyTooltip("numStdDevsForBoundingBox", "Multiplier for number of std deviations of x and y distances from median for drawing and returning bounding box");
