@@ -179,7 +179,7 @@ public class ChipCanvas implements GLEventListener, Observer {
      * Connection to ResultEvaluator instance
      */
     private ResultEvaluator reval;
-    private TextRenderer eRenderer = null;
+    private TextRenderer evalRenderer = null;
 
     /**
      * Creates a new instance of ChipCanvas
@@ -543,24 +543,47 @@ public class ChipCanvas implements GLEventListener, Observer {
         if (reval == null) {
             reval = ResultEvaluator.getInstance();
         }
-        if (!reval.isArmed() && !reval.isDrawing()) {
-            //TrackerParams params = reval.getParams();
-            //String header = params.printHeader();
-            //String data = params.print();
-            if (eRenderer == null) {
-                eRenderer = new TextRenderer(new Font("SansSerif", Font.PLAIN, 36));
+        if (reval.isArmed() && reval.isDrawing()) {
+            TrackerParams params = reval.getParams();
+            String[] cols = params.printHeader().split(",");
+            String[] data = params.print().split(",");
+            int x = -85;
+            int y = 140;
+            int offset = 10;
+            if (evalRenderer == null) {
+                evalRenderer = new TextRenderer(new Font("SansSerif", Font.PLAIN, 42));
             }
+            String name = "Name: " + params.getName();
+            final float textScale = TextRendererScale.draw3dScale(evalRenderer, name, getScale(), chip.getSizeX(), .17f);
             gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
             gl.glPushMatrix();
-            gl.glTranslatef(-60, 20, 0);
-            eRenderer.begin3DRendering();
-            eRenderer.setColor(1, 1, 1, 1);
-            final String s = "Test";
-            final float textScale = TextRendererScale.draw3dScale(eRenderer, s, getScale(), 128, .1f);
-            eRenderer.draw3D(s, 0, 0, 0, textScale);
-            eRenderer.end3DRendering();
+            gl.glTranslatef(x, y, 0);
+            evalRenderer.setColor(1, 1, 1, 1);
+            evalRenderer.begin3DRendering();
+            evalRenderer.draw3D(name, 0, 0, 0, textScale);
+            y -= offset;
+            evalRenderer.end3DRendering();
             gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
             gl.glPopMatrix();
+            for (int i = 0; i < cols.length; i++) {
+                gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+                gl.glPushMatrix();
+                gl.glTranslatef(x, y, 0);
+                if (cols[i].equalsIgnoreCase(reval.getThreshold().getTarget().toString())) {
+                    evalRenderer.setColor(1, 0, 0, 1);
+                }
+                else {
+                    evalRenderer.setColor(1, 1, 1, 1);
+                }
+                evalRenderer.begin3DRendering();
+                String s = String.format("%s: %s", cols[i], data[i]);
+                evalRenderer.draw3D(s, 0, 0, 0, textScale);
+                y -= offset;
+                evalRenderer.end3DRendering();
+                gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+                gl.glPopMatrix();
+            }
+            
         }
         
         if ((getChip() instanceof AEChip) && (((AEChip) chip).getFilterChain() != null)
