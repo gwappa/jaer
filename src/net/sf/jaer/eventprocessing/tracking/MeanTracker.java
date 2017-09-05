@@ -11,7 +11,7 @@
 
     import com.jogamp.opengl.GL2;
     import com.jogamp.opengl.GLAutoDrawable;
-import de.cco.jaer.eval.EvaluatorThreshold;
+    import de.cco.jaer.eval.EvaluatorThreshold;
     import de.cco.jaer.eval.MeanTrackerParams;
     import de.cco.jaer.eval.OutputHandler;
     import java.awt.geom.Point2D;
@@ -199,6 +199,15 @@ import de.cco.jaer.eval.EvaluatorThreshold;
             gl.glVertex2d(p.getX() + s.getX(), p.getY() - s.getY());
             gl.glVertex2d(p.getX() + s.getX(), p.getY() + s.getY());
             gl.glVertex2d(p.getX() - s.getX(), p.getY() + s.getY());
+            gl.glEnd();
+            // draw cross at mean 
+            gl.glColor3f(1, 0, 0);
+            gl.glLineWidth(2);
+            gl.glBegin(GL2.GL_LINES);
+            gl.glVertex2d(p.getX(), p.getY() + 2);
+            gl.glVertex2d(p.getX(), p.getY() - 2);
+            gl.glVertex2d(p.getX() + 2, p.getY());
+            gl.glVertex2d(p.getX() - 2, p.getY());
             gl.glEnd();
             gl.glPopMatrix();
         }

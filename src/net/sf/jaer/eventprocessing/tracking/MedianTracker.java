@@ -227,6 +227,15 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
         gl.glVertex2d(p.getX() + s.getX(), p.getY() + s.getY());
         gl.glVertex2d(p.getX() - s.getX(), p.getY() + s.getY());
         gl.glEnd();
+        // draw cross at median 
+        gl.glColor3f(1, 0, 0);
+        gl.glLineWidth(2);
+        gl.glBegin(GL2.GL_LINES);
+        gl.glVertex2d(p.getX(), p.getY() + 2);
+        gl.glVertex2d(p.getX(), p.getY() - 2);
+        gl.glVertex2d(p.getX() + 2, p.getY());
+        gl.glVertex2d(p.getX() - 2, p.getY());
+        gl.glEnd();
         gl.glPopMatrix();
     }
 
