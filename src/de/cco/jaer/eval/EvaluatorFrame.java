@@ -302,8 +302,9 @@ public class EvaluatorFrame extends javax.swing.JFrame {
 
     private void drawCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawCheckBoxActionPerformed
         boolean selected = drawCheckBox.isSelected();
-        jRadioButton1.setEnabled(selected);
-        jRadioButton2.setEnabled(selected);
+        reval.draw(selected);
+        // jRadioButton1.setEnabled(selected);
+        // jRadioButton2.setEnabled(selected);
     }//GEN-LAST:event_drawCheckBoxActionPerformed
 
     private void tabbedPaneStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabbedPaneStateChanged
