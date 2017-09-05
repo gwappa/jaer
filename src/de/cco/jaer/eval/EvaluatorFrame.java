@@ -104,7 +104,6 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         rateSlider.setMaximum(500);
         rateSlider.setPaintLabels(true);
         rateSlider.setPaintTicks(true);
-        rateSlider.setValue(4);
         rateSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 rateSliderStateChanged(evt);
@@ -131,7 +130,7 @@ public class EvaluatorFrame extends javax.swing.JFrame {
                 .addComponent(rateSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rateLabel)
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tabbedPane.addTab("Eventrate", ratePanel);
@@ -200,7 +199,7 @@ public class EvaluatorFrame extends javax.swing.JFrame {
                 .addComponent(speedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(speedLabel)
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tabbedPane.addTab("Speed", speedPane);
@@ -236,7 +235,7 @@ public class EvaluatorFrame extends javax.swing.JFrame {
                 .addComponent(distSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(distLabel)
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tabbedPane.addTab("Distance", distPanel);
