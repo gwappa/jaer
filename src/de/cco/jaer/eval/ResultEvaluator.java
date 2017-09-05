@@ -57,7 +57,7 @@ public class ResultEvaluator{
     /**
      * Ininitalise ResultEvaluator, no logging
      */
-    public void initialize(TrackerParams param, EvaluatorThreshold thresh){
+    public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh){
         this.param = param;
         con = ArduinoConnector.getInstance();
         if (out != null) {
@@ -72,7 +72,7 @@ public class ResultEvaluator{
      * @param t Template object extends ParameterTracker interface
      * @param src OutputSource enum, if FILE -> create new filename
      */
-    public void initialize(TrackerParams param, EvaluatorThreshold thresh, OutputHandler.OutputSource src) {
+    public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh, OutputHandler.OutputSource src) {
         this.param = param;
         con = ArduinoConnector.getInstance();
         if (out != null) {
@@ -87,7 +87,7 @@ public class ResultEvaluator{
      * @param t Template object extends ParameterTracker interface
      * @param path Path to log file 
      */
-    public void initialize(TrackerParams param, EvaluatorThreshold thresh, String path) {
+    public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh, String path) {
         this.param = param;
         con = ArduinoConnector.getInstance();
         if (out != null) {
@@ -113,7 +113,7 @@ public class ResultEvaluator{
         }
     }
     
-    public void arm(boolean b) {
+    public synchronized void arm(boolean b) {
         armed = b;
     }
     
@@ -121,7 +121,7 @@ public class ResultEvaluator{
         return armed;
     }
     
-    public void draw(boolean b) {
+    public synchronized void draw(boolean b) {
         drawing = b;
     }
     
@@ -133,7 +133,7 @@ public class ResultEvaluator{
      * Set evaluator threshold
      * @param thresh
      */
-    public void setThreshold (EvaluatorThreshold thresh) {
+    public synchronized void setThreshold (EvaluatorThreshold thresh) {
         this.thresh = thresh;
     }
     
