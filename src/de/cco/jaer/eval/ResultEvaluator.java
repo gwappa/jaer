@@ -32,9 +32,10 @@ public class ResultEvaluator{
     OutputHandler out;
     ArduinoConnector con;
     TrackerParams param;
-    EvaluatorThreshold<Object> thresh;
+    EvaluatorThreshold thresh;
     
     private boolean armed;
+    private boolean drawing;
     
     public static ResultEvaluator getInstance() {
         ResultEvaluator tmp = instance;
@@ -120,9 +121,17 @@ public class ResultEvaluator{
         return armed;
     }
     
+    public void draw(boolean b) {
+        drawing = b;
+    }
+    
+    public boolean isDrawing() {
+        return drawing;
+    }
+    
     /**
      * Set evaluator threshold
-     * @param t
+     * @param thresh
      */
     public void setThreshold (EvaluatorThreshold thresh) {
         this.thresh = thresh;
@@ -130,6 +139,10 @@ public class ResultEvaluator{
     
     public OutputHandler getOutputHandler() {
         return out;
+    }
+    
+    public TrackerParams getParams() {
+        return param;
     }
     
     public EvaluatorThreshold getThreshold() {
