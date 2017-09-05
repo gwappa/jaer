@@ -52,9 +52,6 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         speedPane = new javax.swing.JPanel();
         speedSlider = new javax.swing.JSlider();
         speedLabel = new javax.swing.JLabel();
-        distPanel = new javax.swing.JPanel();
-        distSlider = new javax.swing.JSlider();
-        distLabel = new javax.swing.JLabel();
 
         setTitle("ResultEvaluator");
         setResizable(false);
@@ -204,42 +201,6 @@ public class EvaluatorFrame extends javax.swing.JFrame {
 
         tabbedPane.addTab("Speed", speedPane);
 
-        distSlider.setMajorTickSpacing(2);
-        distSlider.setMaximum(20);
-        distSlider.setPaintLabels(true);
-        distSlider.setPaintTicks(true);
-        distSlider.setValue(4);
-        distSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                distSliderStateChanged(evt);
-            }
-        });
-
-        distLabel.setText("sqrt( dx² / dy² ) [px]");
-
-        javax.swing.GroupLayout distPanelLayout = new javax.swing.GroupLayout(distPanel);
-        distPanel.setLayout(distPanelLayout);
-        distPanelLayout.setHorizontalGroup(
-            distPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(distPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(distPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(distSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
-                    .addComponent(distLabel))
-                .addContainerGap())
-        );
-        distPanelLayout.setVerticalGroup(
-            distPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(distPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(distSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(distLabel)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        tabbedPane.addTab("Distance", distPanel);
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -309,41 +270,33 @@ public class EvaluatorFrame extends javax.swing.JFrame {
     private void tabbedPaneStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabbedPaneStateChanged
         switch (tabbedPane.getTitleAt(tabbedPane.getSelectedIndex())) {
             case "Eventrate":
-                thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.EVENTRATE, (double) rateSlider.getValue());
-                reval.setThreshold(thresh);
-                break;
+            thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.EVENTRATE, (double) rateSlider.getValue());
+            reval.setThreshold(thresh);
+            break;
             case "Position":
-                try {
-                        xSpinner.commitEdit();
-                        ySpinner.commitEdit();
-                } catch ( java.text.ParseException e ) {  }
-                int x = (Integer) xSpinner.getValue();
-                int y = (Integer) ySpinner.getValue();
-                break;
+            try {
+                xSpinner.commitEdit();
+                ySpinner.commitEdit();
+            } catch ( java.text.ParseException e ) {  }
+            int x = (Integer) xSpinner.getValue();
+            int y = (Integer) ySpinner.getValue();
+            break;
             case "Speed":
-                thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, (double) speedSlider.getValue() * 1e-4);
-                reval.setThreshold(thresh);
-                break;
-            case "Distance":
-                thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.DISTANCE, (double) distSlider.getValue());
-                reval.setThreshold(thresh);
-                break;
+            thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, (double) speedSlider.getValue() * 1e-4);
+            reval.setThreshold(thresh);
+            break;
             default:
-                break;
+            break;
         }
     }//GEN-LAST:event_tabbedPaneStateChanged
-
-    private void rateSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_rateSliderStateChanged
-        thresh.setValue((double) rateSlider.getValue());
-    }//GEN-LAST:event_rateSliderStateChanged
 
     private void speedSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_speedSliderStateChanged
         thresh.setValue((double) speedSlider.getValue() * 1e-4);
     }//GEN-LAST:event_speedSliderStateChanged
 
-    private void distSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_distSliderStateChanged
-        thresh.setValue((double) distSlider.getValue());
-    }//GEN-LAST:event_distSliderStateChanged
+    private void rateSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_rateSliderStateChanged
+        thresh.setValue((double) rateSlider.getValue());
+    }//GEN-LAST:event_rateSliderStateChanged
 
     /**
      * @param args the command line arguments
@@ -381,9 +334,6 @@ public class EvaluatorFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel distLabel;
-    private javax.swing.JPanel distPanel;
-    private javax.swing.JSlider distSlider;
     private javax.swing.JCheckBox drawCheckBox;
     private javax.swing.JCheckBox enableCheckBox;
     private javax.swing.JRadioButton jRadioButton1;
