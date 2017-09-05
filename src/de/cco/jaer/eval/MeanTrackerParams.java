@@ -83,7 +83,7 @@ public class MeanTrackerParams extends TrackerParamsBase {
     
     @Override
     public String print() {
-        return getEventRate() + "," + getFirstTS() + "," + getLastTS() + "," + medianx + "," + mediany + "," + getDist() + "," + getSpeed();
+        return getEventRate() + "," + getFirstTS() + "," + getLastTS() + "," + meanx + "," + meany + "," + getDist() + "," + getSpeed();
     }
     
     @Override
