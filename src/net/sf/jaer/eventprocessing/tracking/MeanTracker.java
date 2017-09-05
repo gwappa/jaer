@@ -46,7 +46,7 @@
         double xmean = 0f, ymean = 0f;
         int lastts = 0, dt = 0;
         int prevlastts = Integer.MIN_VALUE;
-        int tau = getInt("tau", 100);
+        int tau = getInt("tau", 10);
         private float numStdDevsForBoundingBox =getFloat("numStdDevsForBoundingBox", 1f);
 
         MeanTrackerParams params;
