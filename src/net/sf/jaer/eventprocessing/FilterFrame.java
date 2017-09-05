@@ -66,8 +66,6 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
     public static final String LAST_FILTER_SELECTED_KEY = "FilterFrame.lastFilterSelected";
     private JButton resetStatisticsButton = null;
     private Border selectedBorder = new LineBorder(Color.red);
-    private boolean evalFrameBuilt;
-    private EvaluatorFrame evalFrame;
 
     /**
      * Creates new form FilterFrame
@@ -75,7 +73,6 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
     public FilterFrame(AEChip chip) {
         this.chip = chip;
         this.filterChain = chip.getFilterChain();
-        evalFrameBuilt = false;
         chip.setFilterFrame(this);
         setName("FilterFrame");
         initComponents();
@@ -196,7 +193,6 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
         updateIntervalLabel = new javax.swing.JLabel();
         updateIntervalField = new javax.swing.JTextField();
         jbuttonSelectFilt = new javax.swing.JButton();
-        evalButton = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         scrollPane = new javax.swing.JScrollPane();
         filtersPanel = new javax.swing.JPanel();
@@ -301,17 +297,6 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
             }
         });
         toolBar1.add(jbuttonSelectFilt);
-
-        evalButton.setText("Evaluate");
-        evalButton.setFocusable(false);
-        evalButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        evalButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        evalButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                evalButtonActionPerformed(evt);
-            }
-        });
-        toolBar1.add(evalButton);
 
         jLabel1.setText("<html>Enabled filters (check box selected) <br>are processed from top to bottom");
 
@@ -496,12 +481,12 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
                 .addContainerGap()
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(searchTF)
+                .addComponent(searchTF, javax.swing.GroupLayout.DEFAULT_SIZE, 542, Short.MAX_VALUE)
                 .addContainerGap())
             .addComponent(scrollPane)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(toolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 147, Short.MAX_VALUE))
+                .addComponent(toolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 545, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -804,10 +789,6 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
         }
     }//GEN-LAST:event_overviewButtonActionPerformed
 
-    private void evalButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_evalButtonActionPerformed
-        showEvalFrame();
-    }//GEN-LAST:event_evalButtonActionPerformed
-
     private void filterVisibleBiases(String string) {
         if ((string == null) || string.isEmpty()) {
             for (FilterPanel p : filterPanels) {
@@ -899,31 +880,6 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
         }
     }
 
-    private void showEvalFrame() {
-        if (!evalFrameBuilt) {
-            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            try {
-                evalFrame = new EvaluatorFrame();
-            } finally {
-                setCursor(Cursor.getDefaultCursor());
-            }
-            evalFrame.addWindowListener(new WindowAdapter() {
-
-                @Override
-                public void windowClosed(WindowEvent e) {
-                    //                    log.info(e.toString());
-                    evalButton.setSelected(false);
-                }
-            });
-            evalFrameBuilt = true;
-        }
-        
-        if (evalFrame != null) {
-            evalFrame.setVisible(true);
-            evalFrame.setState(Frame.NORMAL);
-        }
-    }
-
     class ResetPerformanceStatisticsAction extends AbstractAction {
 
         public ResetPerformanceStatisticsAction() {
@@ -945,7 +901,6 @@ public class FilterFrame<PanelType extends FilterPanel> extends javax.swing.JFra
     private javax.swing.JRadioButtonMenuItem acquisitionModeMenuItem;
     private javax.swing.JMenuItem customizeMenuItem;
     private javax.swing.JToggleButton disableFilteringToggleButton;
-    private javax.swing.JButton evalButton;
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;
     protected javax.swing.JPanel filtersPanel;
