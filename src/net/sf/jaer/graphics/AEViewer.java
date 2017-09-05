@@ -549,8 +549,13 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
 
     private void deleteEmptyLogFiles() throws FileNotFoundException, IOException {
         System.out.println("Cleaning up data directory.");
-        File[] files = Paths.get(System.getProperty("user.dir"), 
-                "src", "de", "cco", "jaer", "eval", "data").toFile().listFiles();
+        File data = Paths.get(System.getProperty("user.dir"), 
+                "src", "de", "cco", "jaer", "eval", "data").toFile();
+        if( !data.isDirectory() ){
+            data.mkdir();
+            return;
+        }
+        File[] files = data.listFiles();
         for (File file : files) {
             if (file.isFile()) {
                 // count line numbers, all csv files with only one line get deleted
