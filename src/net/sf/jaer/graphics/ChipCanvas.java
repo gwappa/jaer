@@ -63,9 +63,12 @@ import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.gl2.GLUT;
+import de.cco.jaer.eval.ResultEvaluator;
+import de.cco.jaer.eval.TrackerParams;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.lang.reflect.Field;
+import net.sf.jaer.util.TextRendererScale;
 
 /**
  * Superclass for classes that paint rendered AE data to graphics devices.
@@ -171,6 +174,12 @@ public class ChipCanvas implements GLEventListener, Observer {
     // chip fills drawable space
     private double ZCLIP = 1;
     private TextRenderer renderer = null;
+    
+    /**
+     * Connection to ResultEvaluator instance
+     */
+    private ResultEvaluator reval;
+    private TextRenderer eRenderer = null;
 
     /**
      * Creates a new instance of ChipCanvas
@@ -529,6 +538,31 @@ public class ChipCanvas implements GLEventListener, Observer {
             annotate(drawable);
             checkGLError(gl, glu, "after FrameAnnotator (EventFilter) annotations");
         }
+        
+        
+        if (reval == null) {
+            reval = ResultEvaluator.getInstance();
+        }
+        if (!reval.isArmed() && !reval.isDrawing()) {
+            //TrackerParams params = reval.getParams();
+            //String header = params.printHeader();
+            //String data = params.print();
+            if (eRenderer == null) {
+                eRenderer = new TextRenderer(new Font("SansSerif", Font.PLAIN, 36));
+            }
+            gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+            gl.glPushMatrix();
+            gl.glTranslatef(-60, 20, 0);
+            eRenderer.begin3DRendering();
+            eRenderer.setColor(1, 1, 1, 1);
+            final String s = "Test";
+            final float textScale = TextRendererScale.draw3dScale(eRenderer, s, getScale(), 128, .1f);
+            eRenderer.draw3D(s, 0, 0, 0, textScale);
+            eRenderer.end3DRendering();
+            gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+            gl.glPopMatrix();
+        }
+        
         if ((getChip() instanceof AEChip) && (((AEChip) chip).getFilterChain() != null)
                 && (((AEChip) chip).getFilterChain().getProcessingMode() == FilterChain.ProcessingMode.ACQUISITION)) {
             if (renderer == null) {
