@@ -84,6 +84,7 @@ import javax.swing.ToolTipManager;
 
 import ch.unizh.ini.jaer.chip.retina.DVS128;
 import de.cco.jaer.eval.ArduinoConnector;
+import de.cco.jaer.eval.EvaluatorFrame;
 import de.cco.jaer.eval.SyncEventHandler;
 import eu.seebetter.ini.chips.davis.DAVIS240B;
 import eu.seebetter.ini.chips.davis.DAVIS240C;
@@ -221,6 +222,10 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
     private static final String SET_DEFAULT_FIRMWARE_FOR_BLANK_DEVICE = "Set default firmware for blank device...";
     // set true to force null hardware (None in interface menu) even if only single interface
     private boolean nullInterface = false;
+    
+    // EvaluatorFrame
+    private boolean evalFrameBuilt;
+    private EvaluatorFrame evalFrame;
 
     /**
      * Utility method to return a URL to a file in the installation.
@@ -727,6 +732,9 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         //            log.warning(e.getMessage());
         //        }
         setName("AEViewer");
+        
+        // EvalFrame not built yet
+        evalFrameBuilt = false;
 
         initComponents();
         
@@ -2961,6 +2969,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         buttonsPanel = new javax.swing.JPanel();
         biasesToggleButton = new javax.swing.JToggleButton();
         filtersToggleButton = new javax.swing.JToggleButton();
+        evalToggleButton = new javax.swing.JToggleButton();
         loggingButton = new javax.swing.JToggleButton();
         multiModeButton = new javax.swing.JToggleButton();
         playerControlPanel = new javax.swing.JPanel();
@@ -3126,6 +3135,18 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
             }
         });
         buttonsPanel.add(filtersToggleButton);
+
+        evalToggleButton.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
+        evalToggleButton.setText("Evaluate");
+        evalToggleButton.setToolTipText("Shows or hides the filter window");
+        evalToggleButton.setAlignmentY(0.0F);
+        evalToggleButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        evalToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                evalToggleButtonActionPerformed(evt);
+            }
+        });
+        buttonsPanel.add(evalToggleButton);
 
         loggingButton.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
         loggingButton.setMnemonic('l');
@@ -3795,12 +3816,12 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         interfaceMenu.setText("Interface");
         interfaceMenu.setToolTipText("Select the HW interface to use");
         interfaceMenu.addMenuListener(new javax.swing.event.MenuListener() {
-            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                interfaceMenuMenuSelected(evt);
             }
             public void menuDeselected(javax.swing.event.MenuEvent evt) {
             }
-            public void menuSelected(javax.swing.event.MenuEvent evt) {
-                interfaceMenuMenuSelected(evt);
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
             }
         });
 
@@ -5682,6 +5703,10 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         fixSkipPacketsRenderingMenuItems();        // TODO add your handling code here:
     }//GEN-LAST:event_skipPacketsRenderingCheckBoxMenuItemStateChanged
 
+    private void evalToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_evalToggleButtonActionPerformed
+        showEvalFrame(evalToggleButton.isSelected());
+    }//GEN-LAST:event_evalToggleButtonActionPerformed
+
     /**
      * Returns desired frame rate of FrameRater
      *
@@ -5735,6 +5760,33 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         this.activeRenderingEnabled = activeRenderingEnabled;
         prefs.putBoolean("AEViewer.activeRenderingEnabled", activeRenderingEnabled);
     }
+    
+        private void showEvalFrame(boolean b) {
+            if (b && !evalFrameBuilt) {
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                try {
+                    evalFrame = new EvaluatorFrame();
+                } finally {
+                    setCursor(Cursor.getDefaultCursor());
+                }
+                evalFrame.addWindowListener(new WindowAdapter() {
+
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        //                    log.info(e.toString());
+                        evalToggleButton.setSelected(false);
+                    }
+                });
+                evalFrameBuilt = true;
+            }
+
+            if (evalFrame != null) {
+                evalFrame.setVisible(b);
+                evalFrame.setState(Frame.NORMAL);
+            }
+            
+            evalToggleButton.setSelected(b);
+        }
 
     /**
      * Drag and drop data file onto frame to play it. Called while a drag
@@ -6250,6 +6302,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
     private javax.swing.JMenu displayMethodMenu;
     private javax.swing.JCheckBoxMenuItem enableFiltersOnStartupCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem enableMissedEventsCheckBox;
+    private javax.swing.JToggleButton evalToggleButton;
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JSeparator exitSeperator;
     private javax.swing.JMenu fileMenu;
