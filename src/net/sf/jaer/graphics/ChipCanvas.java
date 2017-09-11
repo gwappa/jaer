@@ -570,11 +570,16 @@ public class ChipCanvas implements GLEventListener, Observer {
                 gl.glPushMatrix();
                 gl.glTranslatef(x, y, 0);
                 if (cols[i].equalsIgnoreCase(reval.getThreshold().getTarget().toString())) {
-                    evalRenderer.setColor(1, 0, 0, 1);
+                    if (reval.isEvent()) {
+                        evalRenderer.setColor(0, 1, 0, 1);
+                    } else {
+                        evalRenderer.setColor(1, 0, 0, 1);
+                    }
                 }
                 else {
                     evalRenderer.setColor(1, 1, 1, 1);
                 }
+                // calls to begin/end have bad performance
                 evalRenderer.begin3DRendering();
                 String s = String.format("%s: %s", cols[i], data[i]);
                 evalRenderer.draw3D(s, 0, 0, 0, textScale);

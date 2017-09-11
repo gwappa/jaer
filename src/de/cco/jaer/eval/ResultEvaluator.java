@@ -36,6 +36,7 @@ public class ResultEvaluator{
     
     private boolean armed;
     private boolean drawing;
+    private boolean event;
     
     public static ResultEvaluator getInstance() {
         ResultEvaluator tmp = instance;
@@ -48,6 +49,7 @@ public class ResultEvaluator{
                     tmp.param = null;
                     tmp.out = null;
                     tmp.thresh = null;
+                    tmp.event = false;
                 }
             }
         }
@@ -69,7 +71,7 @@ public class ResultEvaluator{
     
     /**
      * Initialise ResultEvaluator, use specified OutputSource
-     * @param t Template object extends ParameterTracker interface
+     * @param param Template object extends ParameterTracker interface
      * @param src OutputSource enum, if FILE -> create new filename
      */
     public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh, OutputHandler.OutputSource src) {
@@ -84,7 +86,7 @@ public class ResultEvaluator{
     
     /**
      * Inintialise ResultEvaluator, log to specified path
-     * @param t Template object extends ParameterTracker interface
+     * @param param Template object extends ParameterTracker interface
      * @param path Path to log file 
      */
     public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh, String path) {
@@ -106,9 +108,11 @@ public class ResultEvaluator{
         out.write(param.print());
 
         if (param.eval(getThreshold())){
+            event = true;
             con.send(con.LASER_ON);
         }
         else{
+            event = false;
             con.send(con.LASER_OFF);
         }
     }
@@ -127,6 +131,10 @@ public class ResultEvaluator{
     
     public boolean isDrawing() {
         return drawing;
+    }
+    
+    public boolean isEvent() {
+        return event;
     }
     
     /**
