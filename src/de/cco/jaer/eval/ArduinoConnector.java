@@ -11,7 +11,7 @@ package de.cco.jaer.eval;
  * @author viktor
  */
 
-import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import gnu.io.CommPortIdentifier; 
@@ -19,6 +19,7 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent; 
 import gnu.io.SerialPortEventListener; 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,6 +35,7 @@ public final class ArduinoConnector implements SerialPortEventListener {
     public final String SYNC_OFF = "2";
     public final String LASER_ON = "A";
     public final String LASER_OFF = "B";
+    public final String FLUSH = "F";
     
     SerialPort serialPort;
     /** The port we're normally going to use. */
@@ -52,15 +54,18 @@ public final class ArduinoConnector implements SerialPortEventListener {
     * converting the bytes into characters 
     * making the displayed results codepage independent
     */
-    private BufferedReader input;
+    private InputStream input;
     /** The output stream to the port */
     private OutputStream output;
     /** Milliseconds to block while waiting for port open */
     private static final int TIME_OUT = 2000;
     /** Default bits per second for COM port. */
-    private static final int DATA_RATE = 9600;
+    private static final int DATA_RATE = 115200;
 
     private boolean state;
+    
+    private final char[] inputBuffer = new char[4];
+    private boolean      received_hello = false;
     
     private ArduinoConnector() {}
 
@@ -113,7 +118,7 @@ public final class ArduinoConnector implements SerialPortEventListener {
                                     SerialPort.PARITY_NONE);
 
                     // open the streams
-                    input = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
+                    input = serialPort.getInputStream();
                     output = serialPort.getOutputStream();
 
                     // add event listeners
@@ -146,7 +151,7 @@ public final class ArduinoConnector implements SerialPortEventListener {
      * Getter for BufferedReader input stream
      * @return Opened BufferedReader 
      */
-    public synchronized BufferedReader getIntputStream(){
+    public synchronized InputStream getIntputStream(){
         return input;
     }
 
@@ -177,12 +182,32 @@ public final class ArduinoConnector implements SerialPortEventListener {
         if (isConnected()){
             try {
                 getOutputStream().write(str.getBytes());
+                getOutputStream().flush();
             } catch (IOException ex) {
                 Logger.getLogger(ArduinoConnector.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             System.out.println("ResultEvaluator sends: '" + str + "'");
         }
+    }
+    
+    /**
+     * decodes a 4-flag byte into a series of chars, and store it into 
+     */
+    private void decodeToInputBuffer(int cin){
+        for(int i=3; i>=0; i--){
+            inputBuffer[i] = decodeFlag(cin);
+            cin = cin >> 2;
+        }
+    }
+    
+    private char decodeFlag(int flag){
+        // System.out.println(Integer.toBinaryString(flag));
+        char c = ((flag & 0x02)!=0)? 'a':'b';
+        if( (flag & 0x01) != 0 ){
+            c = Character.toUpperCase(c);
+        }
+        return c;
     }
 
     /**
@@ -193,8 +218,19 @@ public final class ArduinoConnector implements SerialPortEventListener {
     public synchronized void serialEvent(SerialPortEvent oEvent) {
             if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
                     try {
-                            String inputLine=input.readLine();
-                            System.out.println("Uno says: " + inputLine);
+                            if( !received_hello ){
+                                System.out.println("Uno says: " + new java.io.BufferedReader(new InputStreamReader(input)).readLine());
+                                received_hello = true;
+                                return;
+                            }
+                            int cin;
+                            while( input.available() > 0 ){
+                                cin = input.read();
+                                if( (cin > 0) && (cin < 255) ){
+                                    decodeToInputBuffer(cin);
+                                    System.out.println("Uno says: " + Arrays.toString(inputBuffer));
+                                }
+                            }
                     } catch (Exception e) {
                             System.err.println(e.toString());
                     }
@@ -203,6 +239,7 @@ public final class ArduinoConnector implements SerialPortEventListener {
     }
 
     protected void finalize() {
+        send(FLUSH); // just in case; this may not get processed
         close();
     }
 }
