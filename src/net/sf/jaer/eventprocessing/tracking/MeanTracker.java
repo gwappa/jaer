@@ -47,7 +47,7 @@
         int lastts = 0, dt = 0;
         int prevlastts = Integer.MIN_VALUE;
         int tau = getInt("tau", 10);
-        private float numStdDevsForBoundingBox =getFloat("numStdDevsForBoundingBox", 1f);
+        private float numStdDevsForBoundingBox = getFloat("numStdDevsForBoundingBox", 1f);
 
         MeanTrackerParams params;
         ResultEvaluator reval;
@@ -63,7 +63,7 @@
             thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, 4e-4);
             reval = ResultEvaluator.getInstance();
             reval.initialize(params, thresh, OutputHandler.OutputSource.FILE);
-            
+            reval.attachFilterStateListener(support);
             setPropertyTooltip("tau", "Time constant in us (microseonds) of mean location lowpass filter, 0 for instantaneous");
             setPropertyTooltip("numStdDevsForBoundingBox", "Multiplier for number of std deviations of x and y distances from median for drawing and returning bounding box");
         }
@@ -106,10 +106,6 @@
         @Override
         public EventPacket filterPacket(EventPacket in) {
             int n = in.getSize();
-
-            if (!reval.isListening()) {
-                reval.getOutputHandler().attachFilterStateListener(this.getSupport());
-            }
 
             lastts = in.getLastTimestamp();
             dt = lastts - prevlastts;

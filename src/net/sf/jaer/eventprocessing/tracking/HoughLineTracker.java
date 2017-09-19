@@ -26,8 +26,6 @@ import de.cco.jaer.eval.EvaluatorThreshold;
 import de.cco.jaer.eval.HoughLineTrackerParams;
 import de.cco.jaer.eval.OutputHandler;
 import de.cco.jaer.eval.ResultEvaluator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFrame;
 
 import net.sf.jaer.Description;
@@ -96,7 +94,7 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
     //    private int maxNumLines=getPrefs().getInt("LineTracker.maxNumLines",2);
     //    private List<Line> lines=new ArrayList<Line>(maxNumLines);
     //    Peak[] peaks=null;
-    
+
     // attach result evaluator
     HoughLineTrackerParams params;
     ResultEvaluator reval;
@@ -126,7 +124,8 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
         thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.EVENTRATE, 5.0);
         reval = ResultEvaluator.getInstance();
         reval.initialize(params, thresh, OutputHandler.OutputSource.FILE);
-     }
+        reval.attachFilterStateListener(support);
+    }
 
     /**
      * returns the Hough line radius of the last packet's estimate - the closest
@@ -207,17 +206,17 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
         decayAccumArray();
         thetaDegFiltered = thetaFilter.filter(getThetaDeg(), in.getLastTimestamp());
         rhoPixelsFiltered = rhoFilter.filter(getRhoPixels(), in.getLastTimestamp());
-        
+
         if (index > 0) {
-        // evalute line parameters
-        params.update(index, 
-                in.getFirstTimestamp(), 
-                in.getLastTimestamp(), 
-                getRhoPixels(), 
-                getThetaDeg());
-        reval.eval();
+            // evalute line parameters
+            params.update(index,
+                    in.getFirstTimestamp(),
+                    in.getLastTimestamp(),
+                    getRhoPixels(),
+                    getThetaDeg());
+            reval.eval();
         }
-        
+
         if (showHoughWindow) {
             checkAccumFrame();
             accumCanvas.repaint();

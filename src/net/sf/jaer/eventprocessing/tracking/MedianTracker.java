@@ -67,6 +67,7 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
         reval = ResultEvaluator.getInstance();
         thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, 4e-4);
         reval.initialize(params, thresh, OutputHandler.OutputSource.FILE);
+        reval.attachFilterStateListener(support);
         
         xFilter.setTauMs(tauUs / 1000f);
         yFilter.setTauMs(tauUs / 1000f);
@@ -128,10 +129,6 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
     public EventPacket filterPacket(EventPacket in) {
         int n = in.getSize();
         
-        if (!reval.isListening()) {
-            reval.getOutputHandler().attachFilterStateListener(this.getSupport());
-        }
-
         lastts = in.getLastTimestamp();
         dt = lastts - prevlastts;
         prevlastts = lastts;
