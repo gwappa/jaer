@@ -296,7 +296,7 @@ public class EventPacket<E extends BasicEvent> implements /* EventPacketInterfac
         //// return eventList.get(size-1).timestamp;
         final int s = size;
         if (s == 0) {
-            log.warning("called getLastTimestamp on empty packet, returning 0");
+            // log.warning("called getLastTimestamp on empty packet, returning 0");
             return 0;
         }
         return elementData[s - 1].timestamp;
