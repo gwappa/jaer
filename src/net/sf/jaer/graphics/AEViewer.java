@@ -85,6 +85,7 @@ import javax.swing.ToolTipManager;
 import ch.unizh.ini.jaer.chip.retina.DVS128;
 import de.cco.jaer.eval.ArduinoConnector;
 import de.cco.jaer.eval.EvaluatorFrame;
+import de.cco.jaer.eval.ResultEvaluator;
 import de.cco.jaer.eval.SyncEventHandler;
 import eu.seebetter.ini.chips.davis.DAVIS240B;
 import eu.seebetter.ini.chips.davis.DAVIS240C;
@@ -226,6 +227,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
     // EvaluatorFrame
     private boolean evalFrameBuilt;
     private EvaluatorFrame evalFrame;
+    private ResultEvaluator reval;
 
     /**
      * Utility method to return a URL to a file in the installation.
@@ -852,6 +854,8 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         buildDeviceMenu();
         // we need to do this after building device menu so that proper menu item radio button can be selected
         cleanup(); // close sockets if they are open
+        // build EvaluatorFrame so that FilterChain PropertyChangeListeners can be attached.
+        buildEvalFrame();
         setAeChipClass(aeChipClass);
 
         playerControlPanel.setVisible(false);
@@ -5761,32 +5765,37 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         prefs.putBoolean("AEViewer.activeRenderingEnabled", activeRenderingEnabled);
     }
     
-        private void showEvalFrame(boolean b) {
-            if (b && !evalFrameBuilt) {
-                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                try {
-                    evalFrame = new EvaluatorFrame();
-                } finally {
-                    setCursor(Cursor.getDefaultCursor());
+    private void buildEvalFrame() {
+        if (!evalFrameBuilt) {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            try {
+                evalFrame = new EvaluatorFrame();
+                reval = ResultEvaluator.getInstance();
+                reval.setEvaluatorFrame(evalFrame);
+            } finally {
+                setCursor(Cursor.getDefaultCursor());
+            }
+            evalFrame.addWindowListener(new WindowAdapter() {
+
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    //                    log.info(e.toString());
+                    evalToggleButton.setSelected(false);
                 }
-                evalFrame.addWindowListener(new WindowAdapter() {
-
-                    @Override
-                    public void windowClosed(WindowEvent e) {
-                        //                    log.info(e.toString());
-                        evalToggleButton.setSelected(false);
-                    }
-                });
-                evalFrameBuilt = true;
-            }
-
-            if (evalFrame != null) {
-                evalFrame.setVisible(b);
-                evalFrame.setState(Frame.NORMAL);
-            }
-            
-            evalToggleButton.setSelected(b);
+            });
+            evalFrameBuilt = true;
+            evalFrame.setVisible(false);
         }
+    }
+    
+    private void showEvalFrame(boolean b) {
+        if (evalFrame != null) {
+            evalFrame.setVisible(b);
+            evalFrame.setState(Frame.NORMAL);
+        }
+
+        evalToggleButton.setSelected(b);
+    }
 
     /**
      * Drag and drop data file onto frame to play it. Called while a drag
