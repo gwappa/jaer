@@ -6,7 +6,12 @@
 package de.cco.jaer.eval;
 
 import de.cco.jaer.eval.ResultEvaluator;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import javax.swing.JLabel;
 
 /**
@@ -17,12 +22,41 @@ public class EvaluatorFrame extends javax.swing.JFrame {
     
     ResultEvaluator reval;
     EvaluatorThreshold thresh;
+    
+    boolean listening;
+    List<PropertyChangeSupport> pcsl;
+    PropertyChangeListener filterStateListener = new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent pce) {
+            if (pce.getPropertyName().equals("filterEnabled")) {
+                boolean val = (boolean) pce.getNewValue();
+                if (val == false) {
+                    System.out.println("Filter disabled.");
+                    System.out.println("Stopping evaluation.");
+                    enableCheckBox.setSelected(false);
+                    enableCheckBox.setEnabled(false);
+                    drawCheckBox.setSelected(false);
+                    drawCheckBox.setEnabled(false);
+                    visualizeLabel.setEnabled(false);
+                    reval.draw(false);
+                    reval.arm(false);
+                }
+                else if (val == true) {
+                    System.out.println("Filter enabled.");
+                    enableCheckBox.setEnabled(true);
+                    drawCheckBox.setEnabled(true);
+                    visualizeLabel.setEnabled(true);
+                }
+            }
+        }
+    };
 
     /**
      * Creates new form EvaluatorFrame
      */
     public EvaluatorFrame() {
         reval = ResultEvaluator.getInstance();
+        pcsl = new LinkedList<>();
         initComponents();
     }
 
@@ -58,6 +92,7 @@ public class EvaluatorFrame extends javax.swing.JFrame {
 
         enableCheckBox.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         enableCheckBox.setText("Evaluate Results");
+        enableCheckBox.setEnabled(false);
         enableCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 enableCheckBoxActionPerformed(evt);
@@ -245,6 +280,14 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    public synchronized void attachFilterStateListener(PropertyChangeSupport s) {
+        s.addPropertyChangeListener(filterStateListener);
+        pcsl.add(s);
+        if (!listening) {
+            listening = true;
+        }
+    }
+    
     private void enableCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableCheckBoxActionPerformed
         boolean selected = enableCheckBox.isSelected();
         visualizeLabel.setEnabled(selected);
@@ -266,7 +309,11 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         // jRadioButton1.setEnabled(selected);
         // jRadioButton2.setEnabled(selected);
     }//GEN-LAST:event_drawCheckBoxActionPerformed
-
+    
+    public boolean isListening() {
+        return listening;
+    }
+    
     private void tabbedPaneStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabbedPaneStateChanged
         switch (tabbedPane.getTitleAt(tabbedPane.getSelectedIndex())) {
             case "Eventrate":
@@ -293,7 +340,12 @@ public class EvaluatorFrame extends javax.swing.JFrame {
     private void speedSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_speedSliderStateChanged
         thresh.setValue((double) speedSlider.getValue() * 1e-4);
     }//GEN-LAST:event_speedSliderStateChanged
-
+    
+    public synchronized void removeFilterStateListener(PropertyChangeSupport pcs) {
+        pcs.removePropertyChangeListener(filterStateListener);
+        listening = false;
+    }
+    
     private void rateSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_rateSliderStateChanged
         thresh.setValue((double) rateSlider.getValue());
     }//GEN-LAST:event_rateSliderStateChanged

@@ -224,7 +224,7 @@ public class OutputHandler {
     
     public synchronized void attachFilterStateListener(PropertyChangeSupport s) {
         if (pcs != null) {
-            return;
+            removeFilterStateListener(pcs);
         }
         pcs = s;
         pcs.addPropertyChangeListener(filterStateListener);

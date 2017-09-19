@@ -17,31 +17,36 @@
  */
 package de.cco.jaer.eval;
 
+import java.beans.PropertyChangeSupport;
+
 /**
- * Generic class, handles TrackerParams, ArduinoConnector and OutputHandle objects
- * 
+ * Generic class, handles TrackerParams, ArduinoConnector and OutputHandle
+ * objects
+ *
  * @author viktor
  */
-public class ResultEvaluator{
-    
+public class ResultEvaluator {
+
     // singleton instance
     private static volatile ResultEvaluator instance = null;
-    
-    private ResultEvaluator() {}
-    
+
+    private ResultEvaluator() {
+    }
+
     OutputHandler out;
     ArduinoConnector con;
     TrackerParams param;
     EvaluatorThreshold thresh;
-    
+    EvaluatorFrame frame;
+
     private boolean armed;
     private boolean drawing;
     private boolean event;
-    
+
     public static ResultEvaluator getInstance() {
         ResultEvaluator tmp = instance;
         if (tmp == null) {
-            synchronized(ResultEvaluator.class) {
+            synchronized (ResultEvaluator.class) {
                 tmp = instance;
                 if (tmp == null) {
                     instance = tmp = new ResultEvaluator();
@@ -50,16 +55,17 @@ public class ResultEvaluator{
                     tmp.out = null;
                     tmp.thresh = null;
                     tmp.event = false;
+                    tmp.frame = null;
                 }
             }
         }
         return tmp;
     }
-    
+
     /**
      * Ininitalise ResultEvaluator, no logging
      */
-    public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh){
+    public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh) {
         this.param = param;
         con = ArduinoConnector.getInstance();
         if (out != null) {
@@ -68,9 +74,10 @@ public class ResultEvaluator{
         out = new OutputHandler(OutputHandler.OutputSource.CONSOLE, param.getName(), param.printHeader());
         this.thresh = thresh;
     }
-    
+
     /**
      * Initialise ResultEvaluator, use specified OutputSource
+     *
      * @param param Template object extends ParameterTracker interface
      * @param src OutputSource enum, if FILE -> create new filename
      */
@@ -83,11 +90,12 @@ public class ResultEvaluator{
         out = new OutputHandler(src, param.getName(), param.printHeader());
         this.thresh = thresh;
     }
-    
+
     /**
      * Inintialise ResultEvaluator, log to specified path
+     *
      * @param param Template object extends ParameterTracker interface
-     * @param path Path to log file 
+     * @param path Path to log file
      */
     public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh, String path) {
         this.param = param;
@@ -99,71 +107,93 @@ public class ResultEvaluator{
         out.write(param.printHeader());
         this.thresh = thresh;
     }
+    
+    public void attachFilterStateListener(PropertyChangeSupport pcs) {
+        if (out != null) {
+            out.attachFilterStateListener(pcs);
+        }
+        if (frame != null) {
+            frame.attachFilterStateListener(pcs);
+        }
+    }
 
     /**
      * Evaluate result and send signal to Arduino.
      */
     public void eval() {
-        if (!isArmed()) {return;}
+        if (!isArmed()) {
+            return;
+        }
         out.write(param.print());
 
-        if (param.eval(getThreshold())){
+        if (param.eval(getThreshold())) {
             event = true;
             con.send(con.LASER_ON);
-        }
-        else{
+        } else {
             event = false;
             con.send(con.LASER_OFF);
         }
     }
     
+    public synchronized void draw(boolean b) {
+        drawing = b;
+    }
+
     public synchronized void arm(boolean b) {
         armed = b;
     }
     
+    public EvaluatorFrame getEvaluatorFrame() {
+        return frame;
+    }
+    
+    public OutputHandler getOutputHandler() {
+        return out;
+    }
+
+    public TrackerParams getParams() {
+        return param;
+    }
+
+    public EvaluatorThreshold getThreshold() {
+        return thresh;
+    }
+
     public boolean isArmed() {
         return armed;
     }
     
-    public synchronized void draw(boolean b) {
-        drawing = b;
+    public boolean isListening() {
+        if (frame == null || out == null) {
+            return false;
+        } else {
+            return frame.isListening() && out.isListening();
+        }
     }
-    
+
     public boolean isDrawing() {
         return drawing;
     }
-    
+
     public boolean isEvent() {
         return event;
     }
     
     /**
      * Set evaluator threshold
+     *
      * @param thresh
      */
-    public synchronized void setThreshold (EvaluatorThreshold thresh) {
+    public synchronized void setThreshold(EvaluatorThreshold thresh) {
         this.thresh = thresh;
     }
     
-    public OutputHandler getOutputHandler() {
-        return out;
-    }
-    
-    public TrackerParams getParams() {
-        return param;
-    }
-    
-    public EvaluatorThreshold getThreshold() {
-        return thresh;
-    }
-    
-    public boolean isListening() {
-        if (!isArmed()) {
-            return false;
-        }
-        else {
-            return getOutputHandler().isListening();
-        }
+    /**
+     * Set EvaluatorFrame GUI instance
+     * @param frame 
+     */
+    public synchronized void setEvaluatorFrame(EvaluatorFrame frame) {
+        this.frame = frame;
     }
     
 }
