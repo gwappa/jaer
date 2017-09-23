@@ -17,6 +17,8 @@
     import java.awt.geom.Point2D;
 
     import de.cco.jaer.eval.ResultEvaluator;
+import java.util.ArrayList;
+import java.util.Vector;
 
     import net.sf.jaer.Description;
     import net.sf.jaer.DevelopmentStatus;
@@ -116,8 +118,8 @@
                 kappa = 1;
             }
             
-            int[] xs = new int[n];
-            int[] ys = new int[n];
+            ArrayList<Short> xs = new ArrayList<Short>();
+            ArrayList<Short> ys = new ArrayList<Short>();
             float[] wsum_packet = new float[2];
             int index = 0;
             wsum_packet[0] = wsum_packet[1] = 0f;
@@ -128,8 +130,8 @@
                 }
                 wsum_packet[0] += e.x;
                 wsum_packet[1] += e.y;
-                xs[index] = e.x;
-                ys[index] = e.y;
+                xs.add(e.x);
+                ys.add(e.y);
                 index++;
             }
             if(index==0)  { // got no actual events
@@ -146,11 +148,11 @@
             double xvar = 0, yvar = 0;
             double tmp;
             for (int i = 0; i < index; i++) {
-                tmp = xs[i] - xmean;
+                tmp = xs.get(i) - xmean;
                 tmp *= tmp;
                 xvar += tmp;
 
-                tmp = ys[i] - ymean;
+                tmp = ys.get(i) - ymean;
                 tmp *= tmp;
                 yvar += tmp;
             }
