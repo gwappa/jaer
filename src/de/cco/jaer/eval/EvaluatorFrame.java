@@ -249,11 +249,11 @@ public class EvaluatorFrame extends javax.swing.JFrame{
 
         tabbedPane.addTab("Position", posPanel);
 
-        speedSlider.setMajorTickSpacing(2);
-        speedSlider.setMaximum(20);
+        speedSlider.setMajorTickSpacing(5);
+        speedSlider.setMaximum(40);
         speedSlider.setPaintLabels(true);
         speedSlider.setPaintTicks(true);
-        speedSlider.setValue(4);
+        speedSlider.setValue(5);
         speedSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 speedSliderStateChanged(evt);
