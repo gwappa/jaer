@@ -118,8 +118,8 @@ import java.util.Vector;
                 kappa = 1;
             }
             
-            ArrayList<Short> xs = new ArrayList<Short>();
-            ArrayList<Short> ys = new ArrayList<Short>();
+            ArrayList<Short> xs = new ArrayList<>();
+            ArrayList<Short> ys = new ArrayList<>();
             float[] wsum_packet = new float[2];
             int index = 0;
             wsum_packet[0] = wsum_packet[1] = 0f;
