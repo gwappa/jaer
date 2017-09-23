@@ -63,6 +63,7 @@ import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.gl2.GLUT;
+import de.cco.jaer.eval.EvaluatorThreshold;
 import de.cco.jaer.eval.ResultEvaluator;
 import de.cco.jaer.eval.TrackerParams;
 import java.awt.GraphicsDevice;
@@ -588,7 +589,24 @@ public class ChipCanvas implements GLEventListener, Observer {
                 gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
                 gl.glPopMatrix();
             }
-            
+        }
+        
+        // uggly hack to draw line threshold
+        if (reval.getThreshold().getTarget().equals(EvaluatorThreshold.Parameter.POSITION)) {
+            int[] val = (int[]) reval.getThreshold().getValue();
+            gl.glPushMatrix();
+            if (reval.isEvent()) {
+                gl.glColor3f(1f, 0, 0);
+            } else {
+                gl.glColor3f(1f, 1f, 1f);
+            }
+            gl.glLineWidth(2f);
+            gl.glTranslatef(-.5f, -.5f, 0);
+            gl.glBegin(GL.GL_LINES);
+            gl.glVertex2i(val[0], val[1]);
+            gl.glVertex2i(val[2], val[3]);
+            gl.glEnd();
+            gl.glPopMatrix();
         }
         
         if ((getChip() instanceof AEChip) && (((AEChip) chip).getFilterChain() != null)
