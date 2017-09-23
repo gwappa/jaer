@@ -97,8 +97,16 @@ public class MeanTrackerParams extends TrackerParamsBase {
             case EVENTRATE:
                 return (getEventRate() > (double) thresh.getValue());
             case POSITION:
-                // TODO
-                return false;
+                int[] t = (int[]) thresh.getValue();
+                int sx1 = Integer.signum(t[0] - (int) meanx);
+                int sy1 = Integer.signum(t[1] - (int) meany);
+                int sx2 = Integer.signum(t[2] - (int) meanx);
+                int sy2 = Integer.signum(t[3] - (int) meany);
+                int psx1 = Integer.signum(t[0] - (int) prevx);
+                int psy1 = Integer.signum(t[1] - (int) prevy);
+                int psx2 = Integer.signum(t[2] - (int) prevx);
+                int psy2 = Integer.signum(t[3] - (int) prevy);
+                return sx1 != psx1 || sy1 != psy1 || sx2 != psx2 || sy2 != psy2;
             case SPEED:
                 return (getSpeed() > (double) thresh.getValue());
             case DISTANCE:
