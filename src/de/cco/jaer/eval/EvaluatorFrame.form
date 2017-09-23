@@ -192,46 +192,117 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="52" max="-2" attributes="0"/>
-                      <Component id="xLabel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="xSpinner" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="103" max="32767" attributes="0"/>
-                      <Component id="yLabel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="ySpinner" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="45" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="51" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="1" attributes="0">
+                          <Group type="102" attributes="0">
+                              <Component id="x2Label" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="x2Spinner" min="-2" pref="55" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" attributes="0">
+                              <Component id="x1Label" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="x1Spinner" min="-2" pref="55" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <EmptySpace pref="53" max="32767" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="1" attributes="0">
+                              <Component id="y1Label" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="y1Spinner" min="-2" pref="55" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Component id="y2Label" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="y2Spinner" min="-2" pref="55" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <EmptySpace min="-2" pref="46" max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
-                      <EmptySpace min="-2" pref="42" max="-2" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="2" attributes="0">
-                          <Component id="xSpinner" alignment="2" min="-2" max="-2" attributes="0"/>
-                          <Component id="xLabel" alignment="2" min="-2" max="-2" attributes="0"/>
-                          <Component id="yLabel" alignment="2" min="-2" max="-2" attributes="0"/>
-                          <Component id="ySpinner" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="x1Spinner" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="x1Label" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="y1Label" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="y1Spinner" alignment="2" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="39" max="32767" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="2" attributes="0">
+                          <Component id="x2Spinner" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="x2Label" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="y2Label" alignment="2" min="-2" max="-2" attributes="0"/>
+                          <Component id="y2Spinner" alignment="2" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace pref="22" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JSpinner" name="xSpinner">
-            </Component>
-            <Component class="javax.swing.JSpinner" name="ySpinner">
-            </Component>
-            <Component class="javax.swing.JLabel" name="xLabel">
+            <Component class="javax.swing.JSpinner" name="x1Spinner">
               <Properties>
-                <Property name="text" type="java.lang.String" value="X:"/>
+                <Property name="value" type="java.lang.Object" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="80" type="code"/>
+                </Property>
+              </Properties>
+              <Events>
+                <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="x1SpinnerStateChanged"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JSpinner" name="y1Spinner">
+              <Properties>
+                <Property name="value" type="java.lang.Object" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="30" type="code"/>
+                </Property>
+              </Properties>
+              <Events>
+                <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="y1SpinnerStateChanged"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JSpinner" name="x2Spinner">
+              <Properties>
+                <Property name="value" type="java.lang.Object" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="80" type="code"/>
+                </Property>
+              </Properties>
+              <Events>
+                <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="x2SpinnerStateChanged"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JSpinner" name="y2Spinner">
+              <Properties>
+                <Property name="value" type="java.lang.Object" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="100" type="code"/>
+                </Property>
+              </Properties>
+              <Events>
+                <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="y2SpinnerStateChanged"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JLabel" name="x1Label">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="X1:"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="yLabel">
+            <Component class="javax.swing.JLabel" name="y1Label">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Y:"/>
+                <Property name="text" type="java.lang.String" value="Y1:"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="y2Label">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Y2:"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="x2Label">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="X2:"/>
               </Properties>
             </Component>
           </SubComponents>

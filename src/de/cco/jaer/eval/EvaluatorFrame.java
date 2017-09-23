@@ -5,20 +5,17 @@
  */
 package de.cco.jaer.eval;
 
-import de.cco.jaer.eval.ResultEvaluator;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import javax.swing.JLabel;
 
 /**
  *
  * @author viktor
  */
-public class EvaluatorFrame extends javax.swing.JFrame {
+public class EvaluatorFrame extends javax.swing.JFrame{
     
     ResultEvaluator reval;
     EvaluatorThreshold thresh;
@@ -44,8 +41,6 @@ public class EvaluatorFrame extends javax.swing.JFrame {
                 else if (val == true) {
                     System.out.println("Filter enabled.");
                     enableCheckBox.setEnabled(true);
-                    drawCheckBox.setEnabled(true);
-                    visualizeLabel.setEnabled(true);
                 }
             }
         }
@@ -79,10 +74,14 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         rateSlider = new javax.swing.JSlider();
         rateLabel = new javax.swing.JLabel();
         posPanel = new javax.swing.JPanel();
-        xSpinner = new javax.swing.JSpinner();
-        ySpinner = new javax.swing.JSpinner();
-        xLabel = new javax.swing.JLabel();
-        yLabel = new javax.swing.JLabel();
+        x1Spinner = new javax.swing.JSpinner();
+        y1Spinner = new javax.swing.JSpinner();
+        x2Spinner = new javax.swing.JSpinner();
+        y2Spinner = new javax.swing.JSpinner();
+        x1Label = new javax.swing.JLabel();
+        y1Label = new javax.swing.JLabel();
+        y2Label = new javax.swing.JLabel();
+        x2Label = new javax.swing.JLabel();
         speedPane = new javax.swing.JPanel();
         speedSlider = new javax.swing.JSlider();
         speedLabel = new javax.swing.JLabel();
@@ -167,35 +166,85 @@ public class EvaluatorFrame extends javax.swing.JFrame {
 
         tabbedPane.addTab("Eventrate", ratePanel);
 
-        xLabel.setText("X:");
+        x1Spinner.setValue(80);
+        x1Spinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                x1SpinnerStateChanged(evt);
+            }
+        });
 
-        yLabel.setText("Y:");
+        y1Spinner.setValue(30);
+        y1Spinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                y1SpinnerStateChanged(evt);
+            }
+        });
+
+        x2Spinner.setValue(80);
+        x2Spinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                x2SpinnerStateChanged(evt);
+            }
+        });
+
+        y2Spinner.setValue(100);
+        y2Spinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                y2SpinnerStateChanged(evt);
+            }
+        });
+
+        x1Label.setText("X1:");
+
+        y1Label.setText("Y1:");
+
+        y2Label.setText("Y2:");
+
+        x2Label.setText("X2:");
 
         javax.swing.GroupLayout posPanelLayout = new javax.swing.GroupLayout(posPanel);
         posPanel.setLayout(posPanelLayout);
         posPanelLayout.setHorizontalGroup(
             posPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(posPanelLayout.createSequentialGroup()
-                .addGap(52, 52, 52)
-                .addComponent(xLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(xSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 103, Short.MAX_VALUE)
-                .addComponent(yLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ySpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(45, 45, 45))
+                .addGap(51, 51, 51)
+                .addGroup(posPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(posPanelLayout.createSequentialGroup()
+                        .addComponent(x2Label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(x2Spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(posPanelLayout.createSequentialGroup()
+                        .addComponent(x1Label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(x1Spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
+                .addGroup(posPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, posPanelLayout.createSequentialGroup()
+                        .addComponent(y1Label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(y1Spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, posPanelLayout.createSequentialGroup()
+                        .addComponent(y2Label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(y2Spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(46, 46, 46))
         );
         posPanelLayout.setVerticalGroup(
             posPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(posPanelLayout.createSequentialGroup()
-                .addGap(42, 42, 42)
+                .addGap(15, 15, 15)
                 .addGroup(posPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(xSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(xLabel)
-                    .addComponent(yLabel)
-                    .addComponent(ySpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(39, Short.MAX_VALUE))
+                    .addComponent(x1Spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(x1Label)
+                    .addComponent(y1Label)
+                    .addComponent(y1Spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(posPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(x2Spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(x2Label)
+                    .addComponent(y2Label)
+                    .addComponent(y2Spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
 
         tabbedPane.addTab("Position", posPanel);
@@ -321,12 +370,9 @@ public class EvaluatorFrame extends javax.swing.JFrame {
             reval.setThreshold(thresh);
             break;
             case "Position":
-            try {
-                xSpinner.commitEdit();
-                ySpinner.commitEdit();
-            } catch ( java.text.ParseException e ) {  }
-            int x = (Integer) xSpinner.getValue();
-            int y = (Integer) ySpinner.getValue();
+            int[] arr = getPositionSpinnerValues();
+            thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
+            reval.setThreshold(thresh);
             break;
             case "Speed":
             thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, (double) speedSlider.getValue() * 1e-4);
@@ -350,6 +396,45 @@ public class EvaluatorFrame extends javax.swing.JFrame {
         thresh.setValue((double) rateSlider.getValue());
     }//GEN-LAST:event_rateSliderStateChanged
 
+    private void x1SpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_x1SpinnerStateChanged
+        int[] arr = getPositionSpinnerValues();
+        thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
+        reval.setThreshold(thresh);
+    }//GEN-LAST:event_x1SpinnerStateChanged
+
+    private void y1SpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_y1SpinnerStateChanged
+        int[] arr = getPositionSpinnerValues();
+        thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
+        reval.setThreshold(thresh);
+    }//GEN-LAST:event_y1SpinnerStateChanged
+
+    private void x2SpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_x2SpinnerStateChanged
+        int[] arr = getPositionSpinnerValues();
+        thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
+        reval.setThreshold(thresh);
+    }//GEN-LAST:event_x2SpinnerStateChanged
+
+    private void y2SpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_y2SpinnerStateChanged
+        int[] arr = getPositionSpinnerValues();
+        thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
+        reval.setThreshold(thresh);
+    }//GEN-LAST:event_y2SpinnerStateChanged
+
+    private int[] getPositionSpinnerValues() {
+        try {
+                x1Spinner.commitEdit();
+                y1Spinner.commitEdit();
+                x2Spinner.commitEdit();
+                y2Spinner.commitEdit();
+            } catch ( java.text.ParseException e ) {  }
+        int x1 = (int) x1Spinner.getValue();
+        int y1 = (int) y1Spinner.getValue();
+        int x2 = (int) x2Spinner.getValue();
+        int y2 = (int) y2Spinner.getValue();
+        int[] arr = {x1, y1, x2, y2};
+        return arr;
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -399,9 +484,13 @@ public class EvaluatorFrame extends javax.swing.JFrame {
     private javax.swing.JSlider speedSlider;
     private javax.swing.JTabbedPane tabbedPane;
     private javax.swing.JLabel visualizeLabel;
-    private javax.swing.JLabel xLabel;
-    private javax.swing.JSpinner xSpinner;
-    private javax.swing.JLabel yLabel;
-    private javax.swing.JSpinner ySpinner;
+    private javax.swing.JLabel x1Label;
+    private javax.swing.JSpinner x1Spinner;
+    private javax.swing.JLabel x2Label;
+    private javax.swing.JSpinner x2Spinner;
+    private javax.swing.JLabel y1Label;
+    private javax.swing.JSpinner y1Spinner;
+    private javax.swing.JLabel y2Label;
+    private javax.swing.JSpinner y2Spinner;
     // End of variables declaration//GEN-END:variables
 }
