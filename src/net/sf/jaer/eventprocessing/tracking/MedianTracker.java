@@ -24,6 +24,7 @@ import net.sf.jaer.DevelopmentStatus;
 import net.sf.jaer.chip.AEChip;
 import net.sf.jaer.event.BasicEvent;
 import net.sf.jaer.event.EventPacket;
+import net.sf.jaer.event.PolarityEvent;
 import net.sf.jaer.eventprocessing.EventFilter2D;
 import net.sf.jaer.graphics.FrameAnnotater;
 import net.sf.jaer.util.filter.LowpassFilter;
@@ -50,6 +51,7 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
     LowpassFilter xStdFilter = new LowpassFilter(), yStdFilter = new LowpassFilter();
     LowpassFilter xMeanFilter = new LowpassFilter(), yMeanFilter = new LowpassFilter();
     int tauUs =getInt("tauUs", 1000);
+    private boolean offonly = getBoolean("OFFOnly", false);
     private float numStdDevsForBoundingBox =getFloat("numStdDevsForBoundingBox", 1f);
     float alpha = 1, beta = 0; // alpha is current weighting, beta is past value weighting
     
@@ -76,6 +78,7 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
         xMeanFilter.setTauMs(tauUs / 1000f);
         yMeanFilter.setTauMs(tauUs / 1000f);
         setPropertyTooltip("tauUs", "Time constant in us (microseonds) of median location lowpass filter, 0 for instantaneous");
+        setPropertyTooltip("OFFOnly", "Consider only off events for tracking.");
         setPropertyTooltip("numStdDevsForBoundingBox", "Multiplier for number of std deviations of x and y distances from median for drawing and returning bounding box");
     }
 
@@ -136,12 +139,16 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
         int[] xs = new int[n], ys = new int[n];// big enough for all events, including IMU and APS events if there are those too
         int index = 0;
         for (Object o : in) {
-            BasicEvent e = (BasicEvent) o;
-            if (e.isSpecial()) {
+            PolarityEvent p = (PolarityEvent) o;
+            // if filter is enabled, consider only off events
+            if (offonly && p.getPolaritySignum() == 1) {
                 continue;
             }
-            xs[index] = e.x;
-            ys[index] = e.y;
+            if (p.isSpecial()) {
+                continue;
+            }
+            xs[index] = p.x;
+            ys[index] = p.y;
             index++;
         }
         if(index==0)  { // got no actual events
@@ -249,5 +256,16 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
     public void setNumStdDevsForBoundingBox(float numStdDevsForBoundingBox) {
         this.numStdDevsForBoundingBox = numStdDevsForBoundingBox;
         putFloat("numStdDevsForBoundingBox",numStdDevsForBoundingBox);
+    }
+    
+    public boolean getOffOnly() {
+        return offonly;
+    }
+    
+    public void setOffOnly(boolean offonly) {
+        boolean old = this.offonly;
+        this.offonly = offonly;
+        putBoolean("OFFOnly", offonly);
+        // support.firePropertyChange("OFFOnly", old, offonly);
     }
 }
