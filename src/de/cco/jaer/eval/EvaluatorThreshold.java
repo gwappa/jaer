@@ -51,7 +51,7 @@ public class EvaluatorThreshold<T> {
     
     private void initTypeMap() {
         paramType.put(Parameter.EVENTRATE, "java.lang.Double");
-        paramType.put(Parameter.POSITION, "int[]");
+        paramType.put(Parameter.POSITION, "[I");
         paramType.put(Parameter.DISTANCE, "java.lang.Double");
         paramType.put(Parameter.SPEED, "java.lang.Double");
     }
