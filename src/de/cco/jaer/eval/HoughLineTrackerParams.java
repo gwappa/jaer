@@ -17,6 +17,8 @@
  */
 package de.cco.jaer.eval;
 
+import java.awt.geom.Line2D;
+
 /**
  *
  * @author viktor
@@ -81,7 +83,7 @@ public class HoughLineTrackerParams extends TrackerParamsBase {
                 // TODO: true, when any part of the line crosses this point
                 return false;
             case SPEED:
-                // TODO?
+                // Line2D line = new Line2D.Float();
                 return false;
             case DISTANCE:
                 return (getDist() > (double) thresh.getValue());

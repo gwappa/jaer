@@ -69,7 +69,7 @@ public interface TrackerParams {
      */
     public void setNumEvents(int n);
     
-        /**
+    /**
      * Setter for first timestamp.
      * @param ts Integer, first timestamp in package.
      */
@@ -80,6 +80,11 @@ public interface TrackerParams {
      * @param ts Integer, last timestamp in package.
      */
     public void setLastTS(int ts);
+    
+    /**
+     * Getter for chip object.
+     */
+    public AEChip getChip();
     
     /**
      * Getter for first timestamp.

@@ -75,6 +75,11 @@ public abstract class TrackerParamsBase implements TrackerParams{
     }
     
     @Override
+    public AEChip getChip() {
+        return chip;
+    }
+    
+    @Override
     public int getFirstTS() {
         return firstts;
     }

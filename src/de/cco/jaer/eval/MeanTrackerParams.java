@@ -17,6 +17,9 @@
  */
 package de.cco.jaer.eval;
 
+import java.awt.Point;
+import java.awt.Rectangle;
+
 /**
  * Class that acts as container for jAER MeanTracker parameters and results.
  * Extends the abstract TrackerParamsTemplate base class which itself implements
@@ -107,6 +110,10 @@ public class MeanTrackerParams extends TrackerParamsBase {
                 int psx2 = Integer.signum(t[2] - (int) prevx);
                 int psy2 = Integer.signum(t[3] - (int) prevy);
                 return sx1 != psx1 || sy1 != psy1 || sx2 != psx2 || sy2 != psy2;
+            case REGION:
+                Rectangle r = (Rectangle) thresh.getValue();
+                Point p = new Point((int) meanx, (int) meany);
+                return r.contains(p);
             case SPEED:
                 return (getSpeed() > (double) thresh.getValue());
             case DISTANCE:

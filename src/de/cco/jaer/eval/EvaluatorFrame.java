@@ -5,23 +5,36 @@
  */
 package de.cco.jaer.eval;
 
+import com.jogamp.opengl.awt.GLCanvas;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.LinkedList;
 import java.util.List;
+import net.sf.jaer.graphics.ChipCanvas;
 
 /**
  *
  * @author viktor
  */
-public class EvaluatorFrame extends javax.swing.JFrame{
+public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener, MouseMotionListener {
     
-    ResultEvaluator reval;
-    EvaluatorThreshold thresh;
+    private ResultEvaluator reval;
+    private EvaluatorThreshold thresh;
+    private ChipCanvas canvas;
+    private GLCanvas glCanvas;
+    private boolean listening;
+    private boolean selecting = false;
+    private int startx, starty, endx, endy;
+    private Point startPoint = null, endPoint = null;
+    private Rectangle selection = null;
+    private final List<PropertyChangeSupport> pcsl;
     
-    boolean listening;
-    List<PropertyChangeSupport> pcsl;
     PropertyChangeListener filterStateListener = new PropertyChangeListener() {
         @Override
         public void propertyChange(PropertyChangeEvent pce) {
@@ -34,7 +47,6 @@ public class EvaluatorFrame extends javax.swing.JFrame{
                     enableCheckBox.setEnabled(false);
                     drawCheckBox.setSelected(false);
                     drawCheckBox.setEnabled(false);
-                    visualizeLabel.setEnabled(false);
                     reval.draw(false);
                     reval.arm(false);
                 }
@@ -65,9 +77,6 @@ public class EvaluatorFrame extends javax.swing.JFrame{
     private void initComponents() {
 
         enableCheckBox = new javax.swing.JCheckBox();
-        visualizeLabel = new javax.swing.JLabel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
         drawCheckBox = new javax.swing.JCheckBox();
         tabbedPane = new javax.swing.JTabbedPane();
         ratePanel = new javax.swing.JPanel();
@@ -82,6 +91,9 @@ public class EvaluatorFrame extends javax.swing.JFrame{
         y1Label = new javax.swing.JLabel();
         y2Label = new javax.swing.JLabel();
         x2Label = new javax.swing.JLabel();
+        roiPanel = new javax.swing.JPanel();
+        resetROIButton = new javax.swing.JButton();
+        selectROIButton = new javax.swing.JToggleButton();
         speedPane = new javax.swing.JPanel();
         speedSlider = new javax.swing.JSlider();
         speedLabel = new javax.swing.JLabel();
@@ -90,7 +102,7 @@ public class EvaluatorFrame extends javax.swing.JFrame{
         setResizable(false);
 
         enableCheckBox.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        enableCheckBox.setText("Evaluate Results");
+        enableCheckBox.setText("Evaluate");
         enableCheckBox.setEnabled(false);
         enableCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -98,26 +110,8 @@ public class EvaluatorFrame extends javax.swing.JFrame{
             }
         });
 
-        visualizeLabel.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        visualizeLabel.setText("Visualize");
-
-        jRadioButton1.setText("Option 1");
-        jRadioButton1.setEnabled(false);
-        jRadioButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton1ActionPerformed(evt);
-            }
-        });
-
-        jRadioButton2.setText("Option 2");
-        jRadioButton2.setEnabled(false);
-        jRadioButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton2ActionPerformed(evt);
-            }
-        });
-
-        drawCheckBox.setText("Draw");
+        drawCheckBox.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        drawCheckBox.setText("Show");
         drawCheckBox.setEnabled(false);
         drawCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -150,7 +144,7 @@ public class EvaluatorFrame extends javax.swing.JFrame{
             .addGroup(ratePanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(ratePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(rateSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
+                    .addComponent(rateSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
                     .addComponent(rateLabel))
                 .addContainerGap())
         );
@@ -217,7 +211,7 @@ public class EvaluatorFrame extends javax.swing.JFrame{
                         .addComponent(x1Label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(x1Spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
                 .addGroup(posPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, posPanelLayout.createSequentialGroup()
                         .addComponent(y1Label)
@@ -249,6 +243,43 @@ public class EvaluatorFrame extends javax.swing.JFrame{
 
         tabbedPane.addTab("Position", posPanel);
 
+        resetROIButton.setText("Reset");
+        resetROIButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetROIButtonActionPerformed(evt);
+            }
+        });
+
+        selectROIButton.setText("Select");
+        selectROIButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectROIButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout roiPanelLayout = new javax.swing.GroupLayout(roiPanel);
+        roiPanel.setLayout(roiPanelLayout);
+        roiPanelLayout.setHorizontalGroup(
+            roiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(roiPanelLayout.createSequentialGroup()
+                .addGap(50, 50, 50)
+                .addComponent(selectROIButton, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 57, Short.MAX_VALUE)
+                .addComponent(resetROIButton)
+                .addGap(55, 55, 55))
+        );
+        roiPanelLayout.setVerticalGroup(
+            roiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(roiPanelLayout.createSequentialGroup()
+                .addGap(36, 36, 36)
+                .addGroup(roiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(resetROIButton)
+                    .addComponent(selectROIButton))
+                .addContainerGap(40, Short.MAX_VALUE))
+        );
+
+        tabbedPane.addTab("Region", roiPanel);
+
         speedSlider.setMajorTickSpacing(5);
         speedSlider.setMaximum(40);
         speedSlider.setPaintLabels(true);
@@ -269,7 +300,7 @@ public class EvaluatorFrame extends javax.swing.JFrame{
             .addGroup(speedPaneLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(speedPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(speedSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
+                    .addComponent(speedSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
                     .addComponent(speedLabel))
                 .addContainerGap())
         );
@@ -290,40 +321,25 @@ public class EvaluatorFrame extends javax.swing.JFrame{
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(enableCheckBox)
-                    .addComponent(tabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(visualizeLabel))
-                .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jRadioButton2)
-                    .addComponent(jRadioButton1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(drawCheckBox)
-                .addGap(51, 51, 51))
+                .addGap(15, 15, 15)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(tabbedPane)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(enableCheckBox)
+                        .addGap(152, 152, 152)
+                        .addComponent(drawCheckBox)))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addComponent(enableCheckBox)
-                .addGap(18, 18, 18)
+                .addGap(41, 41, 41)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(enableCheckBox)
+                    .addComponent(drawCheckBox))
+                .addGap(28, 28, 28)
                 .addComponent(tabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(25, 25, 25)
-                .addComponent(visualizeLabel)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jRadioButton1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jRadioButton2))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(drawCheckBox)))
-                .addContainerGap(30, Short.MAX_VALUE))
+                .addContainerGap(44, Short.MAX_VALUE))
         );
 
         pack();
@@ -339,28 +355,21 @@ public class EvaluatorFrame extends javax.swing.JFrame{
     
     private void enableCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableCheckBoxActionPerformed
         boolean selected = enableCheckBox.isSelected();
-        visualizeLabel.setEnabled(selected);
         drawCheckBox.setEnabled(selected);
         reval.arm(selected);
     }//GEN-LAST:event_enableCheckBoxActionPerformed
 
-    private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jRadioButton1ActionPerformed
-
-    private void jRadioButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jRadioButton2ActionPerformed
-
     private void drawCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawCheckBoxActionPerformed
         boolean selected = drawCheckBox.isSelected();
         reval.draw(selected);
-        // jRadioButton1.setEnabled(selected);
-        // jRadioButton2.setEnabled(selected);
     }//GEN-LAST:event_drawCheckBoxActionPerformed
     
     public boolean isListening() {
         return listening;
+    }
+    
+    public boolean isSelecting() {
+        return selecting;
     }
     
     private void tabbedPaneStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabbedPaneStateChanged
@@ -372,6 +381,13 @@ public class EvaluatorFrame extends javax.swing.JFrame{
             case "Position":
             int[] arr = getPositionSpinnerValues();
             thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
+            reval.setThreshold(thresh);
+            break;
+            case "Region":
+            if (selection == null){
+                selection = new Rectangle(0, 0, 0, 0);
+            }
+            thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.REGION, selection);
             reval.setThreshold(thresh);
             break;
             case "Speed":
@@ -420,6 +436,33 @@ public class EvaluatorFrame extends javax.swing.JFrame{
         reval.setThreshold(thresh);
     }//GEN-LAST:event_y2SpinnerStateChanged
 
+    private void resetROIButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetROIButtonActionPerformed
+        glCanvas.removeMouseListener(this);
+        glCanvas.removeMouseMotionListener(this);
+        selection = new Rectangle(0, 0, 0, 0);
+        reval.getThreshold().setValue(selection);
+    }//GEN-LAST:event_resetROIButtonActionPerformed
+
+    private void selectROIButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectROIButtonActionPerformed
+        if (!selectROIButton.isSelected() || selecting) {
+            return;
+        }
+        if ((reval.getParams().getChip().getCanvas() != null) && 
+                (reval.getParams().getChip().getCanvas().getCanvas() != null)) {
+            canvas = reval.getParams().getChip().getCanvas();
+            glCanvas = (GLCanvas) reval.getParams().getChip().getCanvas().getCanvas();
+        }
+        else {
+            selectROIButton.setSelected(false);
+            return;
+        }
+        selecting = true;
+        glCanvas.removeMouseListener(this);
+        glCanvas.removeMouseMotionListener(this);
+        glCanvas.addMouseListener(this);
+        glCanvas.addMouseMotionListener(this);
+    }//GEN-LAST:event_selectROIButtonActionPerformed
+
     private int[] getPositionSpinnerValues() {
         try {
                 x1Spinner.commitEdit();
@@ -433,6 +476,18 @@ public class EvaluatorFrame extends javax.swing.JFrame{
         int y2 = (int) y2Spinner.getValue();
         int[] arr = {x1, y1, x2, y2};
         return arr;
+    }
+    
+    private Rectangle updateSelection(MouseEvent me) {
+        endPoint = canvas.getPixelFromMouseEvent(me);
+        startx = min(startPoint.x, endPoint.x);
+        starty = min(startPoint.y, endPoint.y);
+        endx = max(startPoint.x, endPoint.x);
+        endy = max(startPoint.y, endPoint.y);
+        int w = endx - startx;
+        int h = endy - starty;
+        selection = new Rectangle(startx, starty, w, h);
+        return selection;
     }
     
     /**
@@ -473,17 +528,17 @@ public class EvaluatorFrame extends javax.swing.JFrame{
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox drawCheckBox;
     private javax.swing.JCheckBox enableCheckBox;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JPanel posPanel;
     private javax.swing.JLabel rateLabel;
     private javax.swing.JPanel ratePanel;
     private javax.swing.JSlider rateSlider;
+    private javax.swing.JButton resetROIButton;
+    private javax.swing.JPanel roiPanel;
+    private javax.swing.JToggleButton selectROIButton;
     private javax.swing.JLabel speedLabel;
     private javax.swing.JPanel speedPane;
     private javax.swing.JSlider speedSlider;
     private javax.swing.JTabbedPane tabbedPane;
-    private javax.swing.JLabel visualizeLabel;
     private javax.swing.JLabel x1Label;
     private javax.swing.JSpinner x1Spinner;
     private javax.swing.JLabel x2Label;
@@ -493,4 +548,77 @@ public class EvaluatorFrame extends javax.swing.JFrame{
     private javax.swing.JLabel y2Label;
     private javax.swing.JSpinner y2Spinner;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void mouseClicked(MouseEvent me) {
+    }
+
+    @Override
+    public void mousePressed(MouseEvent me) {
+        if (!selecting) {
+            return;
+        }
+        canvas = reval.getParams().getChip().getCanvas();
+        Point p = canvas.getPixelFromMouseEvent(me);
+        startPoint = p;
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent me) {
+        if ((startPoint == null) || 
+                canvas.getPixelFromMouseEvent(me).equals(startPoint) ||
+                !selecting) {
+            return;
+        }
+        selection = updateSelection(me);
+        int szx = reval.getParams().getChip().getSizeX();
+        int szy = reval.getParams().getChip().getSizeY();
+        startx = clip(startx, szx);
+        starty = clip(starty, szy);
+        endx = clip(endx, szx);
+        endy = clip(endy, szy);
+        selecting = false;
+        selectROIButton.setSelected(false);
+        thresh.setValue(selection);
+    }
+    
+    private int min(int a, int b) {
+        return a < b ? a : b;
+    }
+
+    private int max(int a, int b) {
+        return a > b ? a : b;
+    }
+    
+    private int clip(int val, int limit) {
+        if ((val > limit) && (limit != 0)) {
+            return limit;
+        } else if (val < 0) {
+            return 0;
+        }
+        return val;
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent me) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent me) {
+        selecting = false;
+        selectROIButton.setSelected(false);
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent me) {
+        if (startPoint == null || !selecting) {
+            return;
+        }
+        selection = updateSelection(me);
+        reval.getThreshold().setValue(selection);
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent me) {
+    }
 }

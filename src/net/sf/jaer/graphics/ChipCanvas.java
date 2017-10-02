@@ -68,6 +68,7 @@ import de.cco.jaer.eval.ResultEvaluator;
 import de.cco.jaer.eval.TrackerParams;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.lang.reflect.Field;
 import net.sf.jaer.util.TextRendererScale;
 
@@ -605,6 +606,27 @@ public class ChipCanvas implements GLEventListener, Observer {
             gl.glBegin(GL.GL_LINES);
             gl.glVertex2i(val[0], val[1]);
             gl.glVertex2i(val[2], val[3]);
+            gl.glEnd();
+            gl.glPopMatrix();
+        } else if (reval.getThreshold().getTarget().equals(EvaluatorThreshold.Parameter.REGION)) {
+            Rectangle r = (Rectangle) reval.getThreshold().getValue();
+            gl.glPushMatrix();
+            gl.glTranslatef(-.5f, -.5f, 0);
+            gl.glEnable(GL.GL_BLEND);
+            if (reval.isEvent()) {
+                gl.glColor4f(1f, 0f, 0f, 0.3f);
+            } else {
+                gl.glColor4f(1f, 1f, 1f, 0.3f);
+            }
+            gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+            gl.glRectf(r.x, r.y, r.x + r.width, r.y + r.height);
+            gl.glDisable(GL.GL_BLEND);
+            gl.glLineWidth(2f);
+            gl.glBegin(GL.GL_LINE_LOOP);
+            gl.glVertex2f(r.x, r.y);
+            gl.glVertex2f(r.x + r.width, r.y);
+            gl.glVertex2f(r.x + r.width, r.y + r.height);
+            gl.glVertex2f(r.x, r.y + r.height);
             gl.glEnd();
             gl.glPopMatrix();
         }

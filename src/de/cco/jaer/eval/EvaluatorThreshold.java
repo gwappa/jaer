@@ -16,6 +16,7 @@ public class EvaluatorThreshold<T> {
     public enum Parameter {
         EVENTRATE,
         POSITION,
+        REGION,
         DISTANCE,
         SPEED
     }
@@ -52,6 +53,7 @@ public class EvaluatorThreshold<T> {
     private void initTypeMap() {
         paramType.put(Parameter.EVENTRATE, "java.lang.Double");
         paramType.put(Parameter.POSITION, "[I");
+        paramType.put(Parameter.REGION, "java.awt.Rectangle");
         paramType.put(Parameter.DISTANCE, "java.lang.Double");
         paramType.put(Parameter.SPEED, "java.lang.Double");
     }
