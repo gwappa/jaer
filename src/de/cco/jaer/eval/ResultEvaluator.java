@@ -33,11 +33,11 @@ public class ResultEvaluator {
     private ResultEvaluator() {
     }
 
-    OutputHandler out;
-    ArduinoConnector con;
-    TrackerParams param;
-    EvaluatorThreshold thresh;
-    EvaluatorFrame frame;
+    private OutputHandler out;
+    private FastEventClient client;
+    private TrackerParams param;
+    private EvaluatorThreshold thresh;
+    private EvaluatorFrame frame;
 
     private boolean armed;
     private boolean drawing;
@@ -50,7 +50,7 @@ public class ResultEvaluator {
                 tmp = instance;
                 if (tmp == null) {
                     instance = tmp = new ResultEvaluator();
-                    tmp.con = null;
+                    tmp.client = FastEventClient.getInstance();
                     tmp.param = null;
                     tmp.out = null;
                     tmp.thresh = null;
@@ -67,7 +67,7 @@ public class ResultEvaluator {
      */
     public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh) {
         this.param = param;
-        con = ArduinoConnector.getInstance();
+        client = FastEventClient.getInstance();
         if (out != null) {
             out.close();
         }
@@ -83,7 +83,7 @@ public class ResultEvaluator {
      */
     public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh, OutputHandler.OutputSource src) {
         this.param = param;
-        con = ArduinoConnector.getInstance();
+        client = FastEventClient.getInstance();
         if (out != null) {
             out.close();
         }
@@ -99,7 +99,7 @@ public class ResultEvaluator {
      */
     public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh, String path) {
         this.param = param;
-        con = ArduinoConnector.getInstance();
+        client = FastEventClient.getInstance();
         if (out != null) {
             out.close();
         }
@@ -128,10 +128,10 @@ public class ResultEvaluator {
 
         if (param.eval(getThreshold())) {
             event = true;
-            con.send(con.LASER_ON);
+            client.send(client.LASER_ON);
         } else {
             event = false;
-            con.send(con.LASER_OFF);
+            client.send(client.LASER_OFF);
         }
     }
     
@@ -141,6 +141,10 @@ public class ResultEvaluator {
 
     public synchronized void arm(boolean b) {
         armed = b;
+    }
+    
+    public FastEventClient getFastEventClient() {
+        return client;
     }
     
     public EvaluatorFrame getEvaluatorFrame() {

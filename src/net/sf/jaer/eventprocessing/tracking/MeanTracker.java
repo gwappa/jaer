@@ -64,6 +64,9 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
         reval = ResultEvaluator.getInstance();
         reval.initialize(params, thresh, OutputHandler.OutputSource.FILE);
         reval.attachFilterStateListener(support);
+        if (!reval.getFastEventClient().isConnected()) {
+            reval.getFastEventClient().connect("localhost", 1312);
+        }
         setPropertyTooltip("tau", "Time constant in us (microseonds) of mean location lowpass filter, 0 for instantaneous");
         setPropertyTooltip("OFFOnly", "Consider only off events for tracking.");
         setPropertyTooltip("numStdDevsForBoundingBox", "Multiplier for number of std deviations of x and y distances from median for drawing and returning bounding box");
