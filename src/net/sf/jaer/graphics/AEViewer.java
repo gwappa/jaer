@@ -83,7 +83,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 import ch.unizh.ini.jaer.chip.retina.DVS128;
-import de.cco.jaer.eval.ArduinoConnector;
+import de.cco.jaer.eval.FastEventClient;
 import de.cco.jaer.eval.EvaluatorFrame;
 import de.cco.jaer.eval.ResultEvaluator;
 import de.cco.jaer.eval.SyncEventHandler;
@@ -227,7 +227,8 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
     // EvaluatorFrame
     private boolean evalFrameBuilt;
     private EvaluatorFrame evalFrame;
-    private ResultEvaluator reval;
+    private ResultEvaluator reval = null;
+    private boolean jAER_initialized = false; 
 
     /**
      * Utility method to return a URL to a file in the installation.
@@ -961,6 +962,16 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
      */
     private void cleanup() {
         stopLogging(true); // in case logging, make sure we give chance to save file
+        
+        if(reval != null){
+            if( !jAER_initialized ){
+                jAER_initialized = true;
+            } else {
+                System.out.println("Shutting down the FastEventServer");
+                reval.getFastEventClient().disconnect(); // try to terminate server, close socket
+            }
+        }
+        
         if ((aemon != null) && aemon.isOpen()) {
             log.info("closing " + aemon);
             aemon.close();

@@ -68,6 +68,7 @@ public class ResultEvaluator {
     public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh) {
         this.param = param;
         client = FastEventClient.getInstance();
+        
         if (out != null) {
             out.close();
         }

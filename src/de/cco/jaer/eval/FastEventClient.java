@@ -26,6 +26,9 @@ public final class FastEventClient {
     public final String LASER_ON = "A";
     public final String LASER_OFF = "B";
     public final String OKAY = "Y";
+    public final String CLOSE = "Q";
+    
+    static final int default_port = 666;
     
     // tcp socket to server
     Socket socket;
@@ -51,6 +54,7 @@ public final class FastEventClient {
                     tmp.out = null;
                     tmp.socket = null;
                     tmp.connected = false;
+                    tmp.connect("localhost", default_port);
                 }
             }
         }
@@ -80,6 +84,7 @@ public final class FastEventClient {
     public synchronized void disconnect() {
         if (isConnected()) {
             try {
+                out.println(CLOSE);
                 in.close();
                 out.close();
                 socket.close();

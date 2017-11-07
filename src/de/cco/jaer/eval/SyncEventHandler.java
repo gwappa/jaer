@@ -28,10 +28,10 @@ public class SyncEventHandler {
     private static volatile SyncEventHandler instance = null;
     
     OutputHandler out;
-    ArduinoConnector con;
+    FastEventClient client;
     
     private SyncEventHandler() {
-        con = ArduinoConnector.getInstance();
+        client = FastEventClient.getInstance();
         out = new OutputHandler(OutputHandler.OutputSource.FILE, 
                 "SyncEvents", 
                 "sync,system");
@@ -54,13 +54,13 @@ public class SyncEventHandler {
     public void on() {
         long system = System.currentTimeMillis();
         out.write("1," + system);
-        con.send(con.SNYC_ON);
+        client.send(client.SNYC_ON);
     }
     
     public void off() {
         long system = System.currentTimeMillis();
         out.write("0," + system);
-        con.send(con.SYNC_OFF);
+        client.send(client.SYNC_OFF);
     }
     
     public void close() {
