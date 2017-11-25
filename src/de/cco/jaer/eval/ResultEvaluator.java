@@ -125,14 +125,15 @@ public class ResultEvaluator {
         if (!isArmed()) {
             return;
         }
-        out.write(param.print());
 
         if (param.eval(getThreshold())) {
             event = true;
             client.send(client.LASER_ON);
+            out.write(param.print() + ",1");
         } else {
             event = false;
             client.send(client.LASER_OFF);
+            out.write(param.print() + ",0");
         }
     }
     

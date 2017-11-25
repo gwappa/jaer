@@ -91,7 +91,7 @@ public class MeanTrackerParams extends TrackerParamsBase {
     
     @Override
     public String printHeader() {
-        return "eventrate,firstts,lastts,meanx,meany,distance,speed";
+        return "eventrate,firstts,lastts,meanx,meany,distance,speed,eval";
     }
 
     @Override

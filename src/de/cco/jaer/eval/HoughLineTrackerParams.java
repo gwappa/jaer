@@ -70,7 +70,7 @@ public class HoughLineTrackerParams extends TrackerParamsBase {
     
     @Override
     public String printHeader() {
-        return "eventrate,firstts,lastts,rho,theta,distance";
+        return "eventrate,firstts,lastts,rho,theta,distance,eval";
     }
 
     @Override

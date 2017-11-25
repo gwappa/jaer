@@ -96,7 +96,7 @@ public class MedianTrackerParams extends TrackerParamsBase{
     
     @Override
     public String printHeader() {
-        return "eventrate,firstts,lastts,medianx,mediany,stdx,sty,distance,speed";
+        return "eventrate,firstts,lastts,medianx,mediany,stdx,sty,distance,speed,eval";
     }
 
     @Override
