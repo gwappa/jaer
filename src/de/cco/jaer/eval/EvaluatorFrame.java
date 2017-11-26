@@ -360,6 +360,7 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         boolean selected = enableCheckBox.isSelected();
         drawCheckBox.setEnabled(selected);
         reval.arm(selected);
+        // TODO: If isSelected, find out current Threshold and log it to file.
     }//GEN-LAST:event_enableCheckBoxActionPerformed
 
     private void drawCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawCheckBoxActionPerformed
