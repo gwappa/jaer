@@ -228,7 +228,8 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
     private boolean evalFrameBuilt;
     private EvaluatorFrame evalFrame;
     private ResultEvaluator reval = null;
-    private boolean jAER_initialized = false; 
+    private SyncEventHandler seh = null;
+    private int init_cnt = 0; 
 
     /**
      * Utility method to return a URL to a file in the installation.
@@ -556,6 +557,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
     }
 
     private void deleteEmptyLogFiles() throws FileNotFoundException, IOException {
+        if ( init_cnt < 3) { return; }
         System.out.println("Cleaning up data directory.");
         File data = Paths.get(System.getProperty("user.dir"), 
                 "src", "de", "cco", "jaer", "eval", "data").toFile();
@@ -963,12 +965,15 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
     private void cleanup() {
         stopLogging(true); // in case logging, make sure we give chance to save file
         
-        if(reval != null){
-            if( !jAER_initialized ){
-                jAER_initialized = true;
-            } else {
-                System.out.println("Shutting down the FastEventServer");
-                reval.getFastEventClient().disconnect(); // try to terminate server, close socket
+        init_cnt++;
+        if( init_cnt > 2 ) {
+            System.out.println("Shutting down the FastEventServer");
+            reval.getFastEventClient().disconnect(); // try to terminate server, close socket
+            evalFrame.getOutputHandler().close(); // try to close threshold info file
+            // try to close syncevent handler
+            if (seh != null)
+            {
+                seh.close();
             }
         }
         
@@ -5101,7 +5106,6 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
             }
             
             // send synchronisation stop event
-            SyncEventHandler seh = SyncEventHandler.getInstance();
             seh.off();
             
             loggingEnabled = false;

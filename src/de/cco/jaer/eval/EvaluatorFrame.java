@@ -26,6 +26,7 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
     
     private ResultEvaluator reval;
     private EvaluatorThreshold thresh;
+    private OutputHandler thresh_out;
     private ChipCanvas canvas;
     private GLCanvas glCanvas;
     private boolean listening;
@@ -64,6 +65,8 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
     public EvaluatorFrame() {
         reval = ResultEvaluator.getInstance();
         pcsl = new LinkedList<>();
+        thresh_out = new OutputHandler(OutputHandler.OutputSource.FILE,
+                "EvalThresholds", "type,system,value");
         initComponents();
     }
 
@@ -373,15 +376,22 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
     }
     
     private void tabbedPaneStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabbedPaneStateChanged
+        long system = System.currentTimeMillis();
         switch (tabbedPane.getTitleAt(tabbedPane.getSelectedIndex())) {
             case "Eventrate":
             thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.EVENTRATE, (double) rateSlider.getValue());
             reval.setThreshold(thresh);
+            if (enableCheckBox.isSelected()) {
+                thresh_out.write(thresh.getTarget().toString() + "," + system + "," + (double) rateSlider.getValue());
+            }
             break;
             case "Position":
             int[] arr = getPositionSpinnerValues();
             thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
             reval.setThreshold(thresh);
+            if (enableCheckBox.isSelected()) {
+                thresh_out.write(thresh.getTarget().toString() + "," + system + "," + arrayToString(arr));
+            }
             break;
             case "Region":
             if (selection == null){
@@ -389,10 +399,16 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
             }
             thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.REGION, selection);
             reval.setThreshold(thresh);
+            if (enableCheckBox.isSelected()) {
+                thresh_out.write(thresh.getTarget().toString() + "," + system + "," + rectToString(selection));
+            }
             break;
             case "Speed":
             thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, (double) speedSlider.getValue() * 1e-4);
             reval.setThreshold(thresh);
+            if (enableCheckBox.isSelected()) {
+                thresh_out.write(thresh.getTarget().toString() + "," + system + "," + (double) speedSlider.getValue() * 1e-4);
+            }
             break;
             default:
             break;
@@ -401,6 +417,10 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
 
     private void speedSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_speedSliderStateChanged
         thresh.setValue((double) speedSlider.getValue() * 1e-4);
+        if (enableCheckBox.isSelected()) {
+            long system = System.currentTimeMillis();
+            thresh_out.write(thresh.getTarget().toString() + "," + system + "," + (double) speedSlider.getValue() * 1e-4);
+        }
     }//GEN-LAST:event_speedSliderStateChanged
     
     public synchronized void removeFilterStateListener(PropertyChangeSupport pcs) {
@@ -410,29 +430,50 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
     
     private void rateSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_rateSliderStateChanged
         thresh.setValue((double) rateSlider.getValue());
+        if (enableCheckBox.isSelected()) {
+            long system = System.currentTimeMillis();
+            thresh_out.write(thresh.getTarget().toString() + "," + system + "," + (double) rateSlider.getValue());
+        }
     }//GEN-LAST:event_rateSliderStateChanged
 
     private void x1SpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_x1SpinnerStateChanged
         int[] arr = getPositionSpinnerValues();
         thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
+        if (enableCheckBox.isSelected()) {
+            long system = System.currentTimeMillis();
+            thresh_out.write(thresh.getTarget().toString() + "," + system + "," + arrayToString(arr));
+        }
         reval.setThreshold(thresh);
     }//GEN-LAST:event_x1SpinnerStateChanged
 
     private void y1SpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_y1SpinnerStateChanged
         int[] arr = getPositionSpinnerValues();
         thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
+        if (enableCheckBox.isSelected()) {
+            long system = System.currentTimeMillis();
+            thresh_out.write(thresh.getTarget().toString() + "," + system + "," + arrayToString(arr));
+        }
+        
         reval.setThreshold(thresh);
     }//GEN-LAST:event_y1SpinnerStateChanged
 
     private void x2SpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_x2SpinnerStateChanged
         int[] arr = getPositionSpinnerValues();
         thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
+        if (enableCheckBox.isSelected()) {
+            long system = System.currentTimeMillis();
+            thresh_out.write(thresh.getTarget().toString() + "," + system + "," + arrayToString(arr));
+        }
         reval.setThreshold(thresh);
     }//GEN-LAST:event_x2SpinnerStateChanged
 
     private void y2SpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_y2SpinnerStateChanged
         int[] arr = getPositionSpinnerValues();
         thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
+        if (enableCheckBox.isSelected()) {
+            long system = System.currentTimeMillis();
+            thresh_out.write(thresh.getTarget().toString() + "," + system + "," + arrayToString(arr));
+        }
         reval.setThreshold(thresh);
     }//GEN-LAST:event_y2SpinnerStateChanged
 
@@ -440,6 +481,10 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         glCanvas.removeMouseListener(this);
         glCanvas.removeMouseMotionListener(this);
         selection = new Rectangle(0, 0, 0, 0);
+        if (enableCheckBox.isSelected()) {
+            long system = System.currentTimeMillis();
+            thresh_out.write(thresh.getTarget().toString() + "," + system + "," + rectToString(selection));
+        }
         reval.getThreshold().setValue(selection);
     }//GEN-LAST:event_resetROIButtonActionPerformed
 
@@ -463,6 +508,10 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         glCanvas.addMouseMotionListener(this);
     }//GEN-LAST:event_selectROIButtonActionPerformed
 
+    public OutputHandler getOutputHandler() {
+        return thresh_out;
+    }
+    
     private int[] getPositionSpinnerValues() {
         try {
                 x1Spinner.commitEdit();
@@ -476,6 +525,20 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         int y2 = (int) y2Spinner.getValue();
         int[] arr = {x1, y1, x2, y2};
         return arr;
+    }
+    
+    private String arrayToString(int[] arr) {
+        String out = "[";
+        for (int i = 0; i < arr.length; i++) {
+            out += arr[i] + " ";
+        }
+        return out.substring(0, out.length() - 1) + "]";
+    }
+    
+    private String rectToString(Rectangle rect) {
+        int x2 = rect.x + rect.height;
+        int y2 = rect.y + rect.width;
+        return "[" + rect.x + " " + rect.y + " " + x2 + " " + y2 + "]";
     }
     
     private Rectangle updateSelection(MouseEvent me) {
@@ -580,6 +643,10 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         selecting = false;
         selectROIButton.setSelected(false);
         thresh.setValue(selection);
+        if (enableCheckBox.isSelected()) {
+            long system = System.currentTimeMillis();
+            thresh_out.write(thresh.getTarget().toString() + "," + system + "," + rectToString(selection));
+        }
     }
     
     private int min(int a, int b) {
