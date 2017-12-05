@@ -43,16 +43,13 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 	/** The USB product ID of this device */
 	static public final short PID_FX3 = (short) 0x841A;
 	static public final short PID_FX2 = (short) 0x841B;
-	static public final int REQUIRED_FIRMWARE_VERSION_FX3 = 4;
-	static public final int REQUIRED_FIRMWARE_VERSION_FX2 = 4;
-	static public final int REQUIRED_LOGIC_REVISION_FX3 = 9912;
-	static public final int REQUIRED_LOGIC_REVISION_FX2 = 9912;
+	static public final int REQUIRED_FIRMWARE_VERSION_FX3 = 3;
+	static public final int REQUIRED_FIRMWARE_VERSION_FX2 = 3;
+	static public final int REQUIRED_LOGIC_REVISION_FX3 = 9880;
+	static public final int REQUIRED_LOGIC_REVISION_FX2 = 9880;
 
-	static public final float FX2_USB_CLOCK_FREQ = 30.0f;
-	static public final float FX3_CLOCK_CORRECTION = 1.008f;
-	static public final float FX3_USB_CLOCK_FREQ = 80.0f * FX3_CLOCK_CORRECTION;
-
-	public float adcClockFreq = 30.0f;
+	static public final int FX2_USB_CLOCK_FREQ = 30;
+	static public final int FX3_USB_CLOCK_FREQ = 80;
 
 	/**
 	 * Starts reader buffer pool thread and enables in endpoints for AEs. This
@@ -64,38 +61,35 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 		setAeReader(new RetinaAEReader(this));
 		allocateAEBuffers();
 
-		// Update ADC clock frequency information.
-		if (getPID() == PID_FX2) {
-			adcClockFreq = spiConfigReceive(CypressFX3.FPGA_SYSINFO, (short) 4);
-		}
-		else {
-			adcClockFreq = spiConfigReceive(CypressFX3.FPGA_SYSINFO, (short) 4) * FX3_CLOCK_CORRECTION;
-		}
+		// Update global information.
+		adcClockFreq = spiConfigReceive(CypressFX3.FPGA_SYSINFO, (short) 4);
 
 		getAeReader().startThread(); // arg is number of errors before giving up
 		HardwareInterfaceException.clearException();
 	}
 
+	public int adcClockFreq = 30;
+
 	@Override
 	protected int adjustHWParam(final short moduleAddr, final short paramAddr, int param) {
 		if ((moduleAddr == FPGA_APS) && (paramAddr == 13)) {
 			// Exposure multiplied by clock.
-			return (int) (param * adcClockFreq);
+			return (param * adcClockFreq);
 		}
 
 		if ((moduleAddr == FPGA_APS) && (paramAddr == 14)) {
 			// FrameDelay multiplied by clock.
-			return (int) (param * adcClockFreq);
+			return (param * adcClockFreq);
 		}
 
 		if ((moduleAddr == FPGA_USB) && (paramAddr == 1)) {
 			// Early packet delay is 125µs slices on host, but in cycles
 			// @ USB_CLOCK_FREQ on FPGA, so we must multiply here.
 			if (getPID() == PID_FX2) {
-				return (int) (param * (125.0f * FX2_USB_CLOCK_FREQ));
+				return (param * (125 * FX2_USB_CLOCK_FREQ));
 			}
 
-			return (int) (param * (125.0f * FX3_USB_CLOCK_FREQ));
+			return (param * (125 * FX3_USB_CLOCK_FREQ));
 		}
 
 		// No change by default.
@@ -145,6 +139,14 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 		private final int apsSizeX;
 		private final int apsSizeY;
 
+		private static final int APS_ROI_REGIONS_MAX = 4;
+		private int apsROIUpdate;
+		private int apsROITmpData;
+		private final short apsROISizeX[];
+		private final short apsROISizeY[];
+		private final short apsROIPositionX[];
+		private final short apsROIPositionY[];
+
 		private static final int IMU_DATA_LENGTH = 7;
 		private final short[] imuEvents;
 		private final boolean imuFlipX;
@@ -169,6 +171,11 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 			apsCountX = new short[RetinaAEReader.APS_READOUT_TYPES_NUM];
 			apsCountY = new short[RetinaAEReader.APS_READOUT_TYPES_NUM];
 
+			apsROISizeX = new short[RetinaAEReader.APS_ROI_REGIONS_MAX];
+			apsROISizeY = new short[RetinaAEReader.APS_ROI_REGIONS_MAX];
+			apsROIPositionX = new short[RetinaAEReader.APS_ROI_REGIONS_MAX];
+			apsROIPositionY = new short[RetinaAEReader.APS_ROI_REGIONS_MAX];
+
 			initFrame();
 
 			imuEvents = new short[RetinaAEReader.IMU_DATA_LENGTH];
@@ -177,6 +184,12 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 
 			apsSizeX = spiConfigReceive(CypressFX3.FPGA_APS, (short) 0);
 			apsSizeY = spiConfigReceive(CypressFX3.FPGA_APS, (short) 1);
+
+			// Set intial ROI sizes.
+			apsROIPositionX[0] = 0;
+			apsROIPositionY[0] = 0;
+			apsROISizeX[0] = (short) apsSizeX;
+			apsROISizeY[0] = (short) apsSizeY;
 
 			final int chipAPSStreamStart = spiConfigReceive(CypressFX3.FPGA_APS, (short) 2);
 			apsInvertXY = (chipAPSStreamStart & 0x04) != 0;
@@ -203,10 +216,37 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 			}
 		}
 
+		private void updateROISizes() {
+			// Calculate APS ROI sizes for each region.
+			for (int i = 0; i < RetinaAEReader.APS_ROI_REGIONS_MAX; i++) {
+				final short startColumn = apsROIPositionX[i];
+				final short startRow = apsROIPositionY[i];
+				final short endColumn = apsROISizeX[i];
+				final short endRow = apsROISizeY[i];
+
+				// Position is already set to startCol/Row, so we don't have to reset
+				// it here. We only have to calculate size from start and end.
+				if (startColumn < apsSizeX) {
+					apsROISizeX[i] = (short) ((endColumn + 1) - startColumn);
+					apsROISizeY[i] = (short) ((endRow + 1) - startRow);
+				}
+				else {
+					// Turn off this ROI region.
+					apsROISizeX[i] = apsROISizeY[i] = 0;
+					apsROIPositionX[i] = apsROIPositionY[i] = 0;
+				}
+			}
+		}
+
 		private void initFrame() {
 			apsCurrentReadoutType = RetinaAEReader.APS_READOUT_RESET;
 			Arrays.fill(apsCountX, 0, RetinaAEReader.APS_READOUT_TYPES_NUM, (short) 0);
 			Arrays.fill(apsCountY, 0, RetinaAEReader.APS_READOUT_TYPES_NUM, (short) 0);
+
+			// Only update ROI info if it was sent by the device.
+			if (apsROIUpdate != 0) {
+				updateROISizes();
+			}
 		}
 
 		private boolean ensureCapacity(final AEPacketRaw buffer, final int capacity) {
@@ -330,7 +370,7 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 										CypressFX3.log.fine("APS Frame End event received.");
 
 										for (int j = 0; j < RetinaAEReader.APS_READOUT_TYPES_NUM; j++) {
-											int checkValue = apsSizeX;
+											int checkValue = apsROISizeX[0];
 
 											// Check reset read against zero if
 											// disabled.
@@ -371,7 +411,7 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 									case 13: // APS Column End
 										CypressFX3.log.fine("APS Column End event received.");
 
-										if (apsCountY[apsCurrentReadoutType] != apsSizeY) {
+										if (apsCountY[apsCurrentReadoutType] != apsROISizeY[0]) {
 											CypressFX3.log.severe("APS Column End: wrong row count [" + apsCurrentReadoutType + " - "
 												+ apsCountY[apsCurrentReadoutType]
 												+ "] detected. You might want to enable 'Ensure APS data transfer' under 'HW Configuration -> Chip Configuration' to improve this.");
@@ -428,21 +468,39 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 										break;
 
 									case 32:
+										// Next Misc8 APS ROI Size events will refer to ROI region 0.
+										// 0/1 used to distinguish between X and Y sizes.
+										apsROIUpdate = (0 << 2);
+										apsROISizeX[0] = apsROISizeY[0] = 0;
+										apsROIPositionX[0] = apsROIPositionY[0] = 0;
+										break;
+
 									case 33:
+										// Next Misc8 APS ROI Size events will refer to ROI region 1.
+										// 2/3 used to distinguish between X and Y sizes.
+										apsROIUpdate = (1 << 2);
+										apsROISizeX[1] = apsROISizeY[1] = 0;
+										apsROIPositionX[1] = apsROIPositionY[1] = 0;
+										break;
+
 									case 34:
+										// Next Misc8 APS ROI Size events will refer to ROI region 2.
+										// 4/5 used to distinguish between X and Y sizes.
+										apsROIUpdate = (2 << 2);
+										apsROISizeX[2] = apsROISizeY[2] = 0;
+										apsROIPositionX[2] = apsROIPositionY[2] = 0;
+										break;
+
 									case 35:
-										// TODO: ROI OFF not exposed, so just ignore events.
+										// Next Misc8 APS ROI Size events will refer to ROI region 3.
+										// 6/7 used to distinguish between X and Y sizes.
+										apsROIUpdate = (3 << 2);
+										apsROISizeX[3] = apsROISizeY[3] = 0;
+										apsROIPositionX[3] = apsROIPositionY[3] = 0;
 										break;
 
 									case 48:
 										// TODO: APS Exposure Information, ignore for now.
-										break;
-
-									case 49:
-									case 50:
-									case 51:
-									case 52:
-										// TODO: ROI ON not exposed, so just ignore events.
 										break;
 
 									default:
@@ -489,7 +547,6 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 									// old logic, we have to flip it here, so that the chip class extractor
 									// can flip it back. Backwards compatibility with recordings is the main
 									// motivation to do this hack.
-									// NOTE 09.2017: logic now uses upper left (CG format) as output.
 
 									// Invert polarity for PixelParade high gain pixels (DavisSense), because of
 									// negative gain from pre-amplifier.
@@ -497,12 +554,12 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 										? ((byte) (~code)) : (code);
 
 									if (dvsInvertXY) {
-										buffer.getAddresses()[eventCounter] = (((dvsSizeX - 1 - data) << DavisChip.YSHIFT) & DavisChip.YMASK)
+										buffer.getAddresses()[eventCounter] = ((data << DavisChip.YSHIFT) & DavisChip.YMASK)
 											| (((dvsSizeY - 1 - dvsLastY) << DavisChip.XSHIFT) & DavisChip.XMASK)
 											| (((polarity & 0x01) << DavisChip.POLSHIFT) & DavisChip.POLMASK);
 									}
 									else {
-										buffer.getAddresses()[eventCounter] = (((dvsSizeY - 1 - dvsLastY) << DavisChip.YSHIFT) & DavisChip.YMASK)
+										buffer.getAddresses()[eventCounter] = ((dvsLastY << DavisChip.YSHIFT) & DavisChip.YMASK)
 											| (((dvsSizeX - 1 - data) << DavisChip.XSHIFT) & DavisChip.XMASK)
 											| (((polarity & 0x01) << DavisChip.POLSHIFT) & DavisChip.POLMASK);
 									}
@@ -517,7 +574,7 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 							case 4: // APS ADC sample
 								// Let's check that apsCountY is not above the maximum. This could happen
 								// if start/end of column events are discarded (no wait on transfer stall).
-								if (apsCountY[apsCurrentReadoutType] >= apsSizeY) {
+								if (apsCountY[apsCurrentReadoutType] >= apsROISizeY[0]) {
 									CypressFX3.log.fine("APS ADC sample: row count is at maximum, discarding further samples.");
 									break;
 								}
@@ -529,14 +586,14 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 								int yPos;
 
 								if (apsFlipX) {
-									xPos = apsSizeX - 1 - apsCountX[apsCurrentReadoutType];
+									xPos = apsROISizeX[0] - 1 - apsCountX[apsCurrentReadoutType];
 								}
 								else {
 									xPos = apsCountX[apsCurrentReadoutType];
 								}
 
 								if (apsFlipY) {
-									yPos = apsSizeY - 1 - apsCountY[apsCurrentReadoutType];
+									yPos = apsROISizeY[0] - 1 - apsCountY[apsCurrentReadoutType];
 								}
 								else {
 									yPos = apsCountY[apsCurrentReadoutType];
@@ -551,9 +608,6 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 									xPos = yPos;
 									yPos = temp;
 								}
-
-								// NOTE 09.2017: logic now uses upper left (CG format) as output.
-								yPos = (apsInvertXY) ? (apsSizeX - 1 - yPos) : (apsSizeY - 1 - yPos);
 
 								apsCountY[apsCurrentReadoutType]++;
 
@@ -663,9 +717,51 @@ public class DAViSFX3HardwareInterface extends CypressFX3Biasgen {
 										break;
 
 									case 1:
-									case 2:
-										// Ignore ROI events.
+										// APS ROI Size Part 1 (bits 15-8).
+										// Here we just store the temporary value, and use it again
+										// in the next case statement.
+										apsROITmpData = ((misc8Data & 0xFF) << 8);
+
 										break;
+
+									case 2: {
+										// APS ROI Size Part 2 (bits 7-0).
+										// Here we just store the values and re-use the four fields
+										// sizeX/Y and positionX/Y to store endCol/Row and startCol/Row.
+										// We then recalculate all the right values and set everything
+										// up in START_FRAME.
+										final short apsROIRegion = (short) (apsROIUpdate >> 2);
+
+										switch (apsROIUpdate & 0x03) {
+											case 0:
+												// START COLUMN
+												apsROIPositionX[apsROIRegion] = (short) (apsROITmpData | (misc8Data & 0xFF));
+												break;
+
+											case 1:
+												// START ROW
+												apsROIPositionY[apsROIRegion] = (short) (apsROITmpData | (misc8Data & 0xFF));
+												break;
+
+											case 2:
+												// END COLUMN
+												apsROISizeX[apsROIRegion] = (short) (apsROITmpData | (misc8Data & 0xFF));
+												break;
+
+											case 3:
+												// END ROW
+												apsROISizeY[apsROIRegion] = (short) (apsROITmpData | (misc8Data & 0xFF));
+												break;
+
+											default:
+												break;
+										}
+
+										// Jump to next type of APS info (col->row, start->end).
+										apsROIUpdate++;
+
+										break;
+									}
 
 									default:
 										CypressFX3.log.severe("Caught Misc8 event that can't be handled.");

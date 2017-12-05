@@ -26,7 +26,7 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
     
     private ResultEvaluator reval;
     private EvaluatorThreshold thresh;
-    private OutputHandler thresh_out;
+    private final OutputHandler thresh_out;
     private ChipCanvas canvas;
     private GLCanvas glCanvas;
     private boolean listening;

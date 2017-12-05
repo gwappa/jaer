@@ -47,6 +47,7 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
     int prevlastts = Integer.MIN_VALUE;
     int tau = getInt("tau", 10);
     private boolean offonly = getBoolean("OFFOnly", false);
+    private boolean ononly = getBoolean("ONOnly", false);
     private float numStdDevsForBoundingBox = getFloat("numStdDevsForBoundingBox", 1f);
 
     MeanTrackerParams params;
@@ -66,6 +67,7 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
         reval.attachFilterStateListener(support);
         setPropertyTooltip("tau", "Time constant in us (microseonds) of mean location lowpass filter, 0 for instantaneous");
         setPropertyTooltip("OFFOnly", "Consider only off events for tracking.");
+        setPropertyTooltip("ONOnly", "Consider only on events for tracking.");
         setPropertyTooltip("numStdDevsForBoundingBox", "Multiplier for number of std deviations of x and y distances from median for drawing and returning bounding box");
     }
 
@@ -128,6 +130,9 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
             PolarityEvent p = (PolarityEvent) o;
             // if filter is enabled, consider only off events
             if (offonly && p.getPolaritySignum() == 1) {
+                continue;
+            }
+            else if (ononly && p.getPolaritySignum() == -1) {
                 continue;
             }
             if (p.isSpecial()) {
@@ -230,14 +235,28 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
         putFloat("numStdDevsForBoundingBox", numStdDevsForBoundingBox);
     }
     
+    
     public boolean getOffOnly() {
         return offonly;
+    }
+    
+    public boolean getOnOnly() {
+        return ononly;
     }
     
     public void setOffOnly(boolean offonly) {
         boolean old = this.offonly;
         this.offonly = offonly;
         putBoolean("OFFOnly", offonly);
+        putBoolean("ONOnly", !offonly);
+        // support.firePropertyChange("OFFOnly", old, offonly);
+    }
+    
+    public void setOnOnly(boolean ononly) {
+        boolean old = this.ononly;
+        this.ononly = ononly;
+        putBoolean("ONOnly", ononly);
+        putBoolean("OFFOnly", !ononly);
         // support.firePropertyChange("OFFOnly", old, offonly);
     }
 }

@@ -969,6 +969,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         if( init_cnt > 2 ) {
             System.out.println("Shutting down the FastEventServer");
             reval.getFastEventClient().disconnect(); // try to terminate server, close socket
+            reval.getOutputHandler().close(); // close result evaluator output handler
             evalFrame.getOutputHandler().close(); // try to close threshold info file
             // try to close syncevent handler
             if (seh != null)
@@ -4877,7 +4878,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
             loggingEnabled = true;
 
             // send synchronisation start event
-            SyncEventHandler seh = SyncEventHandler.getInstance();
+            seh = SyncEventHandler.getInstance();
             seh.on();
             
             fixLoggingControls();
