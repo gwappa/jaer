@@ -1,12 +1,25 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2017 Viktor Bahr
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package de.cco.jaer.eval;
 
 /**
- * Handle connection to Arduino board.
+ * Handle connection from jAER to Arduino board using RXTXcomm libary
+ * Deprecated, replaced by faster socket-based FastEventClient.java
  * 
  * @author viktor
  */
@@ -27,10 +40,14 @@ import java.util.logging.Logger;
 
 public final class ArduinoConnector implements SerialPortEventListener {
     
-    // singleton instance
+    /** 
+     * singleton instance 
+     */
     private static volatile ArduinoConnector instance = null;
     
-    // hardcoded messages
+    /** 
+     * Set of messages sent to ARDUINO
+     */
     public final String SNYC_ON = "1";
     public final String SYNC_OFF = "2";
     public final String LASER_ON = "A";
@@ -38,7 +55,10 @@ public final class ArduinoConnector implements SerialPortEventListener {
     public final String FLUSH = "F";
     
     SerialPort serialPort;
-    /** The port we're normally going to use. */
+    
+    /** 
+     * Set of default serial ports
+     */
     private static final String PORT_NAMES[] = { 
                     "/dev/tty.usbserial-A9007UX1", // Mac OS X
                     "/dev/ttyACM0", // Linux
@@ -49,23 +69,45 @@ public final class ArduinoConnector implements SerialPortEventListener {
                     "COM4", // Windows
                     "COM5", // Windows
     };
+    
     /**
     * A BufferedReader which will be fed by a InputStreamReader 
     * converting the bytes into characters 
     * making the displayed results codepage independent
     */
     private InputStream input;
-    /** The output stream to the port */
-    private OutputStream output;
-    /** Milliseconds to block while waiting for port open */
-    private static final int TIME_OUT = 2000;
-    /** Default bits per second for COM port. */
-    private static final int DATA_RATE = 115200;
-
-    private boolean state;
     
-    private final char[] inputBuffer = new char[4];
-    private boolean      received_hello = false;
+    /**
+     * The output stream to the port
+     */
+    private OutputStream output;
+    
+    /** 
+     * Milliseconds to block while waiting for port open
+     */
+    private static final int TIME_OUT = 2000;
+    
+    /**
+     * Default bits per second for COM port
+     */
+    private static final int DATA_RATE = 115200;
+    
+    /** 
+     * Connection state
+     */
+    private boolean connected;
+    
+    /**
+     * Stores values returned by arduino
+     */
+    private final char[] input_buffer = new char[4];
+    
+    /**
+     * When first opening connection to ARDUINO
+     * we listen for a custom 'hello' message that
+     * signals that ARDUINO is ready.
+     */
+    private boolean received_hello = false;
     
     private ArduinoConnector() {}
 
@@ -102,7 +144,7 @@ public final class ArduinoConnector implements SerialPortEventListener {
             }
             if (portId == null) {
                     System.out.println("Could not find COM port.");
-                    state = false;
+                    connected = false;
                     return;
             }
 
@@ -129,10 +171,10 @@ public final class ArduinoConnector implements SerialPortEventListener {
                     Thread.sleep(2000);
                     System.out.println("Trying to connect to Arduino and sending 'Hello' packet.");
                     send("Java says 'Hello'");
-                    state = true;
+                    connected = true;
             } catch (Exception e) {
                     System.err.println(e.toString());
-                    state = false;
+                    connected = false;
             }
     }
 
@@ -168,7 +210,7 @@ public final class ArduinoConnector implements SerialPortEventListener {
      * @return boolean, true if connection is established
      */
     public boolean isConnected(){
-        return state;
+        return connected;
     }
 
     /**
@@ -196,7 +238,7 @@ public final class ArduinoConnector implements SerialPortEventListener {
      */
     private void decodeToInputBuffer(int cin){
         for(int i=3; i>=0; i--){
-            inputBuffer[i] = decodeFlag(cin);
+            input_buffer[i] = decodeFlag(cin);
             cin = cin >> 2;
         }
     }
@@ -228,10 +270,10 @@ public final class ArduinoConnector implements SerialPortEventListener {
                                 cin = input.read();
                                 if( (cin > 0) && (cin < 255) ){
                                     decodeToInputBuffer(cin);
-                                    System.out.println("Uno says: " + Arrays.toString(inputBuffer));
+                                    System.out.println("Uno says: " + Arrays.toString(input_buffer));
                                 }
                             }
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                             System.err.println(e.toString());
                     }
             }
