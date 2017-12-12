@@ -18,10 +18,19 @@
 package de.cco.jaer.eval;
 
 /**
- * Class that acts as a sinc for jAER HoughLineTracker filter data, Extends
- * TrackerParamBase template class
- *
+ * Class that acts as container for jAER HoughLineTracker parameters.
+ * Extends the abstract TrackerParamsTemplate base class which itself implements
+ * TrackerParams interface.
+ * Internally, HoughLineTracker stores the Hough space parameters
+ * <ul>
+ * <li> rho
+ * <li> theta
+ * </ul>
+ * representing the detected line.
+ * 
  * @author viktor
+ * @see TrackerParamsTemplate
+ * @see TrackerParams
  */
 public class HoughLineTrackerParams extends TrackerParamsBase {
 
@@ -94,32 +103,16 @@ public class HoughLineTrackerParams extends TrackerParamsBase {
         return Math.sqrt(dRho * dRho + dTheta * dTheta);
     }
 
-    /**
-     * Print class parameters as comma-seperated string
-     *
-     * @return Tracker data in CSV row style
-     */
     @Override
     public String print() {
         return getEventRate() + "," + getFirstTS() + "," + getLastTS() + "," + line_rho + "," + line_theta + "," + getDist();
     }
 
-    /**
-     * Print class parameter description as command-seperated string
-     *
-     * @return CSV file header
-     */
     @Override
     public String printHeader() {
         return "eventrate,first_ts,last_ts,rho,theta,distance,eval";
     }
 
-    /**
-     * Evaluate threshold using data of current package
-     *
-     * @param thresh Instance of EvaluatorThreshold
-     * @return True, if threshold is exceeded, otherwise false
-     */
     @Override
     public Boolean eval(EvaluatorThreshold thresh) {
         // TODO: Implement more thresholds for theta and rho?

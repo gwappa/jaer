@@ -22,6 +22,7 @@ package de.cco.jaer.eval;
  * Deprecated, replaced by faster socket-based FastEventClient.java
  *
  * @author viktor
+ * @see FastEventClient
  */
 import java.io.InputStream;
 import java.io.InputStreamReader;

@@ -34,6 +34,9 @@ import net.sf.jaer.graphics.ChipCanvas;
  * GUI for controlling event evaluation, threshold type and value.
  *
  * @author viktor
+ * @see ResultEvaluator
+ * @see OutputHandler
+ * @see EvaluatorThreshold
  */
 public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener, MouseMotionListener {
 

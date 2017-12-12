@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 viktor
+ * Copyright (C) 2017 Viktor Bahr
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,34 +21,36 @@ import java.awt.Point;
 import java.awt.Rectangle;
 
 /**
- * Class that acts as container for jAER MeanTracker parameters and results.
- * Extends the abstract TrackerParamsTemplate base class which itself implements
- * TrackerParams interface.
- * Internally, MeanTracker stores X-Y positions for the 
+ * Class that acts as container for jAER MeanTracker parameters. Extends the
+ * abstract TrackerParamsTemplate base class which itself implements
+ * TrackerParams interface. Internally, MeanTracker stores X-Y positions for the
  * <ul>
  * <li> object mean position
  * <li> object position standard deviation
  * </ul>
- * which is provided to the MeanTrackerParams object via the <i>update()</i> method.
+ *
  * @author viktor
  * @see TrackerParamsTemplate
  * @see TrackerParams
  */
 public class MeanTrackerParams extends TrackerParamsBase {
-    
-    // median tracker parameters
+
+    /**
+     * Mean tracker parameters
+     */
     private double medianx, mediany;
-    private double stdx, stdy; 
+    private double stdx, stdy;
     private double meanx, meany;
     private double prevx, prevy;
-    
-    public MeanTrackerParams(){ 
-        setName("MeanTracker"); 
+
+    public MeanTrackerParams() {
+        setName("MeanTracker");
     }
-    
+
     /**
-     * Update internal result representation with values from MedianTracker object.
-     * 
+     * Update internal result representation with values from MedianTracker
+     * object.
+     *
      * @param n Number of events per package
      * @param firstts First timestamp in event package
      * @param lastts Last timestamp in event package
@@ -65,13 +67,13 @@ public class MeanTrackerParams extends TrackerParamsBase {
         prevy = meany;
         stdx = p1x;
         stdy = p1y;
-        meanx = p2x; 
+        meanx = p2x;
         meany = p2y;
     }
 
     /**
      * Calculate euclidian distance between current and last object position.
-     * 
+     *
      * @return Euclidian distance, double
      */
     public double getDist() {
@@ -79,16 +81,21 @@ public class MeanTrackerParams extends TrackerParamsBase {
         double dy = Math.abs(meany - prevy);
         return Math.sqrt(dx * dx + dy * dy);
     }
-    
+
+    /**
+     * Calculate speed of tracked object between current and last package.
+     *
+     * @return object speed in px/ms
+     */
     public double getSpeed() {
         return getDist() / getDt();
     }
-    
+
     @Override
     public String print() {
         return getEventRate() + "," + getFirstTS() + "," + getLastTS() + "," + meanx + "," + meany + "," + getDist() + "," + getSpeed();
     }
-    
+
     @Override
     public String printHeader() {
         return "eventrate,firstts,lastts,meanx,meany,distance,speed,eval";
