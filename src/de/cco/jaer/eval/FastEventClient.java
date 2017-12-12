@@ -25,28 +25,27 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 /**
- * Client for handling communication of evaluation result
- * Opens TCP socket and sends messaged to FastEventServer
- * Replaces direct serial connection via ArduinoConnector.java
- * 
+ * Client for handling communication of evaluation result Opens TCP socket and
+ * sends messaged to FastEventServer Replaces direct serial connection via
+ * ArduinoConnector.java
+ *
  * @author viktor
  */
 public final class FastEventClient {
-    
+
     /**
      * Singelton instance
      */
     private static volatile FastEventClient instance = null;
-    
+
     /**
      * Predefined messages for communicating with FastEventServer
-     * 
-     * SNYC_ON      Started DVS recording in jAER
-     * SYNC_OFF     Stopped DVS recording in jAER
-     * LASER_ON     Successfull evaluation, turn on optogenetic laser
-     * LASER_OFF    Evaluated event did not exceed threshold, disable optogenetic laser
-     * OKAY         Server acknowledges message reception
-     * CLOSE        Tell the Server to shut down TCP connection
+     *
+     * SNYC_ON Started DVS recording in jAER SYNC_OFF Stopped DVS recording in
+     * jAER LASER_ON Successfull evaluation, turn on optogenetic laser LASER_OFF
+     * Evaluated event did not exceed threshold, disable optogenetic laser OKAY
+     * Server acknowledges message reception CLOSE Tell the Server to shut down
+     * TCP connection
      */
     public final String SNYC_ON = "1";
     public final String SYNC_OFF = "2";
@@ -54,47 +53,45 @@ public final class FastEventClient {
     public final String LASER_OFF = "B";
     public final String OKAY = "Y";
     public final String CLOSE = "Q";
-    
+
     /**
      * Default TCP port
      */
-    static final int default_port = 666;
-    
+    static final int DEFAULT_PORT = 666;
+
     /**
      * TCP socket to FastEventServer
      */
     Socket socket;
-    
+
     /**
-     * Output stream object,
-     * write newline seperated messages to socket
+     * Output stream object, write newline seperated messages to socket
      */
     PrintWriter out;
-    
+
     /**
-     * Input stream object,
-     * buffered read from socket
+     * Input stream object, buffered read from socket
      */
     BufferedReader in;
-    
-    
+
     /**
      * Is socket connected to FastEventServer?
      */
     private boolean connected;
-    
-    private FastEventClient() {}
+
+    private FastEventClient() {
+    }
 
     /**
-     * Singelton object pseudo constructor,
-     * connect to default port when first creating the instance
-     * 
+     * Singelton object pseudo constructor, connect to default port when first
+     * creating the instance
+     *
      * @return Singelton instance
      */
     public static FastEventClient getInstance() {
         FastEventClient tmp = instance;
         if (tmp == null) {
-            synchronized(FastEventClient.class) {
+            synchronized (FastEventClient.class) {
                 tmp = instance;
                 if (tmp == null) {
                     instance = tmp = new FastEventClient();
@@ -102,16 +99,16 @@ public final class FastEventClient {
                     tmp.out = null;
                     tmp.socket = null;
                     tmp.connected = false;
-                    tmp.connect("localhost", default_port);
+                    tmp.connect("localhost", DEFAULT_PORT);
                 }
             }
         }
         return tmp;
     }
-    
+
     /**
      * Try to connect to FastEventServer via TCP-Socket
-     * 
+     *
      * @param host FastEventServer host adress
      * @param port FastEventServer port
      */
@@ -130,11 +127,11 @@ public final class FastEventClient {
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + host + ".");
         } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to " +
-                host + ".");
+            System.err.println("Couldn't get I/O for the connection to "
+                    + host + ".");
         }
     }
-    
+
     /**
      * Disconnect from FastEventServer
      */
@@ -150,17 +147,17 @@ public final class FastEventClient {
             }
         }
     }
-    
+
     /**
      * @return Is client connected to FastEventServer?
      */
     public boolean isConnected() {
         return connected;
     }
-    
+
     /**
      * Send message to FastEventServer
-     * 
+     *
      * @param msg Message to send to FastEventServer
      * @return True, if server acknowledged message reception
      */
