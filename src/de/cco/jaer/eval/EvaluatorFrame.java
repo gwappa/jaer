@@ -1,7 +1,19 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2017 Viktor Bahr
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package de.cco.jaer.eval;
 
@@ -19,23 +31,75 @@ import java.util.List;
 import net.sf.jaer.graphics.ChipCanvas;
 
 /**
+ * GUI for controlling event evaluation, threshold type and value.
  *
  * @author viktor
  */
 public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener, MouseMotionListener {
-    
+
+    /**
+     * Handles event evaluation
+     */
     private ResultEvaluator reval;
+
+    /**
+     * Handles different thresholds, passed to ResultEvalutor instance
+     */
     private EvaluatorThreshold thresh;
+
+    /**
+     * Handles logging of threshold values
+     */
     private final OutputHandler thresh_out;
+
+    /**
+     * Canvas object that represents DVS chip, used for getting event/mouse
+     * position in pixel, size matches DVS chip size
+     */
     private ChipCanvas canvas;
+
+    /**
+     * Canvas object representing drawable jAER surface, used for at-/detaching
+     * mouse callbacks
+     */
     private GLCanvas glCanvas;
+
+    /**
+     * True, if property change listener (see filterStateListener) is attached
+     */
     private boolean listening;
+
+    /**
+     * True, while region of interest is being selected
+     */
     private boolean selecting = false;
-    private int startx, starty, endx, endy;
-    private Point startPoint = null, endPoint = null;
+
+    /**
+     * Region of interest rectangle
+     */
     private Rectangle selection = null;
-    private final List<PropertyChangeSupport> pcsl;
-    
+
+    /**
+     * Point instances to describe region of interest rectangle
+     */
+    private Point start_point = null, end_point = null;
+
+    /**
+     * Coordinates of region of interest rectangle, default is (0,0,0,0)
+     */
+    private int startx, starty, endx, endy;
+
+    /**
+     * Holds filter specific PropertyChangeSupport objects, enables us to listen
+     * for changes in more than one filter
+     */
+    private final List<PropertyChangeSupport> pcs_list;
+
+    /**
+     * Listens for changes in jAER filter list, evaluation is available, if at
+     * least one filter is enabled, evaluation is disabled, if filters are
+     * disabled
+     */
     PropertyChangeListener filterStateListener = new PropertyChangeListener() {
         @Override
         public void propertyChange(PropertyChangeEvent pce) {
@@ -50,8 +114,7 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
                     drawCheckBox.setEnabled(false);
                     reval.draw(false);
                     reval.arm(false);
-                }
-                else if (val == true) {
+                } else if (val == true) {
                     System.out.println("Filter enabled.");
                     enableCheckBox.setEnabled(true);
                 }
@@ -63,10 +126,11 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
      * Creates new form EvaluatorFrame
      */
     public EvaluatorFrame() {
-        reval = ResultEvaluator.getInstance();
-        pcsl = new LinkedList<>();
+        reval = ResultEvaluator.getInstance(); // get singelton instance
+        pcs_list = new LinkedList<>();
         thresh_out = new OutputHandler(OutputHandler.OutputSource.FILE,
-                "EvalThresholds", "type,system,value");
+                "EvalThresholds",
+                "type,system,value"); // threshold type, system clock and threshold value
         initComponents();
     }
 
@@ -348,74 +412,107 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    public synchronized void attachFilterStateListener(PropertyChangeSupport s) {
-        s.addPropertyChangeListener(filterStateListener);
-        pcsl.add(s);
+    /**
+     * Add state listener to jAER filter
+     *
+     * @param pcs Filter specific PropertyChangeSupport object
+     */
+    public synchronized void attachFilterStateListener(PropertyChangeSupport pcs) {
+        pcs.addPropertyChangeListener(filterStateListener);
+        pcs_list.add(pcs);
         if (!listening) {
             listening = true;
         }
     }
-    
+
+    /**
+     * Remove state listener from jAER filters
+     *
+     * @param pcs Filter specific PropertyChangeSupport object
+     */
+    public synchronized void removeFilterStateListener(PropertyChangeSupport pcs) {
+        pcs.removePropertyChangeListener(filterStateListener);
+        listening = false;
+    }
+
+    /**
+     * En-/Disable evaluation, checkbox callback, when evaluation is disabled,
+     * drawing of tracker output is also disabled
+     *
+     * @param evt Callback event object
+     */
     private void enableCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableCheckBoxActionPerformed
         boolean selected = enableCheckBox.isSelected();
         drawCheckBox.setEnabled(selected);
         reval.arm(selected);
-        // TODO: If isSelected, find out current Threshold and log it to file.
+        if (!selected) {
+            drawCheckBox.setSelected(false);
+            reval.draw(false);
+        }
     }//GEN-LAST:event_enableCheckBoxActionPerformed
 
+    /**
+     * En-/Disable drawing of tracker information, checkbox callback
+     *
+     * @param evt Callback event object
+     */
     private void drawCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawCheckBoxActionPerformed
         boolean selected = drawCheckBox.isSelected();
         reval.draw(selected);
     }//GEN-LAST:event_drawCheckBoxActionPerformed
-    
-    public boolean isListening() {
-        return listening;
-    }
-    
-    public boolean isSelecting() {
-        return selecting;
-    }
-    
+
+    /**
+     * Threshold type selection, tabbed pane callback, new EvaluatorThreshold
+     * object is created and passed on to ResultEvaluator, if evaluation is
+     * enabled, write threshold information to file
+     *
+     * @param evt Callback event object
+     */
     private void tabbedPaneStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabbedPaneStateChanged
-        long system = System.currentTimeMillis();
+        long system = System.currentTimeMillis(); // get system clock for logging
         switch (tabbedPane.getTitleAt(tabbedPane.getSelectedIndex())) {
             case "Eventrate":
-            thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.EVENTRATE, (double) rateSlider.getValue());
-            reval.setThreshold(thresh);
-            if (enableCheckBox.isSelected()) {
-                thresh_out.write(thresh.getTarget().toString() + "," + system + "," + (double) rateSlider.getValue());
-            }
-            break;
+                thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.EVENTRATE, (double) rateSlider.getValue());
+                reval.setThreshold(thresh);
+                if (enableCheckBox.isSelected()) {
+                    thresh_out.write(thresh.getTarget().toString() + "," + system + "," + (double) rateSlider.getValue());
+                }
+                break;
             case "Position":
-            int[] arr = getPositionSpinnerValues();
-            thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
-            reval.setThreshold(thresh);
-            if (enableCheckBox.isSelected()) {
-                thresh_out.write(thresh.getTarget().toString() + "," + system + "," + arrayToString(arr));
-            }
-            break;
+                int[] arr = getPositionSpinnerValues();
+                thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
+                reval.setThreshold(thresh);
+                if (enableCheckBox.isSelected()) {
+                    thresh_out.write(thresh.getTarget().toString() + "," + system + "," + arrayToString(arr));
+                }
+                break;
             case "Region":
-            if (selection == null){
-                selection = new Rectangle(0, 0, 0, 0);
-            }
-            thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.REGION, selection);
-            reval.setThreshold(thresh);
-            if (enableCheckBox.isSelected()) {
-                thresh_out.write(thresh.getTarget().toString() + "," + system + "," + rectToString(selection));
-            }
-            break;
+                if (selection == null) {
+                    selection = new Rectangle(0, 0, 0, 0);
+                }
+                thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.REGION, selection);
+                reval.setThreshold(thresh);
+                if (enableCheckBox.isSelected()) {
+                    thresh_out.write(thresh.getTarget().toString() + "," + system + "," + rectToString(selection));
+                }
+                break;
             case "Speed":
-            thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, (double) speedSlider.getValue() * 1e-4);
-            reval.setThreshold(thresh);
-            if (enableCheckBox.isSelected()) {
-                thresh_out.write(thresh.getTarget().toString() + "," + system + "," + (double) speedSlider.getValue() * 1e-4);
-            }
-            break;
+                thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, (double) speedSlider.getValue() * 1e-4);
+                reval.setThreshold(thresh);
+                if (enableCheckBox.isSelected()) {
+                    thresh_out.write(thresh.getTarget().toString() + "," + system + "," + (double) speedSlider.getValue() * 1e-4);
+                }
+                break;
             default:
-            break;
+                break;
         }
     }//GEN-LAST:event_tabbedPaneStateChanged
 
+    /**
+     * Tracked object speed threshold, slider callback
+     *
+     * @param evt Callback event object
+     */
     private void speedSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_speedSliderStateChanged
         thresh.setValue((double) speedSlider.getValue() * 1e-4);
         if (enableCheckBox.isSelected()) {
@@ -423,12 +520,12 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
             thresh_out.write(thresh.getTarget().toString() + "," + system + "," + (double) speedSlider.getValue() * 1e-4);
         }
     }//GEN-LAST:event_speedSliderStateChanged
-    
-    public synchronized void removeFilterStateListener(PropertyChangeSupport pcs) {
-        pcs.removePropertyChangeListener(filterStateListener);
-        listening = false;
-    }
-    
+
+    /**
+     * DVS event rate threshold, slider callback
+     *
+     * @param evt Callback event object
+     */
     private void rateSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_rateSliderStateChanged
         thresh.setValue((double) rateSlider.getValue());
         if (enableCheckBox.isSelected()) {
@@ -437,6 +534,11 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         }
     }//GEN-LAST:event_rateSliderStateChanged
 
+    /**
+     * Manual region threshold, spinner control callback [X1 Y1; X2 Y2]
+     *
+     * @param evt Callback event object
+     */
     private void x1SpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_x1SpinnerStateChanged
         int[] arr = getPositionSpinnerValues();
         thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
@@ -447,6 +549,11 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         reval.setThreshold(thresh);
     }//GEN-LAST:event_x1SpinnerStateChanged
 
+    /**
+     * Manual region threshold, spinner control callback [X1 Y1; X2 Y2]
+     *
+     * @param evt Callback event object
+     */
     private void y1SpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_y1SpinnerStateChanged
         int[] arr = getPositionSpinnerValues();
         thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
@@ -454,10 +561,15 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
             long system = System.currentTimeMillis();
             thresh_out.write(thresh.getTarget().toString() + "," + system + "," + arrayToString(arr));
         }
-        
+
         reval.setThreshold(thresh);
     }//GEN-LAST:event_y1SpinnerStateChanged
 
+    /**
+     * Manual region threshold, spinner control callback [X1 Y1; X2 Y2]
+     *
+     * @param evt Callback event object
+     */
     private void x2SpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_x2SpinnerStateChanged
         int[] arr = getPositionSpinnerValues();
         thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
@@ -468,6 +580,11 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         reval.setThreshold(thresh);
     }//GEN-LAST:event_x2SpinnerStateChanged
 
+    /**
+     * Manual region threshold, spinner control callback [X1 Y1; X2 Y2]
+     *
+     * @param evt Callback event object
+     */
     private void y2SpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_y2SpinnerStateChanged
         int[] arr = getPositionSpinnerValues();
         thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.POSITION, arr);
@@ -478,6 +595,12 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         reval.setThreshold(thresh);
     }//GEN-LAST:event_y2SpinnerStateChanged
 
+    /**
+     * Reset user defined region of interest, button callback, remove mouse
+     * listeners from canvas object
+     *
+     * @param evt Callback event object
+     */
     private void resetROIButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetROIButtonActionPerformed
         glCanvas.removeMouseListener(this);
         glCanvas.removeMouseMotionListener(this);
@@ -489,16 +612,21 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         reval.getThreshold().setValue(selection);
     }//GEN-LAST:event_resetROIButtonActionPerformed
 
+    /**
+     * Let user select region of interest with mouse, button callback, attach
+     * mouse listener to jAER canvas object
+     *
+     * @param evt Callback event object
+     */
     private void selectROIButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectROIButtonActionPerformed
         if (!selectROIButton.isSelected() || selecting) {
             return;
         }
-        if ((reval.getParams().getChip().getCanvas() != null) && 
-                (reval.getParams().getChip().getCanvas().getCanvas() != null)) {
+        if ((reval.getParams().getChip().getCanvas() != null)
+                && (reval.getParams().getChip().getCanvas().getCanvas() != null)) {
             canvas = reval.getParams().getChip().getCanvas();
             glCanvas = (GLCanvas) reval.getParams().getChip().getCanvas().getCanvas();
-        }
-        else {
+        } else {
             selectROIButton.setSelected(false);
             return;
         }
@@ -509,17 +637,42 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         glCanvas.addMouseMotionListener(this);
     }//GEN-LAST:event_selectROIButtonActionPerformed
 
+    /**
+     * @return Is filterStateListener attached to jAER filter(s)?
+     */
+    public boolean isListening() {
+        return listening;
+    }
+
+    /**
+     * @return Is region of interest currently being drawn?
+     */
+    public boolean isSelecting() {
+        return selecting;
+    }
+
+    /**
+     * Getter for OutputHandler object tasked with logging threshold information
+     *
+     * @return OutputHandler object
+     */
     public OutputHandler getOutputHandler() {
         return thresh_out;
     }
-    
+
+    /**
+     * Getter for manual region threshold positions
+     *
+     * @return 1x4 array, [x1, y1, x2, y2]
+     */
     private int[] getPositionSpinnerValues() {
         try {
-                x1Spinner.commitEdit();
-                y1Spinner.commitEdit();
-                x2Spinner.commitEdit();
-                y2Spinner.commitEdit();
-            } catch ( java.text.ParseException e ) {  }
+            x1Spinner.commitEdit();
+            y1Spinner.commitEdit();
+            x2Spinner.commitEdit();
+            y2Spinner.commitEdit();
+        } catch (java.text.ParseException e) {
+        }
         int x1 = (int) x1Spinner.getValue();
         int y1 = (int) y1Spinner.getValue();
         int x2 = (int) x2Spinner.getValue();
@@ -527,7 +680,13 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         int[] arr = {x1, y1, x2, y2};
         return arr;
     }
-    
+
+    /**
+     * Convert integer array to string
+     *
+     * @param arr Array of integers
+     * @return String of space seperated integers in square brackets (e.g. "[1 2 3]")
+     */
     private String arrayToString(int[] arr) {
         String out = "[";
         for (int i = 0; i < arr.length; i++) {
@@ -535,25 +694,174 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
         }
         return out.substring(0, out.length() - 1) + "]";
     }
-    
+
+    /**
+     * Convert Rectangle type to string
+     *
+     * @param rect Rectangle object
+     * @return String of rectangle coordinates in square brackets (e.g. "[1, 1, 2, 2]")
+     */
     private String rectToString(Rectangle rect) {
         int x2 = rect.x + rect.height;
         int y2 = rect.y + rect.width;
         return "[" + rect.x + " " + rect.y + " " + x2 + " " + y2 + "]";
     }
-    
+
+    /**
+     * Update selection rectangle object with pixel values from mouse selection
+     *
+     * @param me MouseListener callback event
+     * @return Mouse selected region of interest
+     */
     private Rectangle updateSelection(MouseEvent me) {
-        endPoint = canvas.getPixelFromMouseEvent(me);
-        startx = min(startPoint.x, endPoint.x);
-        starty = min(startPoint.y, endPoint.y);
-        endx = max(startPoint.x, endPoint.x);
-        endy = max(startPoint.y, endPoint.y);
+        end_point = canvas.getPixelFromMouseEvent(me);
+        startx = min(start_point.x, end_point.x);
+        starty = min(start_point.y, end_point.y);
+        endx = max(start_point.x, end_point.x);
+        endy = max(start_point.y, end_point.y);
         int w = endx - startx;
         int h = endy - starty;
         selection = new Rectangle(startx, starty, w, h);
         return selection;
     }
-    
+
+    /**
+     * Do nothing after left mouse button has been clicked
+     *
+     * @param me MouseEvent callback event object
+     */
+    @Override
+    public void mouseClicked(MouseEvent me) {
+    }
+
+    /**
+     * When left mouse button is pressed, get current mouse position and store
+     * it as start point of region of interest rectangle
+     *
+     * @param me MouseEvent callback event object
+     */
+    @Override
+    public void mousePressed(MouseEvent me) {
+        if (!selecting) {
+            return;
+        }
+        canvas = reval.getParams().getChip().getCanvas();
+        Point p = canvas.getPixelFromMouseEvent(me);
+        start_point = p;
+    }
+
+    /**
+     * When left mouse button is released, get current mouse position and
+     * generate region of interest rectangle object, clip rectangle to chip
+     * size, update EvaluatorThreshold object
+     *
+     * @param me MouseEvent callback event object
+     */
+    @Override
+    public void mouseReleased(MouseEvent me) {
+        if ((start_point == null)
+                || canvas.getPixelFromMouseEvent(me).equals(start_point)
+                || !selecting) {
+            return;
+        }
+        selection = updateSelection(me);
+        int szx = reval.getParams().getChip().getSizeX();
+        int szy = reval.getParams().getChip().getSizeY();
+        startx = clip(startx, szx);
+        starty = clip(starty, szy);
+        endx = clip(endx, szx);
+        endy = clip(endy, szy);
+        selecting = false;
+        selectROIButton.setSelected(false);
+        thresh.setValue(selection);
+        if (enableCheckBox.isSelected()) {
+            long system = System.currentTimeMillis();
+            thresh_out.write(thresh.getTarget().toString() + "," + system + "," + rectToString(selection));
+        }
+    }
+
+    /**
+     * Do nothing when mouse mode entered
+     *
+     * @param me MouseEvent callback event object
+     */
+    @Override
+    public void mouseEntered(MouseEvent me) {
+    }
+
+    /**
+     * Abort selection
+     *
+     * @param me MouseEvent callback event object
+     */
+    @Override
+    public void mouseExited(MouseEvent me) {
+        selecting = false;
+        selectROIButton.setSelected(false);
+    }
+
+    /**
+     * While mouse with pressed left mouse button is being dragged update
+     * selection and threshold with current mouse position values
+     *
+     * @param me MouseEvent callback event object
+     */
+    @Override
+    public void mouseDragged(MouseEvent me) {
+        if (start_point == null || !selecting) {
+            return;
+        }
+        selection = updateSelection(me);
+        reval.getThreshold().setValue(selection); // TODO: Is this neccesary?
+    }
+
+    /**
+     * Do nothing when mouse is moved (no button pressed)
+     *
+     * @param me MouseEvent callback event object
+     */
+    @Override
+    public void mouseMoved(MouseEvent me) {
+    }
+
+    /**
+     * Get minimum of two integers
+     *
+     * @param a An integer
+     * @param b Another integer
+     * @return Minum of a and b
+     */
+    private int min(int a, int b) {
+        return a < b ? a : b;
+    }
+
+    /**
+     * Get maximum of two integers
+     *
+     * @param a An integer
+     * @param b Another integer
+     * @return Maximum of a and b
+     */
+    private int max(int a, int b) {
+        return a > b ? a : b;
+    }
+
+    /**
+     * Clip value to limit
+     *
+     * @param val An integer
+     * @param limit An upper bound limit, range is [0, limit)
+     * @return Clipped value
+     */
+    private int clip(int val, int limit) {
+        if ((val > limit) && (limit != 0)) {
+            return limit;
+        } else if (val < 0) {
+            return 0;
+        }
+        return val;
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -613,80 +921,4 @@ public class EvaluatorFrame extends javax.swing.JFrame implements MouseListener,
     private javax.swing.JSpinner y2Spinner;
     // End of variables declaration//GEN-END:variables
 
-    @Override
-    public void mouseClicked(MouseEvent me) {
-    }
-
-    @Override
-    public void mousePressed(MouseEvent me) {
-        if (!selecting) {
-            return;
-        }
-        canvas = reval.getParams().getChip().getCanvas();
-        Point p = canvas.getPixelFromMouseEvent(me);
-        startPoint = p;
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent me) {
-        if ((startPoint == null) || 
-                canvas.getPixelFromMouseEvent(me).equals(startPoint) ||
-                !selecting) {
-            return;
-        }
-        selection = updateSelection(me);
-        int szx = reval.getParams().getChip().getSizeX();
-        int szy = reval.getParams().getChip().getSizeY();
-        startx = clip(startx, szx);
-        starty = clip(starty, szy);
-        endx = clip(endx, szx);
-        endy = clip(endy, szy);
-        selecting = false;
-        selectROIButton.setSelected(false);
-        thresh.setValue(selection);
-        if (enableCheckBox.isSelected()) {
-            long system = System.currentTimeMillis();
-            thresh_out.write(thresh.getTarget().toString() + "," + system + "," + rectToString(selection));
-        }
-    }
-    
-    private int min(int a, int b) {
-        return a < b ? a : b;
-    }
-
-    private int max(int a, int b) {
-        return a > b ? a : b;
-    }
-    
-    private int clip(int val, int limit) {
-        if ((val > limit) && (limit != 0)) {
-            return limit;
-        } else if (val < 0) {
-            return 0;
-        }
-        return val;
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent me) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent me) {
-        selecting = false;
-        selectROIButton.setSelected(false);
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent me) {
-        if (startPoint == null || !selecting) {
-            return;
-        }
-        selection = updateSelection(me);
-        reval.getThreshold().setValue(selection);
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent me) {
-    }
 }
