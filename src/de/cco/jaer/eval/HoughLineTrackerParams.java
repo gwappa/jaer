@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 viktor
+ * Copyright (C) 2017 Viktor Bahr
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,62 +17,109 @@
  */
 package de.cco.jaer.eval;
 
-import java.awt.geom.Line2D;
-
 /**
+ * Class that acts as a sinc for jAER HoughLineTracker filter data, Extends
+ * TrackerParamBase template class
  *
  * @author viktor
  */
 public class HoughLineTrackerParams extends TrackerParamsBase {
-    
-    // line tracker parameters
-    private float lineRho, lineTheta;
-    private float prevRho, prevTheta;
-    private float rhoRes, thetaRes;
-    
-    
+
+    /**
+     * HoughLineTracker parameters
+     *
+     * line_rho, line_theta Line rho and theta coordinates in Hough Space
+     * prev_rho, prev_theta Rho and Theta of previous package rho_res, theta_res
+     * Resolution of theta and rho in Hough space
+     */
+    private float line_rho, line_theta;
+    private float prev_rho, prev_theta;
+    private float rho_res, theta_res;
+
+    /**
+     * Class constructor, set default hough space resolution
+     */
     public HoughLineTrackerParams() {
         setName("HoughLineTracker");
         setRhoRes(6);
         setThetaRes(10);
     }
-    
-    public void update(int n, int firstts, int lastts, float rho, float theta) {
+
+    /**
+     * Update class parameters with current filter values, called from
+     * HoughLineTracker
+     *
+     * @param n Number of events in filtered package
+     * @param first_ts First timestamp in event package
+     * @param last_ts Last timestamp in event package
+     * @param rho Current line rho
+     * @param theta Current line theta
+     */
+    public void update(int n, int first_ts, int last_ts, float rho, float theta) {
         setNumEvents(n);
-        setFirstTS(firstts);
-        setLastTS(lastts);
-        prevRho = lineRho;
-        prevTheta = lineTheta;
-        lineRho = rho;
-        lineTheta = theta;
+        setFirstTS(first_ts);
+        setLastTS(last_ts);
+        prev_rho = line_rho;
+        prev_theta = line_theta;
+        line_rho = rho;
+        line_theta = theta;
     }
-    
-    // set offset resolution from lower-left corner for hough-line tracker
+
+    /**
+     * Setter for Hough space rho resolution
+     *
+     * @param res Resolution of rho parameter
+     */
     public void setRhoRes(float res) {
-        rhoRes = res;
+        rho_res = res;
     }
-    
-    // set rotation angle resolution for hough line tracker
+
+    /**
+     * Setter for Hough space theta resolution
+     *
+     * @param res Resolution of theta parameter
+     */
     public void setThetaRes(float res) {
-        thetaRes = res;
+        theta_res = res;
     }
-    
+
+    /**
+     * Get euclidian distance between last and current line
+     *
+     * @return Euclidian distance between last and current line
+     */
     public double getDist() {
-        double dRho = Math.abs((lineRho - prevRho) / rhoRes);
-        double dTheta = Math.abs((lineTheta - prevTheta) / thetaRes);
+        double dRho = Math.abs((line_rho - prev_rho) / rho_res);
+        double dTheta = Math.abs((line_theta - prev_theta) / theta_res);
         return Math.sqrt(dRho * dRho + dTheta * dTheta);
     }
 
+    /**
+     * Print class parameters as comma-seperated string
+     *
+     * @return Tracker data in CSV row style
+     */
     @Override
     public String print() {
-        return getEventRate() + "," + getFirstTS() + "," + getLastTS() + "," + lineRho + "," + lineTheta + "," + getDist();
-    }
-    
-    @Override
-    public String printHeader() {
-        return "eventrate,firstts,lastts,rho,theta,distance,eval";
+        return getEventRate() + "," + getFirstTS() + "," + getLastTS() + "," + line_rho + "," + line_theta + "," + getDist();
     }
 
+    /**
+     * Print class parameter description as command-seperated string
+     *
+     * @return CSV file header
+     */
+    @Override
+    public String printHeader() {
+        return "eventrate,first_ts,last_ts,rho,theta,distance,eval";
+    }
+
+    /**
+     * Evaluate threshold using data of current package
+     *
+     * @param thresh Instance of EvaluatorThreshold
+     * @return True, if threshold is exceeded, otherwise false
+     */
     @Override
     public Boolean eval(EvaluatorThreshold thresh) {
         // TODO: Implement more thresholds for theta and rho?
@@ -83,7 +130,7 @@ public class HoughLineTrackerParams extends TrackerParamsBase {
                 // TODO: true, when any part of the line crosses this point
                 return false;
             case SPEED:
-                // Line2D line = new Line2D.Float();
+                // TODO: Implement a measure for line speed
                 return false;
             case DISTANCE:
                 return (getDist() > (double) thresh.getValue());
