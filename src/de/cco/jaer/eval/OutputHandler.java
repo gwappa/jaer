@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 viktor
+ * Copyright (C) 2017 Viktor Bahr
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,19 +33,41 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 /**
- * Handle output of tracker results.
- * Log to file, console or do nothing.
+ * Handle output of tracker results. Log to CSV file, console or do nothing.
+ *
  * @author viktor
  */
 public class OutputHandler {
-    
-    // output source
+
+    /**
+     * Output source type
+     *
+     * FILE Log data to (CSV) file CONSOLE Log data to STDOUT NONE Log data to
+     * STDOUT
+     */
+    public enum OutputSource {
+        FILE,
+        CONSOLE,
+        NONE
+    }
+
     OutputSource outsrc;
-    
-    // output file object
+
+    /**
+     * Buffered output stream object
+     */
     BufferedWriter outstream;
-    
+
+    /**
+     * jAER Filter property change support object
+     */
     PropertyChangeSupport pcs;
+
+    /**
+     * PropertyChangeListener method attached to jAER filter
+     * PropertyChangeSupport object, listening for filter on/off selection,
+     * closing OutputHanlder when filter is disabled
+     */
     PropertyChangeListener filterStateListener = new PropertyChangeListener() {
         @Override
         public void propertyChange(PropertyChangeEvent pce) {
@@ -55,73 +77,90 @@ public class OutputHandler {
                     System.out.println("Filter disabled.");
                     System.out.println("Closing OutputObject.");
                     OutputHandler.this.close();
-                }
-                else if (val == true) {
+                } else if (val == true) {
                     System.out.println("Filter enabled.");
                     OutputHandler.this.setOutput(OutputSource.FILE);
                 }
             }
         }
     };
-    
+
+    /**
+     * Path of current output file
+     */
     private Path current;
+
+    /**
+     * File name prefix and CSV header
+     */
     private String name, header;
+
+    /**
+     * Number of lines written
+     */
     private int linecount = 0;
+
+    /**
+     * Is PropertyChangeListener attached?
+     */
     private boolean listening = false;
-    
-    public enum OutputSource{
 
-        /**
-         * Log data to file.
-         */
-        FILE,
-
-        /**
-         * Log data to STDOUT
-         */
-        CONSOLE,
-
-        /**
-         * Log data to STDOUT
-         */
-        NONE
-    }
-    
     /**
      * Create new instance of OutputHandler
+     *
      * @param str String with path to logfile
      */
-    public OutputHandler(String str){
+    public OutputHandler(String str) {
         setName("Unknown");
         setHeader("");
         setOutput(str);
     }
-    
+
     /**
      * Create new instance of OutputHandler
+     *
      * @param src OutputSource enum
      */
-    public OutputHandler(OutputSource src){
+    public OutputHandler(OutputSource src) {
         setName("Unknown");
         setHeader("");
         setOutput(src);
     }
-    
+
+    /**
+     * Create new instance of OutputHandler
+     *
+     * @param src OutputSource enum
+     * @param name File name prefix, filter name
+     * @param header CSV file header, "column names"
+     */
     public OutputHandler(OutputSource src, String name, String header) {
         setName(name);
         setHeader(header);
         setOutput(src);
     }
-    
+
+    /**
+     * Create new instance of OutputHandler
+     *
+     * @param path Path of output file
+     * @param name File name prefix, filter name
+     * @param header CSV file header, "column names"
+     */
     public OutputHandler(String path, String name, String header) {
         setName(name);
         setHeader(header);
         setOutput(path);
     }
-    
+
+    /**
+     * Setter for output source type if FILE, generate new file
+     *
+     * @param src
+     */
     public synchronized final void setOutput(OutputSource src) {
         this.outsrc = src;
-        if (src == OutputSource.FILE){
+        if (src == OutputSource.FILE) {
             Path path = genFileName();
             System.out.println("Saving data to '" + path.toString() + "'");
             outstream = openFile(path);
@@ -129,35 +168,70 @@ public class OutputHandler {
         }
     }
 
+    /**
+     * Setter for output source of type FILE
+     *
+     * @param str Desired path of output file
+     */
     public synchronized final void setOutput(String str) {
         System.out.println("Saving data to '" + str + "'");
         outsrc = OutputSource.FILE;
         outstream = openFile(Paths.get(str));
         write(getHeader());
     }
-    
+
+    /**
+     * Setter for file name prefix, filter name
+     *
+     * @param n File name prefix, filter name
+     */
     public synchronized final void setName(String n) {
         name = n;
     }
-    
+
+    /**
+     * Setter for (CSV) file header
+     *
+     * @param h Comma seperated column names
+     */
     public synchronized final void setHeader(String h) {
         header = h;
     }
-    
+
+    /**
+     * Getter for output file path
+     *
+     * @return Current path of the output file
+     */
     public Path getPath() {
         return current;
     }
-    
+
+    /**
+     * Getter for file name prefix, filter name
+     *
+     * @return File name prefix, filter name
+     */
     public String getName() {
         return name;
     }
-    
+
+    /**
+     * Getter for (CSV) file header
+     *
+     * @return Comma seperated column names
+     */
     public String getHeader() {
         return header;
     }
-    
+
+    /**
+     * Write row to desired output source
+     *
+     * @param str CSV row, should match attributes defined in header
+     */
     public synchronized void write(String str) {
-        switch (outsrc){
+        switch (outsrc) {
             case CONSOLE:
                 System.out.println(str);
                 linecount++;
@@ -165,26 +239,25 @@ public class OutputHandler {
             case FILE:
                 try {
                     outstream.write(str + "\n");
-                    outstream.flush();
+                    outstream.flush(); // flush after each row
                     linecount++;
-                }
-                catch (IOException e)
-                {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 break;
             case NONE:
                 break;
         }
-        
+
     }
-    
+
     /**
-     * Generate new filename from current date and working directory.
-     * In case it doesn't exist. Create data directory inside local packet.
+     * Generate new filename from current date and working directory. In case it
+     * doesn't exist. Create data directory inside local packet.
+     *
      * @return String, new file name.
      */
-    private Path genFileName(){
+    private Path genFileName() {
         Path current = Paths.get(System.getProperty("user.dir"), "src", "de", "cco", "jaer", "eval", "data");
         if (!Files.exists(current)) {
             try { // create data directory
@@ -198,30 +271,38 @@ public class OutputHandler {
         Path path = Paths.get(current.toString(), getName() + "_" + dformat.format(d) + ".log");
         return path;
     }
-    
+
     /**
-     * Open new log file.
-     * 
+     * Open a new log file.
+     *
      * @param path Path to new file.
      * @return BufferedWriter object to new log file or null.
      */
-    private synchronized BufferedWriter openFile(Path path){
+    private synchronized BufferedWriter openFile(Path path) {
         BufferedWriter bw = null;
-        try{           
+        try {
             FileWriter fw = new FileWriter(path.toString());
             bw = new BufferedWriter(fw);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         current = path;
         return bw;
     }
-    
+
+    /**
+     * @return Is PropertyChangeListener attached to jAER filter?
+     */
     public boolean isListening() {
         return listening;
     }
-    
+
+    /**
+     * Attach PropertyChangeListener to jAER filter PropertyChangeSupport object
+     *
+     * @param s jAER filter support object, signaling change in filter state to
+     * change listener
+     */
     public synchronized void attachFilterStateListener(PropertyChangeSupport s) {
         if (pcs != null) {
             removeFilterStateListener(pcs);
@@ -230,14 +311,24 @@ public class OutputHandler {
         pcs.addPropertyChangeListener(filterStateListener);
         listening = true;
     }
-    
+
+    /**
+     * Remove PropertyChangeListener from jAER filter PropertyChangeSupport
+     * object
+     *
+     * @param pcs jAER filter support object, signaling change in filter state
+     * to change listener
+     */
     public synchronized void removeFilterStateListener(PropertyChangeSupport pcs) {
         pcs.removePropertyChangeListener(filterStateListener);
         listening = false;
     }
-    
+
+    /**
+     * Close output file stream, delete files with only headers
+     */
     public synchronized void close() {
-        if (outsrc == OutputSource.FILE){
+        if (outsrc == OutputSource.FILE) {
             try {
                 outstream.close();
             } catch (IOException ex) {
