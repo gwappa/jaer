@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 viktor
+ * Copyright (C) 2017 Viktor Bahr
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,27 +20,67 @@ package de.cco.jaer.eval;
 import java.beans.PropertyChangeSupport;
 
 /**
- * Generic class, handles TrackerParams, ArduinoConnector and OutputHandle
- * objects
+ * Evaluate tracker output provided by TrackerParams object using
+ * EvaluatorThreshold, write result of evaluation to OutputHandler and
+ * FastEventServer. EvaluatorThreshold and TrackerParams set from
+ * EvaluatorFrame.
  *
  * @author viktor
+ * @see TrackerParams
+ * @see EvaluatorThreshold
+ * @see OutputHandler
+ * @see FastEventClient
+ * @see EvaluatorFrame
  */
 public class ResultEvaluator {
 
-    // singleton instance
+    /**
+     * Signelton instance
+     */
     private static volatile ResultEvaluator instance = null;
 
     private ResultEvaluator() {
     }
 
+    /**
+     * Logging TrackerParams and evaluation result
+     */
     private OutputHandler out;
+
+    /**
+     * Connection to FastEventServer, sends evaluation results via TCP, invokes
+     * downstream devices via serial connection
+     */
     private FastEventClient client;
+
+    /**
+     * Holds tracker output
+     */
     private TrackerParams param;
+
+    /**
+     * Threshold for evaluating tracker output
+     */
     private EvaluatorThreshold thresh;
+
+    /**
+     * Graphical interface for setting threshold, en/disabling evaluation
+     */
     private EvaluatorFrame frame;
 
+    /**
+     * Is evaluation activated?
+     */
     private boolean armed;
+
+    /**
+     * Are tracker information being drawn to canvas?
+     */
     private boolean drawing;
+
+    /**
+     * Result of current threshold evaluation
+     */
     private boolean event;
 
     public static ResultEvaluator getInstance() {
@@ -68,7 +108,7 @@ public class ResultEvaluator {
     public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh) {
         this.param = param;
         client = FastEventClient.getInstance();
-        
+
         if (out != null) {
             out.close();
         }
@@ -108,7 +148,14 @@ public class ResultEvaluator {
         out.write(param.printHeader());
         this.thresh = thresh;
     }
-    
+
+    /**
+     * Attach OutputHandler and EvaluationFrame filter state listeners to
+     * PropertyChangeSupport object. Once the filter is disabled, log files is
+     * closed and GUI buttons disabled.
+     *
+     * @param pcs jAER filter PropertyChangeSupport object
+     */
     public void attachFilterStateListener(PropertyChangeSupport pcs) {
         if (out != null) {
             out.attachFilterStateListener(pcs);
@@ -119,7 +166,7 @@ public class ResultEvaluator {
     }
 
     /**
-     * Evaluate result and send signal to Arduino.
+     * Evaluate result and send signal to FastEventServer
      */
     public void eval() {
         if (!isArmed()) {
@@ -136,39 +183,85 @@ public class ResultEvaluator {
             out.write(param.print() + ",0");
         }
     }
-    
+
+    /**
+     * Setter for drawing information on tracker output to jAER canvas
+     *
+     * @param b Information drawn / not drawn
+     */
     public synchronized void draw(boolean b) {
         drawing = b;
     }
 
+    /**
+     * Setter for result evaluation
+     *
+     * @param b Evaluation enabled / disabled
+     */
     public synchronized void arm(boolean b) {
         armed = b;
     }
-    
+
+    /**
+     * Getter for FastEventClient instance
+     *
+     * @return FastEventClient instance
+     * @see FastEventClient
+     */
     public FastEventClient getFastEventClient() {
         return client;
     }
-    
+
+    /**
+     * Getter for EvaluatorFrame (GUI) instance
+     *
+     * @return EvaluatorFrame instance
+     * @see EvaluatorFrame
+     */
     public EvaluatorFrame getEvaluatorFrame() {
         return frame;
     }
-    
+
+    /**
+     * Getter for OutputHandler instance
+     *
+     * @return OutputHandler object
+     * @see OutputHandler
+     */
     public OutputHandler getOutputHandler() {
         return out;
     }
 
+    /**
+     * Getter for TrackerParams instance
+     *
+     * @return TrackerParams instance
+     * @see TrackerParams
+     */
     public TrackerParams getParams() {
         return param;
     }
 
+    /**
+     * Getter for EvaluatorThreshold instance
+     *
+     * @return EvaluatorThreshold instance
+     * @see EvaluatorThreshold
+     */
     public EvaluatorThreshold getThreshold() {
         return thresh;
     }
 
+    /**
+     * @return Is evaluation active?
+     */
     public boolean isArmed() {
         return armed;
     }
-    
+
+    /**
+     * @return Are change listeners attached to jAER filter?
+     */
     public boolean isListening() {
         if (frame == null || out == null) {
             return false;
@@ -177,29 +270,38 @@ public class ResultEvaluator {
         }
     }
 
+    /**
+     * @return Are information on tracker output being drawn to canvas?
+     */
     public boolean isDrawing() {
         return drawing;
     }
 
+    /**
+     * @return Does current input exceed given threshold?
+     */
     public boolean isEvent() {
         return event;
     }
-    
+
     /**
-     * Set evaluator threshold
+     * Setter for evaluator threshold
      *
-     * @param thresh
+     * @param thresh EvaluatorThreshold instance
+     * @see EvaluatorThreshold
      */
     public synchronized void setThreshold(EvaluatorThreshold thresh) {
         this.thresh = thresh;
     }
-    
+
     /**
-     * Set EvaluatorFrame GUI instance
-     * @param frame 
+     * Setter for EvaluatorFrame GUI instance
+     *
+     * @param frame EvaluatorFrame instance
+     * @see EvaluatorFrame
      */
     public synchronized void setEvaluatorFrame(EvaluatorFrame frame) {
         this.frame = frame;
     }
-    
+
 }
