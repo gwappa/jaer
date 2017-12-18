@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 viktor
+ * Copyright (C) 2017 Viktor Bahr
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,135 +20,130 @@ package de.cco.jaer.eval;
 import net.sf.jaer.chip.AEChip;
 
 /**
- * This interface provides methods and enum implemented by the 
- * TrackerParameterTemplate class. For all feasable jAER tracking methods a 
+ * This interface provides methods and enum implemented by the
+ * TrackerParameterTemplate class. For all feasable jAER tracking methods a
  * custom class is set up, extending the abstract TrackerParamsTemplate class.
  *
  * @author viktor
  * @see TrackerParamsTemplate
  */
 public interface TrackerParams {
-    /**
-     * OutputSource enum is used to identify what and if data stored in the
-     * custom object that extends the TrackerParamsTemplate is send to a output source.
-     * 
-     */    
-    public enum OutputSource{
 
-        /**
-         * Log data to file.
-         */
-        FILE,
-
-        /**
-         * Log data to STDOUT
-         */
-        CONSOLE,
-
-        /**
-         * Log data to STDOUT
-         */
-        NONE
-    }
-   
     /**
      * Setter for chip obj.
-     * @param chip AEChip object, containing information about chipsize, filename
+     *
+     * @param chip AEChip object, containing information about chipsize,
+     * filename
      */
     public void setChip(AEChip chip);
-    
+
     /**
      * Setter for tracker Name
-     * @param name 
+     *
+     * @param name
      */
     public void setName(String name);
-    
+
     /**
      * Setter for package size
+     *
      * @param n Number of events in packets
      */
     public void setNumEvents(int n);
-    
+
     /**
      * Setter for first timestamp.
+     *
      * @param ts Integer, first timestamp in package.
      */
     public void setFirstTS(int ts);
-    
+
     /**
      * Setter for last timestamp.
+     *
      * @param ts Integer, last timestamp in package.
      */
     public void setLastTS(int ts);
-    
+
     /**
      * Getter for chip object.
      */
     public AEChip getChip();
-    
+
     /**
      * Getter for first timestamp.
+     *
      * @return first timestamp in package
      */
     public int getFirstTS();
-    
+
     /**
      * Getter for last timestamp.
+     *
      * @return Last timestamp in package
      */
     public int getLastTS();
-    
+
     /**
      * Getter for chip size.
+     *
      * @return 1x2 size array of Intergers, X & Y chip size.
      */
     public int[] getSize();
-    
+
     /**
      * Getter for tracker name
+     *
      * @return Tracker name
      */
     public String getName();
-    
+
     /**
      * Getter for packet size
+     *
      * @return Number of events per packet
      */
     public int getNumEvents();
-    
+
     /**
      * Getter for time difference betweens packages.
+     *
      * @return Difference in time, Interger.
      */
     public int getDt();
-    
+
     /**
      * Package duration
+     *
      * @return Difference between first and last timestamp in package.
      */
     public int getDuration();
-    
+
     /**
      * Getter for event rate.
+     *
      * @return Event rat in Hz.
      */
     public double getEventRate();
-    
+
     /**
      * Print selected data
+     *
      * @return String of selected data, comma seperated
      */
     public String print();
-    
+
     /**
      * Print selected data column
+     *
      * @return String of selected data columns, comma seperated
      */
     public String printHeader();
-    
+
     /**
      * Evaluate tracker data
-     * @return Boolean 
+     *
+     * @return Boolean
      */
     public Boolean eval(EvaluatorThreshold thresh);
 }
