@@ -18,49 +18,49 @@
 package de.cco.jaer.eval;
 
 /**
- * Handle start/stop of jAER data logging.
- * Store timestamps, write them to file/console and to FastEventServer. 
- * 
+ * Handle start/stop of jAER data logging. Store timestamps, write them to
+ * file/console and to FastEventServer.
+ *
  * @author viktor
  * @see OutputHandler
  * @see FastEventServer
  */
 public class SyncEventHandler {
-    
+
     /**
      * Singleton instance
      */
     private static volatile SyncEventHandler instance = null;
-    
+
     /**
      * Handle output to CSV file / stdout
      */
     OutputHandler out;
-    
+
     /**
      * TCP connection to FastEventServer
      */
     FastEventClient client;
-    
+
     /**
      * Private class constructor, called from getInstance()
      */
     private SyncEventHandler() {
         client = FastEventClient.getInstance();
-        out = new OutputHandler(OutputHandler.OutputSource.FILE, 
-                "SyncEvents", 
+        out = new OutputHandler(OutputHandler.OutputSource.FILE,
+                "SyncEvents",
                 "sync,system");
     }
-    
+
     /**
      * Get singelton instance, initialise in case unitialised
-     * 
+     *
      * @return Singelton instance
      */
     public static SyncEventHandler getInstance() {
         SyncEventHandler tmp = instance;
         if (tmp == null) {
-            synchronized(SyncEventHandler.class) {
+            synchronized (SyncEventHandler.class) {
                 tmp = instance;
                 if (tmp == null) {
                     instance = tmp = new SyncEventHandler();
@@ -69,32 +69,30 @@ public class SyncEventHandler {
         }
         return tmp;
     }
-    
+
     /**
-     * jAER data logging started,
-     * log current time to file/stdout and TCP
+     * jAER data logging started, log current time to file/stdout and TCP
      */
     public void on() {
         long system = System.currentTimeMillis();
         out.write("1," + system);
         client.send(client.SNYC_ON);
     }
-    
+
     /**
-     * jAER data logging stopped,
-     * log current time to file/stdout and TCP
+     * jAER data logging stopped, log current time to file/stdout and TCP
      */
     public void off() {
         long system = System.currentTimeMillis();
         out.write("0," + system);
         client.send(client.SYNC_OFF);
     }
-    
+
     /**
      * Close open logfile
      */
     public void close() {
         out.close();
     }
-    
+
 }
