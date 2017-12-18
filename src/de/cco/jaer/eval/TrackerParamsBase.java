@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 viktor
+ * Copyright (C) 2017 Viktor Bahr
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,29 +20,29 @@ package de.cco.jaer.eval;
 import net.sf.jaer.chip.AEChip;
 
 /**
- * Abstract base class for custom TrackerParams classes.
- * Implements all methods defined in TrackerParams interface.
- * Upstream object implement update(), log() and getDist() methods.
- * 
+ * Abstract base class for custom TrackerParams classes. Implements all methods
+ * defined in TrackerParams interface. Upstream object implement update(), log()
+ * and getDist() methods.
+ *
  * @author viktor
  * @see TrackerParams
  */
-public abstract class TrackerParamsBase implements TrackerParams{
-    
+public abstract class TrackerParamsBase implements TrackerParams {
+
     // Tracker name
     private String name;
-    
+
     // AEChip instance
     private AEChip chip;
-    
+
     // chip size
     private int sx, sy;
-    
+
     // package size
     private int nevents, prevnevents;
-    
+
     // time stamp vars
-    private int firstts, lastts, prevfirstts, prevlastts;    
+    private int firstts, lastts, prevfirstts, prevlastts;
 
     @Override
     public void setChip(AEChip ch) {
@@ -50,35 +50,35 @@ public abstract class TrackerParamsBase implements TrackerParams{
         sx = chip.getSizeX();
         sy = chip.getSizeY();
     }
-    
+
     @Override
     public void setFirstTS(int ts) {
         prevfirstts = firstts;
         firstts = ts;
     }
-    
+
     @Override
     public void setLastTS(int ts) {
         prevlastts = lastts;
         lastts = ts;
     }
-    
+
     @Override
     public void setName(String n) {
         name = n;
     }
-    
+
     @Override
     public void setNumEvents(int n) {
         prevnevents = nevents;
         nevents = n;
     }
-    
+
     @Override
     public AEChip getChip() {
         return chip;
     }
-    
+
     @Override
     public int getFirstTS() {
         return firstts;
@@ -96,7 +96,7 @@ public abstract class TrackerParamsBase implements TrackerParams{
         sz[1] = sy;
         return sz;
     }
-    
+
     @Override
     public String getName() {
         return name;
@@ -106,17 +106,17 @@ public abstract class TrackerParamsBase implements TrackerParams{
     public int getNumEvents() {
         return nevents;
     }
-    
+
     @Override
-    public int getDt(){
+    public int getDt() {
         return lastts - prevlastts;
     }
 
     @Override
-    public int getDuration(){
+    public int getDuration() {
         return (lastts > 0) ? lastts - firstts : 1;
     }
-    
+
     @Override
     public double getEventRate() {
         return (double) getNumEvents() / getDuration();
