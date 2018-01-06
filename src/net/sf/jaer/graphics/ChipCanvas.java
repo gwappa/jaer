@@ -542,6 +542,12 @@ public class ChipCanvas implements GLEventListener, Observer {
         }
         
         
+        /**
+         * Code to draw ResultEvaluator info.
+         * TrackerParams data is drawn on the left side of the ChipCanvas.
+         * POSITION & REGION threshold boundaries is drawn in the ChipCanvas at the user-designated position.
+         * Currently thresholded value is drawn in red if condition is fulfilled.
+         */
         if (reval == null) {
             reval = ResultEvaluator.getInstance();
         }
@@ -592,7 +598,7 @@ public class ChipCanvas implements GLEventListener, Observer {
             }
         }
         
-        // uggly hack to draw line threshold
+        // draw line and region threshold
         if (reval.getThreshold().getTarget().equals(EvaluatorThreshold.Parameter.POSITION)) {
             int[] val = (int[]) reval.getThreshold().getValue();
             gl.glPushMatrix();
