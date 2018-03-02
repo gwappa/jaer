@@ -223,13 +223,13 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
     private static final String SET_DEFAULT_FIRMWARE_FOR_BLANK_DEVICE = "Set default firmware for blank device...";
     // set true to force null hardware (None in interface menu) even if only single interface
     private boolean nullInterface = false;
-    
+
     // EvaluatorFrame
     private boolean evalFrameBuilt;
     private EvaluatorFrame evalFrame;
     private ResultEvaluator reval = null;
     private SyncEventHandler seh = null;
-    private int init_cnt = 0; 
+    private int init_cnt = 0;
 
     /**
      * Utility method to return a URL to a file in the installation.
@@ -559,7 +559,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
     private void deleteEmptyLogFiles() throws FileNotFoundException, IOException {
         if ( init_cnt < 3) { return; }
         System.out.println("Cleaning up data directory.");
-        File data = Paths.get(System.getProperty("user.dir"), 
+        File data = Paths.get(System.getProperty("user.dir"),
                 "src", "de", "cco", "jaer", "eval", "data").toFile();
         if( !data.isDirectory() ){
             data.mkdir();
@@ -580,7 +580,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
                     lnr.close();
                     continue;
                 }
-                
+
             }
         }
         System.out.println("Cleanup done.");
@@ -737,12 +737,12 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         //            log.warning(e.getMessage());
         //        }
         setName("AEViewer");
-        
+
         // EvalFrame not built yet
         evalFrameBuilt = false;
 
         initComponents();
-        
+
         // modification that contain extra evaluator interface
 //        javax.swing.JToggleButton evalButton = new javax.swing.JToggleButton();
 //        evalButton.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
@@ -756,7 +756,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
 //            }
 //        });
 //        buttonsPanel.add(evalButton);
-        
+
         playerControls = new AePlayerAdvancedControlsPanel(this);
         playerControlPanel.add(playerControls, BorderLayout.NORTH);
         this.jaerViewer = jaerViewer;
@@ -964,20 +964,32 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
      */
     private void cleanup() {
         stopLogging(true); // in case logging, make sure we give chance to save file
-        
+
         init_cnt++;
         if( init_cnt > 2 ) {
             System.out.println("Shutting down the FastEventServer");
-            reval.getFastEventClient().disconnect(); // try to terminate server, close socket
-            reval.getOutputHandler().close(); // close result evaluator output handler
-            evalFrame.getOutputHandler().close(); // try to close threshold info file
+            try {
+                reval.getFastEventClient().disconnect(); // try to terminate server, close socket
+            } catch (NullPointerException nclient) {
+                // do nothing
+            }
+            try {
+                reval.getOutputHandler().close(); // close result evaluator output handler
+            } catch (NullPointerException nout1) {
+                // do nothing
+            }
+            try {
+                evalFrame.getOutputHandler().close(); // try to close threshold info file
+            } catch (NullPointerException nout2) {
+                // do nothing
+            }
             // try to close syncevent handler
             if (seh != null)
             {
                 seh.close();
             }
         }
-        
+
         if ((aemon != null) && aemon.isOpen()) {
             log.info("closing " + aemon);
             aemon.close();
@@ -4880,13 +4892,13 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
             // send synchronisation start event
             seh = SyncEventHandler.getInstance();
             seh.on();
-            
+
             fixLoggingControls();
 
             if (loggingTimeLimit > 0) {
                 loggingStartTime = System.currentTimeMillis();
             }
-            
+
             log.info("starting logging to " + loggingFile.getAbsolutePath());
             //            aemon.resetTimestamps();
 
@@ -4922,8 +4934,8 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
 //        new Object[]{"2.0","3.1"},"2.0");
 //        // User cancel the aedat format choosing dialog.
 //        if(dataFileVersionNum == null) {
-//            return null; 
-//        } 
+//            return null;
+//        }
         dataFileVersionNum = "2.0";
 
         String dateString
@@ -4938,7 +4950,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
             if ((usb.getStringDescriptors() != null) && (usb.getStringDescriptors().length == 3) && (usb.getStringDescriptors()[2] != null)) {
                 serialNumber = usb.getStringDescriptors()[2];
             }
-            // replace non-printable characters with X to avoid errors on windows 10 with creating such filenames. 
+            // replace non-printable characters with X to avoid errors on windows 10 with creating such filenames.
             // this sitation can occur with early prototypes that lack serial number (i.e. serial number is integer 0)
             StringBuilder sb = new StringBuilder("-");
             for (Character c : serialNumber.toCharArray()) {
@@ -5105,10 +5117,10 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
                 }
 
             }
-            
+
             // send synchronisation stop event
             seh.off();
-            
+
             loggingEnabled = false;
         }
 
@@ -5138,7 +5150,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
     public String toString() {
         return getTitle();
     }
-    
+
         private void evalButtonActionPerformed(java.awt.event.ActionEvent evt) {
                 // Get/Create Eval frame instance
             }
@@ -5780,7 +5792,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         this.activeRenderingEnabled = activeRenderingEnabled;
         prefs.putBoolean("AEViewer.activeRenderingEnabled", activeRenderingEnabled);
     }
-    
+
     private void buildEvalFrame() {
         if (!evalFrameBuilt) {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -5803,7 +5815,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
             evalFrame.setVisible(false);
         }
     }
-    
+
     private void showEvalFrame(boolean b) {
         if (evalFrame != null) {
             evalFrame.setVisible(b);
