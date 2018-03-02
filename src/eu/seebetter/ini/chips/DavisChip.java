@@ -15,7 +15,7 @@ import net.sf.jaer.eventprocessing.label.SimpleOrientationFilter;
 import net.sf.jaer.util.avioutput.JaerAviWriter;
 
 /**
- * Constants for DAVIS AE data format such as raw address encodings. 
+ * Constants for DAVIS AE data format such as raw address encodings.
  *
  * @author Christian/Tobi (added IMU)
  * @see eu.seebetter.ini.chips.davis.DavisBaseCamera
@@ -39,7 +39,7 @@ abstract public class DavisChip extends AETemporalConstastRetina {
                 EXTERNAL_INPUT_EVENT_ADDR_FALLING=2+EXTERNAL_INPUT_EVENT_ADDR,
                 EXTERNAL_INPUT_ADDR_RISING=3+EXTERNAL_INPUT_EVENT_ADDR,
                 EXTERNAL_INPUT_EVENT_ADDR_PULSE=4+EXTERNAL_INPUT_EVENT_ADDR;
-        
+
 	/* Detects bit indicating a DVS external event of type IMU */
 	public static final int IMUSHIFT = 0, IMUMASK = 1 << IMUSHIFT;
 

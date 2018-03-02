@@ -1,3 +1,5 @@
 /Thumbs.db
 /bin
 /build
+/server/FastEventServer_*
+/server/TestClient_*
