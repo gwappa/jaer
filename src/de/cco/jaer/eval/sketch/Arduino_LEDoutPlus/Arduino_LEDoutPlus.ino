@@ -1,29 +1,63 @@
-#define BAUDRATE 115200
-
-const int LASER = 13;
-const int SYNC  = 12;
+#define BAUDRATE 230400
 
 const int SYNC_ON   = (int)'1'; // jAER logging started
 const int SYNC_OFF  = (int)'2'; // jAER logging stopped
-const int LASER_ON  = (int)'A'; // swtich on optogenetic laser
-const int LASER_OFF = (int)'B'; // switch off optogenetic laser
-const int FLUSH     = (int)'F'; // flushes the output
+const int EVENT_ON  = (int)'A'; // swtich on event
+const int EVENT_OFF = (int)'B'; // switch off event
+const int FLUSH     = (int)'F'; // clears the buffer and flushes the output
+const int CLEAR     = (int)'O'; // clears the buffer
 int recv = 0; // byte received on the serial port
 
 const char BSYNC  = 0x01;
-const char BLASER = 0x02;
+const char BEVENT = 0x02;
 int offset = 0;
 
 char out = (char)0x00;
 char state = (char)0x00;
 
+#if defined (__AVR_ATmega328P__)
+// UNO-like
+const    int      EVENT = 13;
+const    int      SYNC  = 12;
+volatile uint8_t *syncport  = PORTB;
+volatile uint8_t *eventport = PORTB;
+const    uint8_t  MSYNC     = 0x01 << 4; // pin mask for pin 12
+const    uint8_t  MEVENT    = 0x01 << 5; // pin mask for pin 13
+
+#elif defined (__AVR_ATmega32U4__)
+// Leonardo-like
+const    int      EVENT     = 3;
+const    int      SYNC      = 4;
+volatile uint8_t *syncport  = PORTD;
+volatile uint8_t *eventport = PORTD;
+const    uint8_t  MSYNC     = 0x01;      // pin 4
+const    uint8_t  MEVENT    = 0x10;      // pin 3
+
+#else
+// unknown
+#error unsupported chip
+#endif
+
 void setup() {
   // initialize onboard LED (led) and serial port
-  pinMode(LASER, OUTPUT);
+  pinMode(EVENT, OUTPUT);
   pinMode(SYNC, OUTPUT);
+
   Serial.begin(BAUDRATE);
-  offset = 0;
+#if defined (__AVR_ATmega328P__)
+  // UNO-like
+  // let the host know that it is ready (after ~3 sec)
   Serial.println("--Arduino ready.");
+#elif defined (__AVR_ATmega32U4__)
+  // Leonardo-like
+  // just wait until the boot process is done
+  // (serial port stays open no matter what is going on with the host)
+  while(!Serial);
+#else
+
+#error unsupported chip
+#endif
+  offset = 0;
 }
 
 void encode(){
@@ -34,42 +68,54 @@ void encode(){
 
 void loop()
 {
-  // if serial port is available, read incoming bytes
-  if (Serial.available() > 0) {
-    recv = Serial.read();
+
+  if( (recv = Serial.read()) >= 0 ){
 
     // if '1' (decimal 49) is received, turn SNYC on
     // if '2' (decimal 50) is received, turn SYNC off
-    // if 'A' (decimal 101) is received, turn LED on
-    // if 'B', or any other non registered character is received, turn LED off
-    switch (recv) 
+    // if 'A' (decimal 101) is received, turn EVENT on
+    // if 'B', or any other non registered character is received, turn EVENT off
+    switch (recv)
     {
-      case LASER_ON:
-        digitalWrite(LASER, HIGH);
-        state |= BLASER;
+      case EVENT_ON:
+        *eventport |= MEVENT;
+        state |= BEVENT;
         encode();
         break;
-      case LASER_OFF:
-        digitalWrite(LASER, LOW);
-        state &= ~BLASER;
+      case EVENT_OFF:
+        *eventport &= ~MEVENT;
+        state &= ~BEVENT;
         encode();
         break;
       case SYNC_ON:
-        digitalWrite(SYNC, HIGH);
+        *syncport |= MSYNC;
         state |= BSYNC;
         encode();
         break;
       case SYNC_OFF:
-        digitalWrite(SYNC, LOW);
+        *syncport &= ~MSYNC;
         state &= ~BSYNC;
         encode();
         break;
       case FLUSH:
-        out = out << (4 - offset);
+        if( offset == 0 ){
+          return;
+        } else {
+          for(;offset<4;offset++){
+            out = out << 2;
+            out &= (char)0xFC;
+          }
+        }
         offset = 4;
         break;
+      case CLEAR:
+        *eventport &= ~MEVENT;
+        *syncport &= ~MSYNC;
+        state  = 0x00;
+        offset = 0;
+        break;
     }
-    
+
 
     if( offset == 4 ){
       // confirm values received in serial monitor window
