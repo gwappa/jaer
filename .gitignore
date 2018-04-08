@@ -2,4 +2,5 @@
 /bin
 /build
 /server/TestClient_*
+FastEvent/*
 

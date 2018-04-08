@@ -161,7 +161,7 @@ public class OutputHandler {
     public synchronized final void setOutput(OutputSource src) {
         this.outsrc = src;
         if (src == OutputSource.FILE) {
-            Path path = genFileName();
+            Path path = FastEventEnvironment.genFileName(getName());
             System.out.println("Saving data to '" + path.toString() + "'");
             outstream = openFile(path);
             write(getHeader());

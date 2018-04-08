@@ -83,7 +83,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 import ch.unizh.ini.jaer.chip.retina.DVS128;
-import de.cco.jaer.eval.FastEventClient;
+import de.cco.jaer.eval.TriggerHandler;
 import de.cco.jaer.eval.EvaluatorFrame;
 import de.cco.jaer.eval.ResultEvaluator;
 import de.cco.jaer.eval.SyncEventHandler;
@@ -969,7 +969,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         if( init_cnt > 2 ) {
             System.out.println("Shutting down the FastEventServer");
             try {
-                reval.getFastEventClient().disconnect(); // try to terminate server, close socket
+                TriggerHandler.shutdown(); // try to terminate server, close socket
             } catch (NullPointerException nclient) {
                 // do nothing
             }

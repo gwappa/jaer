@@ -48,12 +48,6 @@ public class ResultEvaluator {
     private OutputHandler out;
 
     /**
-     * Connection to FastEventServer, sends evaluation results via TCP, invokes
-     * downstream devices via serial connection
-     */
-    private FastEventClient client;
-
-    /**
      * Holds tracker output
      */
     private TrackerParams param;
@@ -90,7 +84,6 @@ public class ResultEvaluator {
                 tmp = instance;
                 if (tmp == null) {
                     instance = tmp = new ResultEvaluator();
-                    tmp.client = FastEventClient.getInstance();
                     tmp.param = null;
                     tmp.out = null;
                     tmp.thresh = null;
@@ -107,7 +100,6 @@ public class ResultEvaluator {
      */
     public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh) {
         this.param = param;
-        client = FastEventClient.getInstance();
 
         if (out != null) {
             out.close();
@@ -124,7 +116,6 @@ public class ResultEvaluator {
      */
     public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh, OutputHandler.OutputSource src) {
         this.param = param;
-        client = FastEventClient.getInstance();
         if (out != null) {
             out.close();
         }
@@ -140,7 +131,6 @@ public class ResultEvaluator {
      */
     public synchronized void initialize(TrackerParams param, EvaluatorThreshold thresh, String path) {
         this.param = param;
-        client = FastEventClient.getInstance();
         if (out != null) {
             out.close();
         }
@@ -175,11 +165,11 @@ public class ResultEvaluator {
 
         if (param.eval(getThreshold())) {
             event = true;
-            client.send(client.LASER_ON);
+            TriggerHandler.setEvent(true);
             out.write(param.print() + ",1");
         } else {
             event = false;
-            client.send(client.LASER_OFF);
+            TriggerHandler.setEvent(false);
             out.write(param.print() + ",0");
         }
     }
@@ -208,9 +198,9 @@ public class ResultEvaluator {
      * @return FastEventClient instance
      * @see FastEventClient
      */
-    public FastEventClient getFastEventClient() {
-        return client;
-    }
+    // public FastEventClient getFastEventClient() {
+    //     return client;
+    // }
 
     /**
      * Getter for EvaluatorFrame (GUI) instance

@@ -38,15 +38,9 @@ public class SyncEventHandler {
     OutputHandler out;
 
     /**
-     * TCP connection to FastEventServer
-     */
-    FastEventClient client;
-
-    /**
      * Private class constructor, called from getInstance()
      */
     private SyncEventHandler() {
-        client = FastEventClient.getInstance();
         out = new OutputHandler(OutputHandler.OutputSource.FILE,
                 "SyncEvents",
                 "sync,system");
@@ -76,7 +70,7 @@ public class SyncEventHandler {
     public void on() {
         long system = System.currentTimeMillis();
         out.write("1," + system);
-        client.send(client.SNYC_ON);
+        TriggerHandler.setSync(true);
     }
 
     /**
@@ -85,7 +79,7 @@ public class SyncEventHandler {
     public void off() {
         long system = System.currentTimeMillis();
         out.write("0," + system);
-        client.send(client.SYNC_OFF);
+        TriggerHandler.setSync(false);
     }
 
     /**

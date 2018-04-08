@@ -35,7 +35,8 @@ import net.sf.jaer.graphics.FrameAnnotater;
 @DevelopmentStatus(DevelopmentStatus.Status.Experimental)
 public class MeanTracker extends EventFilter2D implements FrameAnnotater {
 
-    double[] wsum = new double[2];
+    double[] w1sum = new double[2];
+    double[] w2sum = new double[2];
     double w = 0f;
     double kappa = 0f;
 
@@ -111,6 +112,7 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
     @Override
     public EventPacket filterPacket(EventPacket in) {
         int n = in.getSize();
+        int nevents = 0;
 
         lastts = in.getLastTimestamp();
         dt = lastts - prevlastts;
@@ -121,11 +123,20 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
             kappa = 1;
         }
 
-        ArrayList<Short> xs = new ArrayList<>();
-        ArrayList<Short> ys = new ArrayList<>();
-        float[] wsum_packet = new float[2];
-        int index = 0;
-        wsum_packet[0] = wsum_packet[1] = 0f;
+        // multiply weighted sums with decay time constant
+        w        *= kappa;
+        w1sum[0] *= kappa;
+        w1sum[1] *= kappa;
+        w2sum[0] *= kappa;
+        w2sum[1] *= kappa;
+
+        // ArrayList<Short> xs = new ArrayList<>();
+        // ArrayList<Short> ys = new ArrayList<>();
+        // float[] wsum_packet = new float[2];
+        // int index = 0;
+        // wsum_packet[0] = wsum_packet[1] = 0f;
+
+        // update weighted sums by iterating with events
         for (Object o : in) {
             PolarityEvent p = (PolarityEvent) o;
             // if filter is enabled, consider only off events
@@ -138,45 +149,60 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
             if (p.isSpecial()) {
                 continue;
             }
-            wsum_packet[0] += p.x;
-            wsum_packet[1] += p.y;
-            xs.add(p.x);
-            ys.add(p.y);
-            index++;
+            // process this event object
+            // by merging to nevents, w1sum, w2sum
+            nevents++;
+            w1sum[0] += p.x;
+            w1sum[1] += p.y;
+            w2sum[0] += (p.x)*(p.x);
+            w2sum[1] += (p.y)*(p.y);
+
+            // wsum_packet[0] += p.x;
+            // wsum_packet[1] += p.y;
+            // xs.add(p.x);
+            // ys.add(p.y);
+            // index++;
         }
-        if (index == 0) { // got no actual events
-            return in;
-        }
+        // if (index == 0) { // got no actual events
+        //     return in;
+        // }
 
-        wsum[0] = kappa * wsum[0] + wsum_packet[0];
-        wsum[1] = kappa * wsum[1] + wsum_packet[1];
-        w = kappa * w + index;
+        // wsum[0] = kappa * wsum[0] + wsum_packet[0];
+        // wsum[1] = kappa * wsum[1] + wsum_packet[1];
+        // w = kappa * w + index;
 
-        xmean = wsum[0] / w;
-        ymean = wsum[1] / w;
+        // update weight according to `nevents`
+        w += nevents;
 
-        double xvar = 0, yvar = 0;
-        double tmp;
-        for (int i = 0; i < index; i++) {
-            tmp = xs.get(i) - xmean;
-            tmp *= tmp;
-            xvar += tmp;
+        // update AVG values
+        xmean = w1sum[0] / w;
+        ymean = w1sum[1] / w;
 
-            tmp = ys.get(i) - ymean;
-            tmp *= tmp;
-            yvar += tmp;
-        }
-        xvar /= index;
-        yvar /= index;
-        xstd = Math.sqrt(xvar);
-        ystd = Math.sqrt(yvar);
+        // double xvar = 0, yvar = 0;
+        // double tmp;
+        // for (int i = 0; i < index; i++) {
+        //     tmp = xs.get(i) - xmean;
+        //     tmp *= tmp;
+        //     xvar += tmp;
 
+        //     tmp = ys.get(i) - ymean;
+        //     tmp *= tmp;
+        //     yvar += tmp;
+        // }
+        // xvar /= index;
+        // yvar /= index;
+
+        // update STD values
+        xstd = Math.sqrt(w2sum[0]/w - (xmean*xmean));
+        ystd = Math.sqrt(w2sum[1]/w - (ymean*ymean));
+
+        // update points/rectangles to be drawn on the screen
         meanPoint.setLocation(xmean, ymean);
         stdPoint.setLocation(xstd * numStdDevsForBoundingBox, ystd * numStdDevsForBoundingBox);
 
-        if (n > 0) {
+        if (nevents > 0) {
             // evaluate tracker output
-            params.update(index,
+            params.update(nevents,
                     in.getFirstTimestamp(),
                     lastts,
                     xstd, ystd,
