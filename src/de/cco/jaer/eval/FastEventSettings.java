@@ -18,6 +18,8 @@
 
 package de.cco.jaer.eval;
 
+import java.io.Writer;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,7 +35,7 @@ import java.util.logging.Logger;
  *
  * @author gwappa
  */
-public class FastEventEnvironment {
+public class FastEventSettings {
     private static final String HOSTNAME        = "localhost";
     private static final int    SERVICE_PORT    = 11666;
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("ddMMyyyyHHmmss");
@@ -52,18 +54,55 @@ public class FastEventEnvironment {
      * Generate new filename from current date and working directory. In case it
      * doesn't exist. Create data directory inside local packet.
      *
-     * @return String, new file name. 
+     * @param baseName      the base name, without a timestamp
+     * @param referenceAER  the name of the AER data file that works as a reference
+     *                      for the time stamp. can be null.
+     *
+     * @return String, new file name.
      */
-    public static Path genFileName(String baseName) {
+    public static String generateFileName(String baseName, String referenceAER) {
         if (!Files.exists(BASE_DIR)) {
             // create base directory
             try {
                 Files.createDirectory(BASE_DIR);
             } catch (IOException e) {
-                Logger.getLogger(FastEventEnvironment.class.getName()).log(Level.SEVERE, null, e);
+                Logger.getLogger(FastEventSettings.class.getName()).log(Level.SEVERE, null, e);
             }
         }
-        Date date = new Date();
-        return Paths.get(BASE_DIR.toString(), String.format("%s_%s.log", baseName, DATE_FORMAT.format(date)));
+
+        // get time stamp
+        String timestamp = null;
+        if (referenceAER == null) {
+            // create String timestamp by formatting the current time
+            Date date = new Date();
+            timestamp = DATE_FORMAT.format(date);
+        } else {
+            // extract timestamp fraction from the existing ".aedat" file.
+            timestamp = referenceAER.substring(referenceAER.indexOf("-"),
+                                                referenceAER.length() - 6);
+        }
+        return Paths.get(BASE_DIR.toString(), 
+                        String.format("%s_%s.log", baseName, timestamp))
+                    .toString();
+    }
+
+    /**
+     * Generate new Writer object from current date and working directory.
+     * In case it doesn't exist. Create data directory inside local packet.
+     *
+     * @param baseName      the base name, without a timestamp
+     * @param referenceAER  the name of the AER data file that works as a reference
+     *                      for the time stamp. can be null.
+     *
+     * @return the Writer object that points to the created file.
+     *          returns null if it fails to open a Writer.
+     */
+    public static Writer generateWriter(String baseName, String referenceAER) {
+        try {
+            return new FileWriter(generateFileName(baseName, referenceAER));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            return null;
+        }
     }
 }

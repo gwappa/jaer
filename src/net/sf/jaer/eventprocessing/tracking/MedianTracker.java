@@ -11,13 +11,12 @@ package net.sf.jaer.eventprocessing.tracking;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
-import de.cco.jaer.eval.EvaluatorThreshold;
-import de.cco.jaer.eval.MedianTrackerParams;
-import de.cco.jaer.eval.OutputHandler;
+// import de.cco.jaer.eval.EvaluatorThreshold; %%fastevent-related
+// import de.cco.jaer.eval.MedianTrackerParams; %%fastevent-related
+// import de.cco.jaer.eval.OutputHandler; %%fastevent-related
+// import de.cco.jaer.eval.ResultEvaluator; %%fastevent-related
 import java.awt.geom.Point2D;
 import java.util.Arrays;
-
-import de.cco.jaer.eval.ResultEvaluator;
 
 import net.sf.jaer.Description;
 import net.sf.jaer.DevelopmentStatus;
@@ -55,21 +54,21 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
     private float numStdDevsForBoundingBox =getFloat("numStdDevsForBoundingBox", 1f);
     float alpha = 1, beta = 0; // alpha is current weighting, beta is past value weighting
     
-    MedianTrackerParams params;
-    ResultEvaluator reval;
-    EvaluatorThreshold thresh;
+    // MedianTrackerParams params; %%fastevent-related
+    // ResultEvaluator reval; %%fastevent-related
+    // EvaluatorThreshold thresh; %%fastevent-related
     
     /**
      * Creates a new instance of MedianTracker
      */
     public MedianTracker(AEChip chip) {
         super(chip);
-        params = new MedianTrackerParams();
-        params.setChip(chip);
-        reval = ResultEvaluator.getInstance();
-        thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, 4e-4);
-        reval.initialize(params, thresh, OutputHandler.OutputSource.FILE);
-        reval.attachFilterStateListener(support);
+        // params = new MedianTrackerParams(); %%fastevent-related
+        // params.setChip(chip); %%fastevent-related
+        // reval = ResultEvaluator.getInstance(); %%fastevent-related
+        // thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, 4e-4); %%fastevent-related
+        // reval.initialize(params, thresh, OutputHandler.OutputSource.FILE); %%fastevent-related
+        // reval.attachFilterStateListener(support); %%fastevent-related
         
         xFilter.setTauMs(tauUs / 1000f);
         yFilter.setTauMs(tauUs / 1000f);
@@ -196,16 +195,16 @@ public class MedianTracker extends EventFilter2D implements FrameAnnotater {
         meanPoint.setLocation(xmean, ymean);
         stdPoint.setLocation(xstd*numStdDevsForBoundingBox, ystd*numStdDevsForBoundingBox);
 
-        if (n>0) {
-            // evaluate tracker output
-            params.update(index, 
-                    in.getFirstTimestamp(), 
-                    lastts, 
-                    xmedian, ymedian, 
-                    xstd, ystd, 
-                    xmedian, ymedian);
-            reval.eval();
-        }
+        // if (n>0) { %%fastevent-related
+        //     // evaluate tracker output %%fastevent-related
+        //     params.update(index,  %%fastevent-related
+        //             in.getFirstTimestamp(),  %%fastevent-related
+        //             lastts,  %%fastevent-related
+        //             xmedian, ymedian,  %%fastevent-related
+        //             xstd, ystd,  %%fastevent-related
+        //             xmedian, ymedian); %%fastevent-related
+        //     reval.eval(); %%fastevent-related
+        // } %%fastevent-related
         
         return in; // xs and ys will now be sorted, output will be bs because time will not be sorted like addresses
     }

@@ -145,7 +145,6 @@ is divided into following sections:
         </condition>
         <property name="run.jvmargs" value=""/>
         <property name="run.jvmargs.ide" value=""/>
-        <property name="javac.compilerargs" value=""/>
         <property name="work.dir" value="${basedir}"/>
         <condition property="no.deps">
             <and>

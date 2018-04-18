@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Viktor Bahr, Keisuke Sehara
+ * Copyright (C) 2017-2018 Viktor Bahr, Keisuke Sehara
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -25,14 +25,83 @@ import java.net.UnknownHostException;
 import java.net.InetAddress;
 
 /**
- * TriggerHandler
+ * a proxy class to FastEventServer.
  *
- * a proxy to FastEventServer.
- * Internally, it updates the 'internal' state first, and sends the update to the server whenever possible.
+ * <h3>The interface</h3>
+ * <p>
+ * There are only three interface methods that can be used from the other classes:
+ * <ul>
+ * <li>setSync(boolean) -- used to flag whether or not logging is on.</li>
+ * <li>setEvent(boolean) -- used to flag whether or not event is on (as evaluated/called by EvaluationTarget).</li>
+ * <li>shutdown() -- called when jAER is terminating.</li>
+ * </ul>
+ * In most cases, these methods are called by FastEventManager (setEvent() will be by EvaluationTarget).
+ * You will not call them directly.
+ * </p>
+ *
+ * <h3>Internal structure</h3>
+ * <p>
+ * The EventTriggerManager class is comprised of the producer-consumer pattern,
+ * where the Manager updates the 'internal' state (whether or not to trigger event/sync),
+ * and its nested IOLoop thread works to send the given internal state to the FastEventServer as fast as possible.
+ * </p>
+ * <p>
+ * Because of the algorithm used, the IOLoop thread can in theory drop some state updates
+ * as the cost of the fast responses (although we see these drops quite rarely).
+ * </p>
+ *
+ * <h3>The "internal state"</h3>
+ * <p>
+ * The EventTriggerManager holds the current "supposed-to-be" output state all the time,
+ * in the form of EventTriggerManager.State instance.
+ * </p>
+ * <p>
+ * Reflecting the three main interface methods, this class holds the state of:
+ * <ul>
+ * <li>Whether or not the logging is active</li>
+ * <li>Whether or not the event is on</li>
+ * <li>Whether or not the process must be shut down</li>
+ * </ul>
+ * </p>
+ * <p>
+ * Note that there are two copies of this State instance: a 'request' instance that EventTriggerManager holds,
+ * and the other 'server state' instance that the IOLoop thread holds.
+ * The former reflects the up-to-date state of evaluation, whereas the latter reflects the current state on the
+ * server side.
+ * The IOLoop thread may refer to the 'request' instance as frequent as it can, but it does not send any output to
+ * FastEventServer unless it differs from the 'server state' instance.
+ * </p>
+ *
+ * <h3>The life cycle of the IOLoop thread</h3>
+ * <p>
+ * The IOLoop thread starts as soon as EventTriggerManager is loaded, through the `startIOThread()` static method.
+ * You may need to be careful when the main thread fails accidentally, as the IOLoop thread is likely to be still running.
+ * The shutdown of the IOLoop thread occurs when any class (most likely to be FastEventManager) calls `EventTriggerManager.shutdown()`.
+ * This results in passing the shutdown flag to the IOLoop thread, and lets it terminate.
+ * </p>
+ *
+ * <h3>Profiling vs performance</h3>
+ * <p>
+ * By switching the `LOGGING_ENABLED` static constant to `true`, you can let the IOLoop to output all the timings
+ * of its transactions in the form of CSV.
+ * On the other hand, this logging feature often results in a significant reduction in performance (as it accompanies
+ * output to a file).
+ * Therefore, unless you really want to examine the distribution of latency, we strongly recommend to leave the 
+ * `LOGGING_ENABLED` flag being `false`.
+ * </p>
+ * <p>
+ * Instead, we also have the `PROFILE_LATENCY` flag, which is `true` by default.
+ * This enables one to review the min/max/average latency during the whole jAER session, when jAER is about to shutdown,
+ * through the standard output (you may need to run jAER from NetBeans or from the terminal emulator).
+ * Although this should not be a lot of duty by itself, you can turn it to `false` if you think this may be 
+ * causing the latency problem.
+ * </p>
  *
  * @author gwappa
+ * @see FastEventManager
+ * @see EvaluationTarget
  */
-public class TriggerHandler
+public class EventTriggerManager
 {
     private static final boolean PROFILE_LATENCY    = true;
     private static final boolean LOGGING_ENABLED    = false;
@@ -54,14 +123,14 @@ public class TriggerHandler
      * expected to be performed during startup.
      */
     private static void startIOThread() {
-        ioThread_    = new Thread(new TriggerHandler.EventLoop());
+        ioThread_    = new Thread(new EventTriggerManager.IOLoop());
         ioThread_.setPriority(Thread.MAX_PRIORITY);
         ioThread_.start();
     }
 
     /**
      * the class that represents the internal state of the triggers.
-     * instances are used in both TriggerHandler and TriggerHandler.Thread classes.
+     * instances are used in both EventTriggerManager and EventTriggerManager.Thread classes.
      */
     private static class State {
         public boolean  event;
@@ -99,10 +168,10 @@ public class TriggerHandler
     /**
      * the Runnable class that handles I/O to the server.
      */
-    private static class EventLoop 
+    private static class IOLoop 
         implements Runnable 
     {
-        TriggerHandler.State    stateMonitor_   = new TriggerHandler.State(0, false, false, false);
+        EventTriggerManager.State    stateMonitor_   = new EventTriggerManager.State(0, false, false, false);
         DatagramSocket          connection_;
         DatagramPacket          packet_;
 
@@ -124,17 +193,17 @@ public class TriggerHandler
         /*
          * file output for logging output
          */
-        private OutputHandler logger;
+        private FastEventWriter logger;
 
         /**
          * the infinite loop that handles I/O to the server.
-         * it keeps running until `shutdown` flag is set for TriggerHandler.stateUpdate_ state.
+         * it keeps running until `shutdown` flag is set for EventTriggerManager.stateUpdate_ state.
          */
         @Override
         public void run() {
             setup();
 
-            TriggerHandler.State newState;
+            EventTriggerManager.State newState;
 
             // loop
             while (true) {
@@ -151,7 +220,7 @@ public class TriggerHandler
                         try {
                             io_.wait();
                         } catch (InterruptedException e) {
-                            System.err.println("***TriggerHandlerThread detected an interrupt while waiting.");
+                            System.err.println("***EventTriggerManagerThread detected an interrupt while waiting.");
 
                             // end the event loop
                             teardown();
@@ -241,7 +310,7 @@ public class TriggerHandler
          * @param update    the up-to-date state
          * @return hasContents whether the updated packet has a content
          */
-        private boolean updatePacket(TriggerHandler.State update) {
+        private boolean updatePacket(EventTriggerManager.State update) {
             if (update.shutdown == true) {
                 buffer_[0] = SHUTDOWN;
                 packet_.setData(buffer_, 0, 1);
@@ -263,11 +332,11 @@ public class TriggerHandler
          * opens a connection to the host.
          */
         private void openConnection() {
-            String hostName = FastEventEnvironment.getServiceHost();
+            String hostName = FastEventSettings.getServiceHost();
             try {
                 // prepare UDP socket
                 connection_ = new DatagramSocket();
-                connection_.connect(InetAddress.getByName(hostName), FastEventEnvironment.getServicePort());
+                connection_.connect(InetAddress.getByName(hostName), FastEventSettings.getServicePort());
                 packet_ = new DatagramPacket(new byte [] { 0x00 }, 1,
                                             connection_.getInetAddress(),
                                             connection_.getPort());
@@ -303,9 +372,9 @@ public class TriggerHandler
          * sets up `logger` buffered writer instance.
          */
         private void setupLogger() {
-            logger = new OutputHandler(OutputHandler.OutputSource.FILE,
-                            "TriggerHandler",
-                            "index,start,end,sync,event");
+            logger = FastEventWriter.fromBaseName("EventTriggerManager",
+                                                null,
+                                                "index,start,end,sync,event");
         }
 
         private void updateLogger() {

@@ -5,7 +5,7 @@
  */
 package net.sf.jaer.eventprocessing;
 
-import de.cco.jaer.eval.EvaluatorFrame;
+// import de.cco.jaer.eval.EvaluatorFrame; %%toberemoved
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Desktop;

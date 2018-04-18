@@ -1,22 +1,40 @@
 /*
+ * Copyright (C) 2017-2018 Viktor Bahr, Keisuke Sehara
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+
+/*
      *MeanTracker.java
      *
      * Created on August 14, 2017, 11:23 PM
-     *
-     * To change this template, choose Tools | Options and locate the template under
-     * the Source Creation and Management node. Right-click the template and choose
-     * Open. You can then make changes to the template in the Source Editor.
  */
 package net.sf.jaer.eventprocessing.tracking;
 
-import com.jogamp.opengl.GL2;
+import java.awt.Dimension;
 import com.jogamp.opengl.GLAutoDrawable;
-import de.cco.jaer.eval.EvaluatorThreshold;
-import de.cco.jaer.eval.MeanTrackerParams;
-import de.cco.jaer.eval.OutputHandler;
-import java.awt.geom.Point2D;
+import com.jogamp.opengl.GL2;
+import de.cco.jaer.eval.CoordinateType;
+import de.cco.jaer.eval.TrackingDelegate;
+import de.cco.jaer.eval.TrackingParameter;
+import de.cco.jaer.eval.FastEventWriter;
+import de.cco.jaer.eval.EvaluationTarget;
+import de.cco.jaer.eval.FastEventManager;
+import de.cco.jaer.eval.CanvasManager;
+import de.cco.jaer.eval.EventTriggerManager;
 
-import de.cco.jaer.eval.ResultEvaluator;
 import java.util.ArrayList;
 import net.sf.jaer.Description;
 import net.sf.jaer.DevelopmentStatus;
@@ -29,21 +47,21 @@ import net.sf.jaer.graphics.FrameAnnotater;
 /**
  * Decay based tracking of mean event location.
  *
- * @author viktor
+ * @author viktor, gwappa
  */
 @Description("Tracks a single object by mean event location, decay-based.")
 @DevelopmentStatus(DevelopmentStatus.Status.Experimental)
-public class MeanTracker extends EventFilter2D implements FrameAnnotater {
+public class MeanTracker extends EventFilter2D 
+    implements FrameAnnotater, TrackingDelegate
+{
+    private static final    String      TRACKER_NAME        = "MeanTracker";
+    private static final    String[]    TRACKER_HEADERS     = new String[] {"X","Y"};
 
     double[] w1sum = new double[2];
     double[] w2sum = new double[2];
     double w = 0f;
     double kappa = 0f;
 
-    Point2D stdPoint = new Point2D.Double(), meanPoint = new Point2D.Double();
-    double xstd = 0f;
-    double ystd = 0f;
-    double xmean = 0f, ymean = 0f;
     int lastts = 0, dt = 0;
     int prevlastts = Integer.MIN_VALUE;
     int tau = getInt("tau", 10);
@@ -51,21 +69,23 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
     private boolean ononly = getBoolean("ONOnly", false);
     private float numStdDevsForBoundingBox = getFloat("numStdDevsForBoundingBox", 1f);
 
-    MeanTrackerParams params;
-    ResultEvaluator reval;
-    EvaluatorThreshold thresh;
+    TrackingParameter   param;
+
+    FastEventWriter     output = null;
 
     /**
-     * Creates a new instance of MedianTracker
+     * Creates a new instance of MeanTracker
      */
     public MeanTracker(AEChip chip) {
         super(chip);
-        params = new MeanTrackerParams();
-        params.setChip(chip);
-        thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.SPEED, 4e-4);
-        reval = ResultEvaluator.getInstance();
-        reval.initialize(params, thresh, OutputHandler.OutputSource.FILE);
-        reval.attachFilterStateListener(support);
+        param = new TrackingParameter(CoordinateType.POSITION);
+
+        FastEventManager.setTrackingDelegate(this);
+
+        // TODO: probably something like "isLogging" property
+        // should be set here in our PropertyChangeSupport object
+        // so that FastEventWriter can close itself with its value change...
+
         setPropertyTooltip("tau", "Time constant in us (microseonds) of mean location lowpass filter, 0 for instantaneous");
         setPropertyTooltip("OFFOnly", "Consider only off events for tracking.");
         setPropertyTooltip("ONOnly", "Consider only on events for tracking.");
@@ -74,22 +94,10 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
 
     @Override
     public void resetFilter() {
-        meanPoint.setLocation(chip.getSizeX() / 2, chip.getSizeY() / 2);
-        stdPoint.setLocation(1, 1);
-    }
-
-    /**
-     * Returns a 2D point defining the x and y std deviations times the
-     * numStdDevsForBoundingBox
-     *
-     * @return the 2D value
-     */
-    public Point2D getStdPoint() {
-        return this.stdPoint;
-    }
-
-    public Point2D getMeanPoint() {
-        return this.meanPoint;
+        param.coords[0] = chip.getSizeX() / 2;
+        param.coords[1] = chip.getSizeY() / 2;
+        param.confidence[0] = 1;
+        param.confidence[1] = 1;
     }
 
     public int getTauUs() {
@@ -110,7 +118,7 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
     }
 
     @Override
-    public EventPacket filterPacket(EventPacket in) {
+    public final EventPacket filterPacket(EventPacket in) {
         int n = in.getSize();
         int nevents = 0;
 
@@ -129,12 +137,6 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
         w1sum[1] *= kappa;
         w2sum[0] *= kappa;
         w2sum[1] *= kappa;
-
-        // ArrayList<Short> xs = new ArrayList<>();
-        // ArrayList<Short> ys = new ArrayList<>();
-        // float[] wsum_packet = new float[2];
-        // int index = 0;
-        // wsum_packet[0] = wsum_packet[1] = 0f;
 
         // update weighted sums by iterating with events
         for (Object o : in) {
@@ -156,58 +158,39 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
             w1sum[1] += p.y;
             w2sum[0] += (p.x)*(p.x);
             w2sum[1] += (p.y)*(p.y);
-
-            // wsum_packet[0] += p.x;
-            // wsum_packet[1] += p.y;
-            // xs.add(p.x);
-            // ys.add(p.y);
-            // index++;
         }
-        // if (index == 0) { // got no actual events
-        //     return in;
-        // }
-
-        // wsum[0] = kappa * wsum[0] + wsum_packet[0];
-        // wsum[1] = kappa * wsum[1] + wsum_packet[1];
-        // w = kappa * w + index;
-
-        // update weight according to `nevents`
+        // update the weight according to `nevents`
         w += nevents;
 
-        // update AVG values
-        xmean = w1sum[0] / w;
-        ymean = w1sum[1] / w;
+        // compute AVG values
+        final double xmean = w1sum[0] / w;
+        final double ymean = w1sum[1] / w;
 
-        // double xvar = 0, yvar = 0;
-        // double tmp;
-        // for (int i = 0; i < index; i++) {
-        //     tmp = xs.get(i) - xmean;
-        //     tmp *= tmp;
-        //     xvar += tmp;
+        // compute STD values
+        final double xstd = Math.sqrt(w2sum[0]/w - (xmean*xmean));
+        final double ystd = Math.sqrt(w2sum[1]/w - (ymean*ymean));
 
-        //     tmp = ys.get(i) - ymean;
-        //     tmp *= tmp;
-        //     yvar += tmp;
-        // }
-        // xvar /= index;
-        // yvar /= index;
 
-        // update STD values
-        xstd = Math.sqrt(w2sum[0]/w - (xmean*xmean));
-        ystd = Math.sqrt(w2sum[1]/w - (ymean*ymean));
-
-        // update points/rectangles to be drawn on the screen
-        meanPoint.setLocation(xmean, ymean);
-        stdPoint.setLocation(xstd * numStdDevsForBoundingBox, ystd * numStdDevsForBoundingBox);
+        // update the parameter set
+        param.nevents       = nevents;
+        param.firstts       = in.getFirstTimestamp();
+        param.lastts        = lastts;
+        param.coords[0]     = xmean;
+        param.coords[1]     = ymean;
+        param.confidence[0] = xstd * numStdDevsForBoundingBox;
+        param.confidence[1] = ystd * numStdDevsForBoundingBox;
 
         if (nevents > 0) {
-            // evaluate tracker output
-            params.update(nevents,
-                    in.getFirstTimestamp(),
-                    lastts,
-                    xstd, ystd,
-                    xmean, ymean);
-            reval.eval();
+            // update evaluation & position status
+            // (and thus triggers output, if applicable)
+            FastEventManager.trackingParameterUpdated(param);
+        }
+
+        // check whether jAER is currently logging
+        // test by examining output against null
+        if (output != null) {
+            // let the output handler handle the logging
+            output.write(param.toString());
         }
 
         return in; // xs and ys will now be sorted, output will be bs because time will not be sorted like addresses
@@ -218,32 +201,51 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
      */
     @Override
     public void annotate(GLAutoDrawable drawable) {
-        if (!isFilterEnabled()) {
-            return;
+        // not used here.
+        // for rendering, check CanvasManager.render() method.
+    }
+
+    /**
+     * returns the mode of this Tracker.
+     */
+    @Override
+    public final CoordinateType getCoordinateType() {
+        return CoordinateType.POSITION;
+    }
+
+    @Override
+    public final Dimension getSensorDimension() {
+        return new Dimension(chip.getSizeX(), chip.getSizeY());
+    }
+
+    /**
+     * callback for start of logging
+     *
+     * @param referenceAER  the AER data log file to be used as a reference for
+     *                      time stamp.
+     */
+    @Override
+    public final void startLogging(String referenceAER) {
+        if (output == null) {
+            // prepare output
+            output = FastEventWriter.fromBaseName(TRACKER_NAME, referenceAER,
+                                            param.generateHeaders(TRACKER_HEADERS));
+            FastEventManager.logMessage(MSG_TYPE_TRACKER, String.format("Mean(%d)",tau));
+            // TODO: set PropertyChangeSupport
         }
-        Point2D p = meanPoint;
-        Point2D s = stdPoint;
-        GL2 gl = drawable.getGL().getGL2();
-        // already in chip pixel context with LL corner =0,0
-        gl.glPushMatrix();
-        gl.glColor3f(0, 0, 1);
-        gl.glLineWidth(4);
-        gl.glBegin(GL2.GL_LINE_LOOP);
-        gl.glVertex2d(p.getX() - s.getX(), p.getY() - s.getY());
-        gl.glVertex2d(p.getX() + s.getX(), p.getY() - s.getY());
-        gl.glVertex2d(p.getX() + s.getX(), p.getY() + s.getY());
-        gl.glVertex2d(p.getX() - s.getX(), p.getY() + s.getY());
-        gl.glEnd();
-        // draw cross at mean 
-        gl.glColor3f(1, 0, 0);
-        gl.glLineWidth(2);
-        gl.glBegin(GL2.GL_LINES);
-        gl.glVertex2d(p.getX(), p.getY() + 2);
-        gl.glVertex2d(p.getX(), p.getY() - 2);
-        gl.glVertex2d(p.getX() + 2, p.getY());
-        gl.glVertex2d(p.getX() - 2, p.getY());
-        gl.glEnd();
-        gl.glPopMatrix();
+    }
+
+    /**
+     * callback for end of logging
+     */
+    @Override
+    public final void endLogging() {
+        if (output != null) {
+            // close output
+            // (if there were no lines, it should be nicely handled by FastEventWriter)
+            output.close();
+            output = null;
+        }
     }
 
     /**
@@ -260,7 +262,6 @@ public class MeanTracker extends EventFilter2D implements FrameAnnotater {
         this.numStdDevsForBoundingBox = numStdDevsForBoundingBox;
         putFloat("numStdDevsForBoundingBox", numStdDevsForBoundingBox);
     }
-    
     
     public boolean getOffOnly() {
         return offonly;

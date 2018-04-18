@@ -63,14 +63,16 @@ import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.gl2.GLUT;
-import de.cco.jaer.eval.EvaluatorThreshold;
-import de.cco.jaer.eval.ResultEvaluator;
-import de.cco.jaer.eval.TrackerParams;
+// import de.cco.jaer.eval.EvaluatorThreshold; %%toberemoved
+// import de.cco.jaer.eval.ResultEvaluator; %%toberemoved
+// import de.cco.jaer.eval.TrackerParams; %%toberemoved
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.lang.reflect.Field;
 import net.sf.jaer.util.TextRendererScale;
+
+import de.cco.jaer.eval.CanvasManager;
 
 /**
  * Superclass for classes that paint rendered AE data to graphics devices.
@@ -177,11 +179,11 @@ public class ChipCanvas implements GLEventListener, Observer {
     private double ZCLIP = 1;
     private TextRenderer renderer = null;
     
-    /**
-     * Connection to ResultEvaluator instance
-     */
-    private ResultEvaluator reval;
-    private TextRenderer evalRenderer = null;
+    // /** %%toberemoved
+    //  * Connection to ResultEvaluator instance %%toberemoved
+    //  */ %%toberemoved
+    // private ResultEvaluator reval; %%toberemoved
+    // private TextRenderer evalRenderer = null; %%toberemoved
 
     /**
      * Creates a new instance of ChipCanvas
@@ -341,6 +343,8 @@ public class ChipCanvas implements GLEventListener, Observer {
 //                        log.info("focus lost");
 //                    }
 //                });
+                
+        // CanvasManager.reset(chip.getSizeX(), chip.getSizeY(), this); %%toberemoved
     }
 
     /**
@@ -541,101 +545,125 @@ public class ChipCanvas implements GLEventListener, Observer {
             checkGLError(gl, glu, "after FrameAnnotator (EventFilter) annotations");
         }
         
+        // draw FastEvent-related annotations
+        CanvasManager.render(drawable);
         
-        /**
-         * Code to draw ResultEvaluator info.
-         * TrackerParams data is drawn on the left side of the ChipCanvas.
-         * POSITION & REGION threshold boundaries is drawn in the ChipCanvas at the user-designated position.
-         * Currently thresholded value is drawn in red if condition is fulfilled.
-         */
-        if (reval == null) {
-            reval = ResultEvaluator.getInstance();
-        }
-        if (reval.isArmed() && reval.isDrawing()) {
-            TrackerParams params = reval.getParams();
-            String[] cols = params.printHeader().split(",");
-            String[] data = params.print().split(",");
-            int x = -85;
-            int y = 140;
-            int offset = 10;
-            if (evalRenderer == null) {
-                evalRenderer = new TextRenderer(new Font("SansSerif", Font.PLAIN, 42));
-            }
-            String name = "Name: " + params.getName();
-            final float textScale = TextRendererScale.draw3dScale(evalRenderer, name, getScale(), chip.getSizeX(), .17f);
-            gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-            gl.glPushMatrix();
-            gl.glTranslatef(x, y, 0);
-            evalRenderer.setColor(1, 1, 1, 1);
-            evalRenderer.begin3DRendering();
-            evalRenderer.draw3D(name, 0, 0, 0, textScale);
-            y -= offset;
-            evalRenderer.end3DRendering();
-            gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-            gl.glPopMatrix();
-            for (int i = 0; i < cols.length; i++) {
-                gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-                gl.glPushMatrix();
-                gl.glTranslatef(x, y, 0);
-                if (cols[i].equalsIgnoreCase(reval.getThreshold().getTarget().toString())) {
-                    if (reval.isEvent()) {
-                        evalRenderer.setColor(0, 1, 0, 1);
-                    } else {
-                        evalRenderer.setColor(1, 0, 0, 1);
-                    }
-                }
-                else {
-                    evalRenderer.setColor(1, 1, 1, 1);
-                }
-                // calls to begin/end have bad performance
-                evalRenderer.begin3DRendering();
-                String s = String.format("%s: %s", cols[i], data[i]);
-                evalRenderer.draw3D(s, 0, 0, 0, textScale);
-                y -= offset;
-                evalRenderer.end3DRendering();
-                gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-                gl.glPopMatrix();
-            }
-        }
+        // /* %%toberemoved
+        //  * Code to draw ResultEvaluator info. %%toberemoved
+        //  * TrackerParams data is drawn on the left side of the ChipCanvas. %%toberemoved
+        //  * POSITION & REGION threshold boundaries is drawn in the ChipCanvas at the user-designated position. %%toberemoved
+        //  * Currently thresholded value is drawn in red if condition is fulfilled. %%toberemoved
+        //  */ %%toberemoved
+        // if (reval == null) { %%toberemoved
+        //     reval = ResultEvaluator.getInstance(); %%toberemoved
+        // } %%toberemoved
+        // if (reval.isArmed() && reval.isDrawing()) { %%toberemoved
+        //     // obtain parameter info from ResultEvaluator %%toberemoved
+        //     TrackerParams params = reval.getParams(); %%toberemoved
+        //     String[] cols = params.printHeader().split(","); %%toberemoved
+        //     String[] data = params.print().split(","); %%toberemoved
+
+        //     // settings on where to draw texts %%toberemoved
+        //     int x = -85;        // the horizontal position relative to the camera's field of view %%toberemoved
+        //     int y = 140;        // the vertical position relative to the camera's field of view %%toberemoved
+        //     int offset = 10;    // the vertical increment for line feeds %%toberemoved
+
+        //     // we re-use evalRenderer throughout the session %%toberemoved
+        //     if (evalRenderer == null) { %%toberemoved
+        //         evalRenderer = new TextRenderer(new Font("SansSerif", Font.PLAIN, 42)); %%toberemoved
+        //     } %%toberemoved
+
+        //     // the first parameter info is the name itself %%toberemoved
+        //     String name = "Name: " + params.getName(); %%toberemoved
+        //     // generate the size settings for the text to be drawn %%toberemoved
+        //     final float textScale = TextRendererScale.draw3dScale(evalRenderer, name, getScale(), chip.getSizeX(), .17f); %%toberemoved
+
+        //     // draw lines of text %%toberemoved
+        //     // parameter name is drawn at the beginning %%toberemoved
+        //     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW); %%toberemoved
+        //     gl.glPushMatrix(); %%toberemoved
+        //     gl.glTranslatef(x, y, 0); %%toberemoved
+        //     evalRenderer.setColor(1, 1, 1, 1); %%toberemoved
+        //     evalRenderer.begin3DRendering(); %%toberemoved
+        //     evalRenderer.draw3D(name, 0, 0, 0, textScale); %%toberemoved
+        //     y -= offset;    // vertical position gets decremented to point the next line %%toberemoved
+                            // (note that Y is the largest at the top, and smaller towards the bottom)
+        //     evalRenderer.end3DRendering(); %%toberemoved
+        //     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW); %%toberemoved
+        //     gl.glPopMatrix(); %%toberemoved
+
+        //     // other parameter information is drawn afterwards %%toberemoved
+        //     for (int i = 0; i < cols.length; i++) { %%toberemoved
+        //         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW); %%toberemoved
+        //         gl.glPushMatrix(); %%toberemoved
+        //         gl.glTranslatef(x, y, 0); %%toberemoved
+
+        //         // highlight the parameter that is the current evaluation criterion %%toberemoved
+        //         if (cols[i].equalsIgnoreCase(reval.getThreshold().getTarget().toString())) { %%toberemoved
+        //             if (reval.isEvent()) { %%toberemoved
+        //                 // on triggered case, turn to GREEN %%toberemoved
+        //                 evalRenderer.setColor(0, 1, 0, 1); %%toberemoved
+        //             } else { %%toberemoved
+        //                 // otherwise turn to RED %%toberemoved
+        //                 evalRenderer.setColor(1, 0, 0, 1); %%toberemoved
+        //             } %%toberemoved
+        //         } %%toberemoved
+        //         else { %%toberemoved
+        //             // if the parameter is not the criterion of evaluation, %%toberemoved
+        //             // use the default WHITE color for drawing the line %%toberemoved
+        //             evalRenderer.setColor(1, 1, 1, 1); %%toberemoved
+        //         } %%toberemoved
+
+        //         // actual drawing %%toberemoved
+        //         // (calls to begin/end have bad performance; use xx3DRendering() methods) %%toberemoved
+        //         evalRenderer.begin3DRendering(); %%toberemoved
+        //         String s = String.format("%s: %s", cols[i], data[i]); %%toberemoved
+        //         evalRenderer.draw3D(s, 0, 0, 0, textScale); %%toberemoved
+        //         y -= offset; // go to the next line %%toberemoved
+        //         evalRenderer.end3DRendering(); %%toberemoved
+        //         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW); %%toberemoved
+        //         gl.glPopMatrix(); %%toberemoved
+        //     } %%toberemoved
+        // } %%toberemoved
         
         // draw line and region threshold
-        if (reval.getThreshold().getTarget().equals(EvaluatorThreshold.Parameter.POSITION)) {
-            int[] val = (int[]) reval.getThreshold().getValue();
-            gl.glPushMatrix();
-            if (reval.isEvent()) {
-                gl.glColor3f(1f, 0, 0);
-            } else {
-                gl.glColor3f(1f, 1f, 1f);
-            }
-            gl.glLineWidth(2f);
-            gl.glTranslatef(-.5f, -.5f, 0);
-            gl.glBegin(GL.GL_LINES);
-            gl.glVertex2i(val[0], val[1]);
-            gl.glVertex2i(val[2], val[3]);
-            gl.glEnd();
-            gl.glPopMatrix();
-        } else if (reval.getThreshold().getTarget().equals(EvaluatorThreshold.Parameter.REGION)) {
-            Rectangle r = (Rectangle) reval.getThreshold().getValue();
-            gl.glPushMatrix();
-            gl.glTranslatef(-.5f, -.5f, 0);
-            gl.glEnable(GL.GL_BLEND);
-            if (reval.isEvent()) {
-                gl.glColor4f(1f, 0f, 0f, 0.3f);
-            } else {
-                gl.glColor4f(1f, 1f, 1f, 0.3f);
-            }
-            gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-            gl.glRectf(r.x, r.y, r.x + r.width, r.y + r.height);
-            gl.glDisable(GL.GL_BLEND);
-            gl.glLineWidth(2f);
-            gl.glBegin(GL.GL_LINE_LOOP);
-            gl.glVertex2f(r.x, r.y);
-            gl.glVertex2f(r.x + r.width, r.y);
-            gl.glVertex2f(r.x + r.width, r.y + r.height);
-            gl.glVertex2f(r.x, r.y + r.height);
-            gl.glEnd();
-            gl.glPopMatrix();
-        }
+        // if (reval.getThreshold().getTarget().equals(EvaluatorThreshold.Parameter.POSITION)) { %%toberemoved
+        //     int[] val = (int[]) reval.getThreshold().getValue(); %%toberemoved
+        //     gl.glPushMatrix(); %%toberemoved
+        //     if (reval.isEvent()) { %%toberemoved
+        //         gl.glColor3f(1f, 0, 0); %%toberemoved
+        //     } else { %%toberemoved
+        //         gl.glColor3f(1f, 1f, 1f); %%toberemoved
+        //     } %%toberemoved
+        //     gl.glLineWidth(2f); %%toberemoved
+        //     gl.glTranslatef(-.5f, -.5f, 0); %%toberemoved
+        //     gl.glBegin(GL.GL_LINES); %%toberemoved
+        //     gl.glVertex2i(val[0], val[1]); %%toberemoved
+        //     gl.glVertex2i(val[2], val[3]); %%toberemoved
+        //     gl.glEnd(); %%toberemoved
+        //     gl.glPopMatrix(); %%toberemoved
+        // } else if (reval.getThreshold().getTarget().equals(EvaluatorThreshold.Parameter.REGION)) { %%toberemoved
+        //     Rectangle r = (Rectangle) reval.getThreshold().getValue(); %%toberemoved
+        //     gl.glPushMatrix(); %%toberemoved
+        //     gl.glTranslatef(-.5f, -.5f, 0); %%toberemoved
+        //     gl.glEnable(GL.GL_BLEND); %%toberemoved
+        //     if (reval.isEvent()) { %%toberemoved
+        //         gl.glColor4f(1f, 0f, 0f, 0.3f); %%toberemoved
+        //     } else { %%toberemoved
+        //         gl.glColor4f(1f, 1f, 1f, 0.3f); %%toberemoved
+        //     } %%toberemoved
+        //     gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA); %%toberemoved
+        //     gl.glRectf(r.x, r.y, r.x + r.width, r.y + r.height); %%toberemoved
+        //     gl.glDisable(GL.GL_BLEND); %%toberemoved
+        //     gl.glLineWidth(2f); %%toberemoved
+        //     gl.glBegin(GL.GL_LINE_LOOP); %%toberemoved
+        //     gl.glVertex2f(r.x, r.y); %%toberemoved
+        //     gl.glVertex2f(r.x + r.width, r.y); %%toberemoved
+        //     gl.glVertex2f(r.x + r.width, r.y + r.height); %%toberemoved
+        //     gl.glVertex2f(r.x, r.y + r.height); %%toberemoved
+        //     gl.glEnd(); %%toberemoved
+        //     gl.glPopMatrix(); %%toberemoved
+        // } %%toberemoved
         
         if ((getChip() instanceof AEChip) && (((AEChip) chip).getFilterChain() != null)
                 && (((AEChip) chip).getFilterChain().getProcessingMode() == FilterChain.ProcessingMode.ACQUISITION)) {

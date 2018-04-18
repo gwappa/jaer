@@ -22,10 +22,10 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.GLU;
-import de.cco.jaer.eval.EvaluatorThreshold;
-import de.cco.jaer.eval.HoughLineTrackerParams;
-import de.cco.jaer.eval.OutputHandler;
-import de.cco.jaer.eval.ResultEvaluator;
+// import de.cco.jaer.eval.EvaluatorThreshold; %%fastevent-related
+// import de.cco.jaer.eval.HoughLineTrackerParams; %%fastevent-related
+// import de.cco.jaer.eval.OutputHandler; %%fastevent-related
+// import de.cco.jaer.eval.ResultEvaluator; %%fastevent-related
 import javax.swing.JFrame;
 
 import net.sf.jaer.Description;
@@ -95,10 +95,10 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
     //    private List<Line> lines=new ArrayList<Line>(maxNumLines);
     //    Peak[] peaks=null;
 
-    // attach result evaluator
-    HoughLineTrackerParams params;
-    ResultEvaluator reval;
-    EvaluatorThreshold thresh;
+    // // attach result evaluator %%fastevent-related
+    // HoughLineTrackerParams params; %%fastevent-related
+    // ResultEvaluator reval; %%fastevent-related
+    // EvaluatorThreshold thresh; %%fastevent-related
 
     /**
      * Creates a new instance of LineTracker
@@ -117,14 +117,14 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
         setPropertyTooltip("rhoResPixels", "quantization in pixels of hough transform map");
         setPropertyTooltip("showHoughWindow", "shows the hough transform integrator array");
         setPropertyTooltip("tauMs", "time constant in ms of line lowpass");
-        params = new HoughLineTrackerParams();
-        params.setChip(chip);
-        params.setRhoRes(rhoResPixels);
-        params.setThetaRes(thetaResDeg);
-        thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.EVENTRATE, 5.0);
-        reval = ResultEvaluator.getInstance();
-        reval.initialize(params, thresh, OutputHandler.OutputSource.FILE);
-        reval.attachFilterStateListener(support);
+        // params = new HoughLineTrackerParams(); %%fastevent-related
+        // params.setChip(chip); %%fastevent-related
+        // params.setRhoRes(rhoResPixels); %%fastevent-related
+        // params.setThetaRes(thetaResDeg); %%fastevent-related
+        // thresh = new EvaluatorThreshold(EvaluatorThreshold.Parameter.EVENTRATE, 5.0); %%fastevent-related
+        // reval = ResultEvaluator.getInstance(); %%fastevent-related
+        // reval.initialize(params, thresh, OutputHandler.OutputSource.FILE); %%fastevent-related
+        // reval.attachFilterStateListener(support); %%fastevent-related
     }
 
     /**
@@ -207,15 +207,15 @@ public class HoughLineTracker extends EventFilter2D implements FrameAnnotater, L
         thetaDegFiltered = thetaFilter.filter(getThetaDeg(), in.getLastTimestamp());
         rhoPixelsFiltered = rhoFilter.filter(getRhoPixels(), in.getLastTimestamp());
 
-        if (index > 0) {
-            // evalute line parameters
-            params.update(index,
-                    in.getFirstTimestamp(),
-                    in.getLastTimestamp(),
-                    getRhoPixels(),
-                    getThetaDeg());
-            reval.eval();
-        }
+        // if (index > 0) { %%fastevent-related
+        //     // evalute line parameters %%fastevent-related
+        //     params.update(index, %%fastevent-related
+        //             in.getFirstTimestamp(), %%fastevent-related
+        //             in.getLastTimestamp(), %%fastevent-related
+        //             getRhoPixels(), %%fastevent-related
+        //             getThetaDeg()); %%fastevent-related
+        //     reval.eval(); %%fastevent-related
+        // } %%fastevent-related
 
         if (showHoughWindow) {
             checkAccumFrame();

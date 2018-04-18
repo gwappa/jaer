@@ -81,12 +81,15 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
+import javax.swing.JFrame;
 
 import ch.unizh.ini.jaer.chip.retina.DVS128;
-import de.cco.jaer.eval.TriggerHandler;
-import de.cco.jaer.eval.EvaluatorFrame;
-import de.cco.jaer.eval.ResultEvaluator;
-import de.cco.jaer.eval.SyncEventHandler;
+// import de.cco.jaer.eval.EventTriggerManager; %%toberemoved
+// import de.cco.jaer.eval.EvaluatorFrame; %%toberemoved
+import de.cco.jaer.eval.FastEventManager;
+// import de.cco.jaer.eval.SyncEventHandler; %%toberemoved
+import de.cco.jaer.eval.CanvasManager;
+
 import eu.seebetter.ini.chips.davis.DAVIS240B;
 import eu.seebetter.ini.chips.davis.DAVIS240C;
 import eu.seebetter.ini.chips.davis.Davis640;
@@ -225,10 +228,11 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
     private boolean nullInterface = false;
 
     // EvaluatorFrame
-    private boolean evalFrameBuilt;
-    private EvaluatorFrame evalFrame;
-    private ResultEvaluator reval = null;
-    private SyncEventHandler seh = null;
+    // private boolean evalFrameBuilt; %%toberemoved
+    private JFrame  evalFrame = null;
+    // private EvaluatorFrame evalFrame; %%toberemoved
+    // private ResultEvaluator reval = null; %%toberemoved
+    // private SyncEventHandler seh = null; %%toberemoved
     private int init_cnt = 0;
 
     /**
@@ -738,8 +742,8 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
         //        }
         setName("AEViewer");
 
-        // EvalFrame not built yet
-        evalFrameBuilt = false;
+        // // EvalFrame not built yet %%toberemoved
+        // evalFrameBuilt = false; %%toberemoved
 
         initComponents();
 
@@ -967,27 +971,29 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
 
         init_cnt++;
         if( init_cnt > 2 ) {
-            System.out.println("Shutting down the FastEventServer");
-            try {
-                TriggerHandler.shutdown(); // try to terminate server, close socket
-            } catch (NullPointerException nclient) {
-                // do nothing
-            }
-            try {
-                reval.getOutputHandler().close(); // close result evaluator output handler
-            } catch (NullPointerException nout1) {
-                // do nothing
-            }
-            try {
-                evalFrame.getOutputHandler().close(); // try to close threshold info file
-            } catch (NullPointerException nout2) {
-                // do nothing
-            }
-            // try to close syncevent handler
-            if (seh != null)
-            {
-                seh.close();
-            }
+            // shuts down the client connection to the server (and performs other chores?)
+            FastEventManager.shutdown();
+            // System.out.println("Shutting down the FastEventServer"); %%toberemoved
+            // try { %%toberemoved
+            //     EventTriggerManager.shutdown(); // try to terminate server, close socket %%toberemoved
+            // } catch (NullPointerException nclient) { %%toberemoved
+            //     // do nothing %%toberemoved
+            // } %%toberemoved
+            // try { %%toberemoved
+            //     reval.getOutputHandler().close(); // close result evaluator output handler %%toberemoved
+            // } catch (NullPointerException nout1) { %%toberemoved
+            //     // do nothing %%toberemoved
+            // } %%toberemoved
+            // try { %%toberemoved
+            //     evalFrame.getOutputHandler().close(); // try to close threshold info file %%toberemoved
+            // } catch (NullPointerException nout2) { %%toberemoved
+            //     // do nothing %%toberemoved
+            // } %%toberemoved
+            // // try to close syncevent handler %%toberemoved
+            // if (seh != null) %%toberemoved
+            // { %%toberemoved
+            //     seh.close(); %%toberemoved
+            // } %%toberemoved
         }
 
         if ((aemon != null) && aemon.isOpen()) {
@@ -1412,6 +1418,8 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
             displayMethodMenu = chipCanvas.getDisplayMethodMenu();
             viewMenu.invalidate();
         }
+
+        CanvasManager.reset(chip.getSizeX(), chip.getSizeY(), chipCanvas);
 
         //        validate();
         //        pack();
@@ -4890,8 +4898,9 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
             loggingEnabled = true;
 
             // send synchronisation start event
-            seh = SyncEventHandler.getInstance();
-            seh.on();
+            // seh = SyncEventHandler.getInstance(); %%toberemoved
+            // seh.on(); %%toberemoved
+            FastEventManager.startLogging(loggingFile.getName());
 
             fixLoggingControls();
 
@@ -5119,7 +5128,8 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
             }
 
             // send synchronisation stop event
-            seh.off();
+            // seh.off(); %%toberemoved
+            FastEventManager.endLogging();
 
             loggingEnabled = false;
         }
@@ -5794,12 +5804,12 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
     }
 
     private void buildEvalFrame() {
-        if (!evalFrameBuilt) {
+        if (evalFrame == null) {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             try {
-                evalFrame = new EvaluatorFrame();
-                reval = ResultEvaluator.getInstance();
-                reval.setEvaluatorFrame(evalFrame);
+                evalFrame = FastEventManager.getEvaluationControl(); 
+                // reval = ResultEvaluator.getInstance(); %%toberemoved
+                // reval.setEvaluatorFrame(evalFrame); %%toberemoved
             } finally {
                 setCursor(Cursor.getDefaultCursor());
             }
@@ -5811,7 +5821,7 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
                     evalToggleButton.setSelected(false);
                 }
             });
-            evalFrameBuilt = true;
+            // evalFrameBuilt = true; %%toberemoved
             evalFrame.setVisible(false);
         }
     }
