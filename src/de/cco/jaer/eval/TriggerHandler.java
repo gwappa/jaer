@@ -35,7 +35,7 @@ import java.net.InetAddress;
 public class TriggerHandler
 {
     private static final boolean PROFILE_LATENCY    = true;
-    private static final boolean LOGGING_ENABLED    = true;
+    private static final boolean LOGGING_ENABLED    = false;
 
     /*
      * command bytes
@@ -55,6 +55,7 @@ public class TriggerHandler
      */
     private static void startIOThread() {
         ioThread_    = new Thread(new TriggerHandler.EventLoop());
+        ioThread_.setPriority(Thread.MAX_PRIORITY);
         ioThread_.start();
     }
 
