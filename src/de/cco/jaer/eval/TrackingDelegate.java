@@ -100,10 +100,12 @@ public interface TrackingDelegate {
      /**
      * callback for start of logging
      *
+     * @param baseName      the name that are supposed to be prepended in the 
+     *                      log file (usually the experiment name).
      * @param referenceAER  the AER data log file to be used as a reference for
      *                      time stamp.
      */
-    public void startLogging(String referenceAER);
+    public void startLogging(String baseName, String referenceAER);
 
     /**
      * callback for end of logging

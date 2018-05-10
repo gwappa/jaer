@@ -225,10 +225,10 @@ public class MeanTracker extends EventFilter2D
      *                      time stamp.
      */
     @Override
-    public final void startLogging(String referenceAER) {
+    public final void startLogging(String baseName, String referenceAER) {
         if (output == null) {
             // prepare output
-            output = FastEventWriter.fromBaseName(TRACKER_NAME, referenceAER,
+            output = FastEventWriter.fromBaseName(baseName + "_" + TRACKER_NAME, referenceAER,
                                             param.generateHeaders(TRACKER_HEADERS));
             FastEventManager.logMessage(MSG_TYPE_TRACKER, String.format("Mean(%d)",tau));
             // TODO: set PropertyChangeSupport

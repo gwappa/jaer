@@ -4977,7 +4977,9 @@ public class AEViewer extends javax.swing.JFrame implements PropertyChangeListen
 
         do {
             // log files to tmp folder initially, later user will move or delete file on end of logging
-            filename = lastLoggingFolder + File.separator + className + "-" + dateString + serialNumber + "-" + suffixNumber + AEDataFile.DATA_FILE_EXTENSION;
+            filename = lastLoggingFolder + File.separator + 
+                        FastEventManager.getExperimentName() + "_" + className + "_" + dateString + 
+                        serialNumber + "_" + suffixNumber + AEDataFile.DATA_FILE_EXTENSION;
             File lf = new File(filename);
             if (!lf.isFile()) {
                 succeeded = true;

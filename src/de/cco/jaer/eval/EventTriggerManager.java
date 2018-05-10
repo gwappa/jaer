@@ -330,6 +330,9 @@ public class EventTriggerManager
 
         /**
          * opens a connection to the host.
+         *
+         * if it fails to receive the "hello" message from the host,
+         * the `connection_` property will be set null.
          */
         private void openConnection() {
             String hostName = FastEventSettings.getServiceHost();
@@ -342,15 +345,25 @@ public class EventTriggerManager
                                             connection_.getPort());
             } catch (UnknownHostException e) {
                 System.err.println("***failed to resolve host: "+hostName);
+                connection_ = null;
             } catch (IOException e) {
                 System.err.println("***failed connecting to the host: "+hostName);
+                connection_ = null;
             }
         }
 
         /**
          * closes a connection to the host.
+         *
+         * if the connection is not open, it does nothing.
          */
         private void closeConnection() {
+            // do not try to "close" the connection,
+            // if it is not opened.
+            if (connection_ == null) {
+                return;
+            }
+
             connection_.close();
 
             // log latency
@@ -420,7 +433,7 @@ public class EventTriggerManager
             if (value != stateUpdate_.sync) {
                 stateUpdate_.sync = value;
                 stateUpdate_.index++;
-                // System.out.println(String.format("new state=%s", stateUpdate_.toString()));
+                System.out.println(String.format("new state=%s", stateUpdate_.toString()));
                 io_.notify();
             }
         }

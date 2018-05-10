@@ -3,4 +3,5 @@
 /build
 /server/TestClient_*
 FastEvent/*
+*.swp
 

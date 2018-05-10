@@ -27,6 +27,7 @@ import java.beans.PropertyChangeSupport;
 
 import de.cco.jaer.eval.control.EvaluationModeSelector;
 import de.cco.jaer.eval.control.EvaluationTargetSelector;
+import de.cco.jaer.eval.control.ExperimentNameEditor;
 import de.cco.jaer.eval.control.RunningNoteEditor;
 
 /*
@@ -149,6 +150,7 @@ public class FastEventManager {
      * current evaluation mode.
      */
     private static EvaluationMode   mode    = null;
+    private static String           expName = "";
 
     /**
      * the logger output handler.
@@ -162,6 +164,7 @@ public class FastEventManager {
     private static JFrame                   control = null;
     private static EvaluationTargetSelector targets = null;
     private static EvaluationModeSelector   modes   = null;
+    private static ExperimentNameEditor     naming  = null;
     private static RunningNoteEditor        notes   = null;
 
     private static void addTitledBorder(javax.swing.JComponent comp, String title) {
@@ -183,6 +186,8 @@ public class FastEventManager {
         addTitledBorder(targets, null);
         modes   = new EvaluationModeSelector();
         addTitledBorder(modes, "Evaluation mode");
+        naming  = new ExperimentNameEditor();
+        addTitledBorder(naming, "Experiment name");
         notes   = new RunningNoteEditor();
         addTitledBorder(notes, "Running notes");
 
@@ -190,6 +195,7 @@ public class FastEventManager {
         panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
         panel.add(modes);
         panel.add(targets);
+        panel.add(naming);
         panel.add(notes);
         panel.add(Box.createVerticalStrut(10));
         panel.setBorder(BorderFactory.createEmptyBorder(
@@ -250,6 +256,15 @@ public class FastEventManager {
         return mode;
     }
 
+    public static final String getExperimentName() {
+        return expName;
+    }
+
+    public static final void setExperimentName(String value) {
+        naming.setName(value);
+        expName = naming.formatName();
+    }
+
     /**
      * starts logging.
      * notifies evaluation target, tracking delegate and EventTriggerManager
@@ -259,15 +274,16 @@ public class FastEventManager {
      */
     public static final void startLogging(String referenceAER) {
         if (out == null) {
-            out = FastEventWriter.fromBaseName(OUTPUT_NAME, referenceAER, OUTPUT_HEADERS);
+            out = FastEventWriter.fromBaseName(expName + "_" + OUTPUT_NAME, referenceAER, OUTPUT_HEADERS);
             EventTriggerManager.setSync(true);
 
             if (tracker != null) {
-                tracker.startLogging(referenceAER);
+                tracker.startLogging(expName, referenceAER);
             }
             if (target != null) {
                 target.startLogging();
             }
+            naming.startLogging();
             notes.startLogging();
 
             logEvaluationMode();
